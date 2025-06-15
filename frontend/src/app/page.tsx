@@ -1,6 +1,11 @@
+import { Box, Typography } from '@mui/material';
 
 export default function Home() {
   return (
-    <h1>YourTale</h1>  
+    <Box>
+      <Typography variant="h1" component="h1">
+        YourTale
+      </Typography>
+    </Box>
   );
 }
