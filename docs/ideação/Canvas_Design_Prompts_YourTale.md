@@ -27,7 +27,5 @@
 ---
 
 ## 4️⃣ Feedback e Ajustes
-- Coletar feedback através de curtidas/descurtidas e comentários ao final de cada interação com a IA.
 - Analisar logs de uso para identificar solicitações frequentes não atendidas ou prompts mal interpretados.
 - Conduzir testes de usabilidade com usuários reais para entender expectativas de linguagem e tom.
-- Iterar nos prompts com base em feedback qualitativo e métricas de engajamento, ajustando instruções e exemplos conforme necessário para maximizar a coerência e naturalidade das respostas da IA.
