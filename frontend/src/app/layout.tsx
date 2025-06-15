@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "YourTale",
-  description: "Uma plataforma para seções de RPG de mesa online assistidas por IA",
+  title: 'YourTale',
+  description: 'Uma plataforma para seções de RPG de mesa online assistidas por IA',
 };
 
 export default function RootLayout({
@@ -12,9 +12,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
