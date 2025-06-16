@@ -38,4 +38,4 @@ Mestres de RPG enfrentam dificuldade para criar e manter narrativas ricas e coer
 - **Alta prioridade:** Ferramenta de geração automática de enredos, NPCs e cenários.
 - **Média prioridade:** Sistema de registros organizado para consulta durante as sessões.
 - **Média prioridade:** Interface para personalização do mestre de IA.
-- **Baixa prioridade:** Assistente de improvisação para enriquecer eventos durante o jogo — pode ser adicionado em versão posterior.
+- **Média prioridade:** Assistente de improvisação para enriquecer eventos durante o jogo — pode ser adicionado em versão posterior.
