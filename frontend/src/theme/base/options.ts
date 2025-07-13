@@ -3,11 +3,11 @@ import { ThemeOptions } from '@mui/material';
 export const options: ThemeOptions = {
   breakpoints: {
     values: {
-      xs: 450,
-      sm: 768,
-      md: 1280,
-      lg: 1366,
-      xl: 1920,
+      xs: 0,
+      sm: 450,
+      md: 768,
+      lg: 1280,
+      xl: 1366,
     },
   },
 

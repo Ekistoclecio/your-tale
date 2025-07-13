@@ -8,7 +8,11 @@ export const Root = styled(Box)(({ theme }) => ({
   position: 'relative',
   justifyContent: 'flex-end',
   alignItems: 'center',
-  padding: theme.spacing(8),
+  padding: theme.spacing(2), // Reduzido para telas pequenas
+
+  [theme.breakpoints.up('sm')]: {
+    padding: theme.spacing(8),
+  },
 
   [theme.breakpoints.up('md')]: {
     padding: theme.spacing(24),
@@ -17,10 +21,14 @@ export const Root = styled(Box)(({ theme }) => ({
 
 export const Card = styled(MuiCard)(({ theme }) => ({
   width: '100%',
-  minWidth: 400,
-  maxWidth: 550,
+  maxWidth: '100%', // Garante que não ultrapasse a largura da tela
+  minWidth: 'auto', // Remove o minWidth fixo
 
   [theme.breakpoints.up('sm')]: {
+    minWidth: 400,
+  },
+
+  [theme.breakpoints.up('md')]: {
     maxWidth: 550,
   },
 }));

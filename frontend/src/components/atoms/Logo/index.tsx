@@ -23,10 +23,13 @@ export default function Logo({
         position: 'relative',
         width,
         height,
+        minWidth: 120,
+        minHeight: 36,
         backgroundImage: `url(${logoSrc})`,
         backgroundSize: 'contain',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
+        flexShrink: 0,
         ...sx,
       }}
       {...props}
