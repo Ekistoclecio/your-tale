@@ -4,8 +4,8 @@ import { Box, BoxProps } from '@mui/material';
 
 interface LogoProps extends BoxProps {
   variant?: 'horizontal' | 'vertical';
-  width?: number;
-  height?: number;
+  width?: number | BoxProps['width'];
+  height?: number | BoxProps['height'];
 }
 
 export default function Logo({
