@@ -16,7 +16,11 @@ export class UserService {
     return user || undefined;
   }
 
-  async create(userData: { email: string; password: string; name: string }): Promise<User> {
+  async create(userData: { email: string; password: string; passwordConfirmation: string; name: string }): Promise<User> {
+    if (userData.password !== userData.passwordConfirmation) {
+      throw new Error('Password and password confirmation do not match');
+    }
+
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const user = this.usersRepository.create({
       ...userData,

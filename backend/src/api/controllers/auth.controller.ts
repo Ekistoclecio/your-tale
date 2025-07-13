@@ -7,15 +7,13 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() userData: { email: string; password: string; name: string }) {
+  async register(@Body() userData: { email: string; password: string; passwordConfirmation: string; name: string }) {
     return this.authService.register(userData);
   }
 
-  // This endpoint uses LocalAuthGuard
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    // req.user is automatically populated by the guard
     return this.authService.login(req.user);
   }
 } 

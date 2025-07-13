@@ -32,7 +32,7 @@ export class AuthService {
     };
   }
 
-  async register(userData: { email: string; password: string; name: string }) {
+  async register(userData: { email: string; password: string; passwordConfirmation: string; name: string }) {
     // Check if user already exists
     const existingUser = await this.userService.findByEmail(userData.email);
     if (existingUser) {
