@@ -6,6 +6,7 @@ import { InputLabelOverrides } from '@/theme/components/inputLabel';
 import { OutlinedInputOverrides } from '@/theme/components/outlinedInput';
 import { TextFieldOverrides } from '@/theme/components/textfield';
 import { PaperOverrides } from '@/theme/components/paper';
+import { LinkOverrides } from '@/theme/components/link';
 
 export const components: Components = {
   MuiButton: ButtonOverrides,
@@ -15,4 +16,5 @@ export const components: Components = {
   MuiOutlinedInput: OutlinedInputOverrides,
   MuiTextField: TextFieldOverrides,
   MuiPaper: PaperOverrides,
+  MuiLink: LinkOverrides,
 };
