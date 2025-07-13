@@ -1,12 +1,19 @@
 import type { Metadata } from 'next';
 import { AppProviders } from '@/providers';
-import { Roboto } from 'next/font/google';
+import { Pirata_One, Cinzel } from 'next/font/google';
 
-const roboto = Roboto({
-  weight: ['300', '400', '500', '700'],
+const pirataOne = Pirata_One({
+  weight: ['400'],
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-roboto',
+  variable: '--font-pirata-one',
+});
+
+const cinzel = Cinzel({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-cinzel',
 });
 
 export const metadata: Metadata = {
@@ -20,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={roboto.variable}>
+    <html lang="pt-BR" className={`${pirataOne.variable} ${cinzel.variable}`}>
       <AppProviders>
         <body>{children}</body>
       </AppProviders>
