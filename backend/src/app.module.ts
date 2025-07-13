@@ -5,6 +5,7 @@ import { AppController } from './api/controllers/app.controller';
 import { AppService } from './core/services/app.service';
 import { UsersModule } from './core/modules/users.module';
 import { CharactersModule } from './core/modules/characters.module';
+import { SessionsModule } from './core/modules/sessions.module';
 import typeorm from './config/db/database.config';
 import { AuthModule } from './core/modules/auth.module';
 
@@ -21,6 +22,7 @@ import { AuthModule } from './core/modules/auth.module';
     }),
     UsersModule,
     CharactersModule,
+    SessionsModule,
     AuthModule,
   ],
   controllers: [AppController],
