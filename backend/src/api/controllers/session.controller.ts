@@ -8,7 +8,7 @@ export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
 
   @Post()
-  async create(@Body() sessionData: { hasIAMaster: boolean; masterId?: string }): Promise<Session> {
+  async create(@Body() sessionData: { hasIAMaster: boolean; masterId?: string }): Promise<Session | undefined> {
     return await this.sessionService.create(sessionData);
   }
 

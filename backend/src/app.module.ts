@@ -6,6 +6,7 @@ import { AppService } from './core/services/app.service';
 import { UsersModule } from './core/modules/users.module';
 import { CharactersModule } from './core/modules/characters.module';
 import { SessionsModule } from './core/modules/sessions.module';
+import { ChatsModule } from './core/modules/chats.module';
 import typeorm from './config/db/database.config';
 import { AuthModule } from './core/modules/auth.module';
 
@@ -23,6 +24,7 @@ import { AuthModule } from './core/modules/auth.module';
     UsersModule,
     CharactersModule,
     SessionsModule,
+    ChatsModule,
     AuthModule,
   ],
   controllers: [AppController],

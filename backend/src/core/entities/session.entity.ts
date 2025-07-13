@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { SessionPlayer } from './session-player.entity';
+import { Chat } from './chat.entity';
 
 @Entity('sessions')
 export class Session {
@@ -12,13 +13,11 @@ export class Session {
   @Column({ name: 'master_id', nullable: true })
   masterId?: string;
 
-  // TODO: Implementar quando a entidade Chat for criada
-  // @Column({ name: 'chat_id' })
-  // chatId: string;
+  @Column({ name: 'chat_id', nullable: true })
+  chatId?: string;
 
-  // TODO: Implementar quando a entidade Chat for criada
-  // @Column({ name: 'master_annotations_id', nullable: true })
-  // masterAnnotationsId?: string;
+  @Column({ name: 'master_annotations_chat_id', nullable: true })
+  masterAnnotationsChatId?: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -26,7 +25,15 @@ export class Session {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // Relacionamento com SessionPlayer
+  // Relacionamentos
   @OneToMany(() => SessionPlayer, sessionPlayer => sessionPlayer.session)
   sessionPlayers: SessionPlayer[];
+
+  @ManyToOne(() => Chat, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'chat_id' })
+  generalChat?: Chat;
+
+  @ManyToOne(() => Chat, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'master_annotations_chat_id' })
+  masterAnnotationsChat?: Chat;
 } 

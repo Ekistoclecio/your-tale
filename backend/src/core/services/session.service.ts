@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Session } from '../entities/session.entity';
 import { SessionPlayer } from '../entities/session-player.entity';
+import { Chat, ChatType } from '../entities/chat.entity';
 import { UserDto, SessionPlayerDto, UserPublicDto, UserPrivateDto } from '../../api/dto/user.dto';
 import { CharacterListDto } from '../../api/dto/character.dto';
 
@@ -13,11 +14,48 @@ export class SessionService {
     private sessionsRepository: Repository<Session>,
     @InjectRepository(SessionPlayer)
     private sessionPlayersRepository: Repository<SessionPlayer>,
+    @InjectRepository(Chat)
+    private chatsRepository: Repository<Chat>,
   ) {}
 
-  async create(sessionData: { hasIAMaster: boolean; masterId?: string }): Promise<Session> {
+  async create(sessionData: { hasIAMaster: boolean; masterId?: string }): Promise<Session | undefined> {
     const session = this.sessionsRepository.create(sessionData);
-    return this.sessionsRepository.save(session);
+    const savedSession = await this.sessionsRepository.save(session);
+
+    // Criar chat geral automaticamente
+    const generalChat = this.chatsRepository.create({
+      sessionId: savedSession.id,
+      type: ChatType.GENERAL,
+      name: 'Chat Geral',
+      description: 'Chat geral da sessão para todos os jogadores'
+    });
+
+    const savedGeneralChat = await this.chatsRepository.save(generalChat);
+
+    // Atualizar a sessão com o chat geral
+    await this.sessionsRepository.update(savedSession.id, { 
+      chatId: savedGeneralChat.id 
+    });
+
+    // Se tem mestre humano, criar chat de anotações
+    if (sessionData.masterId) {
+      const annotationsChat = this.chatsRepository.create({
+        sessionId: savedSession.id,
+        type: ChatType.MASTER_ANNOTATIONS,
+        name: 'Anotações do Mestre',
+        description: 'Chat privado do mestre para anotações e conversas com IA'
+      });
+
+      const savedAnnotationsChat = await this.chatsRepository.save(annotationsChat);
+
+      // Atualizar a sessão com o chat de anotações
+      await this.sessionsRepository.update(savedSession.id, { 
+        masterAnnotationsChatId: savedAnnotationsChat.id 
+      });
+    }
+
+    // Retornar a sessão atualizada
+    return this.findById(savedSession.id) || savedSession;
   }
 
   private mapUserToPublicDto(user: any): UserPublicDto {
