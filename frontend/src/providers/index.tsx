@@ -1,7 +1,7 @@
 'use client';
 
 import { theme } from '@/theme';
-import { globalStyles } from '@/theme/globalStyles';
+import { globalStyles } from '@/theme/base/globalStyles';
 import { CssBaseline, GlobalStyles, ThemeProvider } from '@mui/material';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 

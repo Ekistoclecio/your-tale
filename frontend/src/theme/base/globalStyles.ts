@@ -16,7 +16,7 @@ export const globalStyles = {
     width: '100vw',
     backgroundColor: baseBackground,
     backgroundAttachment: 'fixed',
-    fontSize: '62.5%',
+    fontSize: '10px',
   },
   body: {
     height: '100%',

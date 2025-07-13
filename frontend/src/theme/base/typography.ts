@@ -2,6 +2,13 @@ import { TypographyVariantsOptions } from '@mui/material';
 
 export const typography: TypographyVariantsOptions = {
   fontFamily: 'var(--font-cinzel)',
+  htmlFontSize: 10,
+
+  // Define pesos das fontes
+  fontWeightRegular: 400,
+  fontWeightMedium: 500,
+  fontWeightSemiBold: 600,
+  fontWeightBold: 700,
 
   h1: {
     fontSize: '3.6rem',
