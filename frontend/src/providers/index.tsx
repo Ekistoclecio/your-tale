@@ -1,13 +1,18 @@
 'use client';
 
 import { theme } from '@/theme';
-import { ThemeProvider } from '@mui/material';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
+import { globalStyles } from '@/theme/globalStyles';
+import { CssBaseline, GlobalStyles, ThemeProvider } from '@mui/material';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <AppRouterCacheProvider>
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <GlobalStyles styles={globalStyles} />
+        {children}
+      </ThemeProvider>
     </AppRouterCacheProvider>
   );
 }
