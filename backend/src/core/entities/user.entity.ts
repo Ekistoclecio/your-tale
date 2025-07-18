@@ -6,9 +6,11 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   BeforeUpdate,
+  OneToMany,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
+import { SessionMember } from './session-member.entity';
 
 @Entity('users')
 export class User {
@@ -46,4 +48,7 @@ export class User {
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
   }
+
+  @OneToMany(() => SessionMember, (member) => member.user)
+  sessionMemberships: SessionMember[];
 } 
