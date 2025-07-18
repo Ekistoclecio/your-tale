@@ -1,15 +1,11 @@
 import { Button, ButtonProps } from '@mui/material';
 import { motion } from 'framer-motion';
+import { animationVariants } from '@/constants/animation';
 
 interface MotionButtonProps extends ButtonProps {
-  whileHover?: object;
-  whileTap?: object;
+  animationVariant?: 'none' | 'subtleBounce';
 }
 
-export const MotionButton = ({
-  whileHover = { scale: 1.02, transition: { duration: 0.1 } },
-  whileTap = { scale: 0.98, transition: { duration: 0.1 } },
-  ...props
-}: MotionButtonProps) => (
-  <Button component={motion.button} whileHover={whileHover} whileTap={whileTap} {...props} />
+export const MotionButton = ({ animationVariant = 'none', ...props }: MotionButtonProps) => (
+  <Button component={motion.button} {...animationVariants[animationVariant]} {...props} />
 );
