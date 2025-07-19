@@ -12,6 +12,7 @@ export const AuthTemplate = ({ children }: { children: React.ReactNode }) => {
         <S.Card>
           <Stack spacing={6}>
             <Logo
+              theme="dark"
               width={{
                 xs: 150,
                 sm: 180,

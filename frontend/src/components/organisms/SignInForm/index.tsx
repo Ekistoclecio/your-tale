@@ -60,7 +60,13 @@ export const SignInForm = () => {
             <MotionTypography variant="body1">Esqueceu sua senha?</MotionTypography>
           </Link> */}
 
-          <MotionButton type="submit" variant="contained" fullWidth sx={{ mt: 8 }}>
+          <MotionButton
+            animationVariant="subtleBounce"
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{ mt: 8 }}
+          >
             Entrar
           </MotionButton>
         </Stack>

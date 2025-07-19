@@ -77,7 +77,13 @@ export const SignUpForm = () => {
             />
           </MotionBox>
         </Stack>
-        <MotionButton type="submit" variant="contained" fullWidth sx={{ mt: 8 }}>
+        <MotionButton
+          animationVariant="subtleBounce"
+          type="submit"
+          variant="contained"
+          fullWidth
+          sx={{ mt: 8 }}
+        >
           Criar conta
         </MotionButton>
       </Stack>
