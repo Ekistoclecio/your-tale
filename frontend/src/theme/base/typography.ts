@@ -85,7 +85,6 @@ export const typography: TypographyVariantsOptions = {
     fontWeight: 600,
     lineHeight: 1.4,
     letterSpacing: '0.07em',
-    textTransform: 'uppercase',
     fontFamily: 'var(--font-cinzel)',
   },
 
