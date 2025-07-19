@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Patch, Put, Delete, Param, Body, UseGuards, Request, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SessionService } from '../../core/providers/session.service';
 import { SessionMemberService } from '../../core/providers/session-member.service';
 import { MessageService } from '../../core/providers/message.service';
@@ -12,6 +13,8 @@ import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { User } from '../../core/entities/user.entity';
 import { MemberRole } from '../../core/entities/session-member.entity';
 
+@ApiTags('sessions')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 @Controller('sessions')
 export class SessionController {
@@ -23,31 +26,89 @@ export class SessionController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Criar uma nova sessão de RPG' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Sessão criada com sucesso',
+    type: Object
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Dados inválidos fornecidos' 
+  })
+  @ApiBody({ type: CreateSessionDto })
   async create(@Body() dto: CreateSessionDto, @CurrentUser() user: User) {
     return await this.sessionService.create(dto, user);
   }
 
   @Get('my')
+  @ApiOperation({ summary: 'Listar sessões do usuário logado' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de sessões do usuário',
+    type: [Object]
+  })
   async mySessions(@CurrentUser() user: User) {
     return this.sessionService.findMySessions(user);
   }
 
   @Get('public')
+  @ApiOperation({ summary: 'Listar sessões públicas disponíveis' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de sessões públicas',
+    type: [Object]
+  })
   async publicSessions() {
     return this.sessionService.findPublicSessions();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Obter detalhes de uma sessão específica' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Detalhes da sessão',
+    type: Object
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Sessão não encontrada' 
+  })
   async getById(@Param('id') id: string, @CurrentUser() user: User) {
     return this.sessionService.findById(id, user);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar uma sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Sessão atualizada com sucesso',
+    type: Object
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Sessão não encontrada' 
+  })
+  @ApiBody({ type: UpdateSessionDto })
   async update(@Param('id') id: string, @Body() dto: UpdateSessionDto, @CurrentUser() user: User) {
     return this.sessionService.update(id, dto, user);
   }
 
   @Post(':id/join')
+  @ApiOperation({ summary: 'Entrar em uma sessão usando código de acesso' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Entrou na sessão com sucesso',
+    type: Object
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Código de acesso inválido' 
+  })
+  @ApiBody({ type: JoinSessionDto })
   async join(@Param('id') id: string, @Body() dto: JoinSessionDto, @CurrentUser() user: User) {
     return this.sessionService.join(id, user, dto.join_code);
   }
@@ -56,6 +117,18 @@ export class SessionController {
 
   @Post('members')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adicionar um membro à sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Membro adicionado com sucesso',
+    type: SessionMemberResponseDto
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Apenas o criador da sessão pode adicionar membros' 
+  })
+  @ApiBody({ type: CreateSessionMemberDto })
   async addMember(
     @Param('id') sessionId: string,
     @Body() createDto: CreateSessionMemberDto,
@@ -73,6 +146,13 @@ export class SessionController {
   }
 
   @Get(':id/members')
+  @ApiOperation({ summary: 'Listar membros de uma sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de membros da sessão',
+    type: [SessionMemberResponseDto]
+  })
   async getSessionMembers(
     @Param('id') sessionId: string,
     @CurrentUser() user: User,
@@ -83,11 +163,25 @@ export class SessionController {
   }
 
   @Get('my/memberships')
+  @ApiOperation({ summary: 'Listar membros do usuário logado' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de membros do usuário',
+    type: [SessionMemberResponseDto]
+  })
   async getMyMemberships(@CurrentUser() user: User): Promise<SessionMemberResponseDto[]> {
     return this.sessionMemberService.findAllByUser(user.id);
   }
 
   @Get(':id/members/:memberId')
+  @ApiOperation({ summary: 'Obter detalhes de um membro específico' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiParam({ name: 'memberId', description: 'ID do membro' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Detalhes do membro',
+    type: SessionMemberResponseDto
+  })
   async getMember(
     @Param('id') sessionId: string,
     @Param('memberId') memberId: string,
@@ -99,6 +193,14 @@ export class SessionController {
   }
 
   @Get(':id/members/user/:userId')
+  @ApiOperation({ summary: 'Obter membro por ID do usuário' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiParam({ name: 'userId', description: 'ID do usuário' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Detalhes do membro',
+    type: SessionMemberResponseDto
+  })
   async getMemberByUser(
     @Param('id') sessionId: string,
     @Param('userId') userId: string,
@@ -110,6 +212,19 @@ export class SessionController {
   }
 
   @Put(':id/members/:memberId')
+  @ApiOperation({ summary: 'Atualizar um membro da sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiParam({ name: 'memberId', description: 'ID do membro' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Membro atualizado com sucesso',
+    type: SessionMemberResponseDto
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Apenas o criador da sessão pode atualizar membros' 
+  })
+  @ApiBody({ type: UpdateSessionMemberDto })
   async updateMember(
     @Param('id') sessionId: string,
     @Param('memberId') memberId: string,
@@ -127,6 +242,17 @@ export class SessionController {
 
   @Delete(':id/members/:memberId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remover um membro da sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiParam({ name: 'memberId', description: 'ID do membro' })
+  @ApiResponse({ 
+    status: 204, 
+    description: 'Membro removido com sucesso' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Apenas o criador da sessão pode remover membros' 
+  })
   async removeMember(
     @Param('id') sessionId: string,
     @Param('memberId') memberId: string,
@@ -143,6 +269,13 @@ export class SessionController {
 
   @Post(':id/members/join')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Entrar na sessão como membro' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Entrou na sessão como membro com sucesso',
+    type: SessionMemberResponseDto
+  })
   async joinAsMember(
     @Param('id') sessionId: string,
     @Body() body: { role?: MemberRole },
@@ -154,6 +287,13 @@ export class SessionController {
   }
 
   @Post(':id/members/leave')
+  @ApiOperation({ summary: 'Sair da sessão como membro' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Saiu da sessão com sucesso',
+    type: SessionMemberResponseDto
+  })
   async leaveAsMember(
     @Param('id') sessionId: string,
     @CurrentUser() user: User,
@@ -164,6 +304,21 @@ export class SessionController {
   }
 
   @Get(':id/members/count/active')
+  @ApiOperation({ summary: 'Obter contagem de membros ativos' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contagem de membros ativos',
+    schema: {
+      type: 'object',
+      properties: {
+        count: {
+          type: 'number',
+          example: 5
+        }
+      }
+    }
+  })
   async getActiveMembersCount(
     @Param('id') sessionId: string,
     @CurrentUser() user: User,
@@ -175,6 +330,21 @@ export class SessionController {
   }
 
   @Get(':id/members/count/players')
+  @ApiOperation({ summary: 'Obter contagem de jogadores ativos' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contagem de jogadores ativos',
+    schema: {
+      type: 'object',
+      properties: {
+        count: {
+          type: 'number',
+          example: 4
+        }
+      }
+    }
+  })
   async getActivePlayersCount(
     @Param('id') sessionId: string,
     @CurrentUser() user: User,
@@ -188,6 +358,16 @@ export class SessionController {
   // ===== ENDPOINTS DE MENSAGENS =====
 
   @Get(':id/messages')
+  @ApiOperation({ summary: 'Listar mensagens de uma sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiQuery({ name: 'chat_type', required: false, enum: ['general', 'master'] })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de mensagens da sessão',
+    type: [MessageResponseDto]
+  })
   async getMessages(
     @Param('id') sessionId: string,
     @Query() query: GetMessagesQueryDto,
@@ -198,6 +378,14 @@ export class SessionController {
 
   @Post(':id/messages')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Enviar uma mensagem na sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Mensagem enviada com sucesso',
+    type: MessageResponseDto
+  })
+  @ApiBody({ type: CreateMessageDto })
   async createMessage(
     @Param('id') sessionId: string,
     @Body() createMessageDto: CreateMessageDto,
@@ -207,6 +395,13 @@ export class SessionController {
   }
 
   @Get('messages/:messageId')
+  @ApiOperation({ summary: 'Obter uma mensagem específica' })
+  @ApiParam({ name: 'messageId', description: 'ID da mensagem' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Detalhes da mensagem',
+    type: MessageResponseDto
+  })
   async getMessage(
     @Param('messageId') messageId: string,
     @CurrentUser() user: User,
@@ -214,7 +409,15 @@ export class SessionController {
     return this.messageService.findOne(messageId, user.id);
   }
 
-  @Patch('messages/:messageId')
+  @Put('messages/:messageId')
+  @ApiOperation({ summary: 'Atualizar uma mensagem' })
+  @ApiParam({ name: 'messageId', description: 'ID da mensagem' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Mensagem atualizada com sucesso',
+    type: MessageResponseDto
+  })
+  @ApiBody({ type: UpdateMessageDto })
   async updateMessage(
     @Param('messageId') messageId: string,
     @Body() updateMessageDto: UpdateMessageDto,
@@ -225,6 +428,12 @@ export class SessionController {
 
   @Delete('messages/:messageId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Excluir uma mensagem' })
+  @ApiParam({ name: 'messageId', description: 'ID da mensagem' })
+  @ApiResponse({ 
+    status: 204, 
+    description: 'Mensagem excluída com sucesso' 
+  })
   async deleteMessage(
     @Param('messageId') messageId: string,
     @CurrentUser() user: User,
@@ -233,6 +442,21 @@ export class SessionController {
   }
 
   @Get(':id/messages/count')
+  @ApiOperation({ summary: 'Obter contagem de mensagens da sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contagem de mensagens',
+    schema: {
+      type: 'object',
+      properties: {
+        count: {
+          type: 'number',
+          example: 150
+        }
+      }
+    }
+  })
   async getMessageCount(
     @Param('id') sessionId: string,
     @CurrentUser() user: User,
@@ -243,6 +467,17 @@ export class SessionController {
   // ===== ENDPOINTS DE NOTAS =====
 
   @Get(':id/notes')
+  @ApiOperation({ summary: 'Listar notas de uma sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'include_private', required: false, type: String })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de notas da sessão',
+    type: [NoteResponseDto]
+  })
   async getNotes(
     @Param('id') sessionId: string,
     @Query() query: GetNotesQueryDto,
@@ -253,6 +488,14 @@ export class SessionController {
 
   @Post(':id/notes')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Criar uma nova nota na sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Nota criada com sucesso',
+    type: NoteResponseDto
+  })
+  @ApiBody({ type: CreateNoteDto })
   async createNote(
     @Param('id') sessionId: string,
     @Body() createNoteDto: CreateNoteDto,
@@ -262,6 +505,13 @@ export class SessionController {
   }
 
   @Get('notes/:noteId')
+  @ApiOperation({ summary: 'Obter uma nota específica' })
+  @ApiParam({ name: 'noteId', description: 'ID da nota' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Detalhes da nota',
+    type: NoteResponseDto
+  })
   async getNote(
     @Param('noteId') noteId: string,
     @CurrentUser() user: User,
@@ -269,7 +519,15 @@ export class SessionController {
     return this.noteService.findOne(noteId, user.id);
   }
 
-  @Patch('notes/:noteId')
+  @Put('notes/:noteId')
+  @ApiOperation({ summary: 'Atualizar uma nota' })
+  @ApiParam({ name: 'noteId', description: 'ID da nota' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Nota atualizada com sucesso',
+    type: NoteResponseDto
+  })
+  @ApiBody({ type: UpdateNoteDto })
   async updateNote(
     @Param('noteId') noteId: string,
     @Body() updateNoteDto: UpdateNoteDto,
@@ -280,6 +538,12 @@ export class SessionController {
 
   @Delete('notes/:noteId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Excluir uma nota' })
+  @ApiParam({ name: 'noteId', description: 'ID da nota' })
+  @ApiResponse({ 
+    status: 204, 
+    description: 'Nota excluída com sucesso' 
+  })
   async deleteNote(
     @Param('noteId') noteId: string,
     @CurrentUser() user: User,
@@ -288,6 +552,21 @@ export class SessionController {
   }
 
   @Get(':id/notes/count')
+  @ApiOperation({ summary: 'Obter contagem de notas da sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contagem de notas',
+    schema: {
+      type: 'object',
+      properties: {
+        count: {
+          type: 'number',
+          example: 25
+        }
+      }
+    }
+  })
   async getNoteCount(
     @Param('id') sessionId: string,
     @CurrentUser() user: User,

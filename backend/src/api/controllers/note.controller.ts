@@ -1,10 +1,13 @@
 import { Controller, Post, Get, Patch, Delete, Param, Body, UseGuards, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { NoteService } from '../../core/providers/note.service';
 import { CreateNoteDto, UpdateNoteDto, NoteResponseDto, GetNotesQueryDto } from '../../core/dto/note.dto';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { User } from '../../core/entities/user.entity';
 
+@ApiTags('notes')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 @Controller('sessions/:sessionId/notes')
 export class NoteController {
@@ -13,6 +16,17 @@ export class NoteController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Listar notas de uma sessão' })
+  @ApiParam({ name: 'sessionId', description: 'ID da sessão' })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'include_private', required: false, type: String })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de notas da sessão',
+    type: [NoteResponseDto]
+  })
   async getNotes(
     @Param('sessionId') sessionId: string,
     @Query() query: GetNotesQueryDto,
@@ -23,6 +37,14 @@ export class NoteController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Criar uma nova nota na sessão' })
+  @ApiParam({ name: 'sessionId', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Nota criada com sucesso',
+    type: NoteResponseDto
+  })
+  @ApiBody({ type: CreateNoteDto })
   async createNote(
     @Param('sessionId') sessionId: string,
     @Body() createNoteDto: CreateNoteDto,
@@ -32,6 +54,14 @@ export class NoteController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Obter uma nota específica' })
+  @ApiParam({ name: 'sessionId', description: 'ID da sessão' })
+  @ApiParam({ name: 'id', description: 'ID da nota' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Detalhes da nota',
+    type: NoteResponseDto
+  })
   async getNote(
     @Param('id') id: string,
     @CurrentUser() user: User,
@@ -40,6 +70,15 @@ export class NoteController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar uma nota' })
+  @ApiParam({ name: 'sessionId', description: 'ID da sessão' })
+  @ApiParam({ name: 'id', description: 'ID da nota' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Nota atualizada com sucesso',
+    type: NoteResponseDto
+  })
+  @ApiBody({ type: UpdateNoteDto })
   async updateNote(
     @Param('id') id: string,
     @Body() updateNoteDto: UpdateNoteDto,
@@ -50,6 +89,13 @@ export class NoteController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Excluir uma nota' })
+  @ApiParam({ name: 'sessionId', description: 'ID da sessão' })
+  @ApiParam({ name: 'id', description: 'ID da nota' })
+  @ApiResponse({ 
+    status: 204, 
+    description: 'Nota excluída com sucesso' 
+  })
   async deleteNote(
     @Param('id') id: string,
     @CurrentUser() user: User,
@@ -58,6 +104,21 @@ export class NoteController {
   }
 
   @Get('count/total')
+  @ApiOperation({ summary: 'Obter contagem total de notas da sessão' })
+  @ApiParam({ name: 'sessionId', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contagem total de notas',
+    schema: {
+      type: 'object',
+      properties: {
+        count: {
+          type: 'number',
+          example: 25
+        }
+      }
+    }
+  })
   async getNoteCount(
     @Param('sessionId') sessionId: string,
     @CurrentUser() user: User,
