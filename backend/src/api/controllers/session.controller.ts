@@ -43,7 +43,6 @@ export class SessionController {
 
   @Post(':id/join')
   async join(@Param('id') id: string, @Body() dto: JoinSessionDto, @CurrentUser() user: User) {
-    console.log("join")
     return this.sessionService.join(id, user, dto.join_code);
   }
 
@@ -56,7 +55,6 @@ export class SessionController {
     @Body() createDto: CreateSessionMemberDto,
     @CurrentUser() user: User,
   ): Promise<SessionMemberResponseDto> {
-    console.log("????")
     // Verificar se o usuário atual tem permissão para adicionar membros
     const session = await this.sessionService.findById(sessionId, user);
     if (session.creator.id !== user.id) {

@@ -11,6 +11,7 @@ import {
 import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { SessionMember } from './session-member.entity';
+import { Character } from './character.entity';
 
 @Entity('users')
 export class User {
@@ -51,4 +52,7 @@ export class User {
 
   @OneToMany(() => SessionMember, (member) => member.user)
   sessionMemberships: SessionMember[];
+
+  @OneToMany(() => Character, (character) => character.user)
+  characters: Character[];
 } 

@@ -29,8 +29,6 @@ export class SessionService {
     });
     
     const savedSession = await this.sessionRepository.save(session);
-
-    console.log(savedSession);
     
     // Adicionar o criador como membro da sessão com role MASTER
     await this.sessionMemberService.create({
@@ -52,8 +50,6 @@ export class SessionService {
       .orWhere('member.userId = :userId', { userId: user.id })
       .orderBy('session.updated_at', 'DESC')
       .getMany();
-
-    console.log(sessions);
     
     return sessions;
   }

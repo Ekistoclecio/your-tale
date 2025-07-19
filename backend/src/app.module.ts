@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import typeorm from './config/db/database.config';
 import { UserModule } from './core/modules/user.module';
 import { SessionModule } from './core/modules/session.module';
+import { CharacterModule } from './core/modules/character.module';
 import { AppController } from './api/controllers/app.controller';
 import { AppService } from './app.service';
 
@@ -20,6 +21,7 @@ import { AppService } from './app.service';
     }),
     UserModule,
     SessionModule,
+    CharacterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

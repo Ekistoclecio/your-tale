@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Unique, OneToMany } from 'typeorm';
 import { User } from './user.entity';
 import { SessionMember } from './session-member.entity';
+import { Character } from './character.entity';
 import { Expose } from 'class-transformer';
 
 export enum SessionStatus {
@@ -71,4 +72,7 @@ export class Session {
 
   @OneToMany(() => SessionMember, (member) => member.session)
   members: SessionMember[];
+
+  @OneToMany(() => Character, (character) => character.session)
+  characters: Character[];
 } 
