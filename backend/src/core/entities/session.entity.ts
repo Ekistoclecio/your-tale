@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { User } from './user.entity';
 import { SessionMember } from './session-member.entity';
 import { Character } from './character.entity';
+import { Message } from './message.entity';
 import { Expose } from 'class-transformer';
 
 export enum SessionStatus {
@@ -75,4 +76,7 @@ export class Session {
 
   @OneToMany(() => Character, (character) => character.session)
   characters: Character[];
+
+  @OneToMany(() => Message, (message) => message.session)
+  messages: Message[];
 } 

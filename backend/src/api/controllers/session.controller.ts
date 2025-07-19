@@ -1,8 +1,10 @@
-import { Controller, Post, Get, Patch, Put, Delete, Param, Body, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Put, Delete, Param, Body, UseGuards, Request, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { SessionService } from '../../core/providers/session.service';
 import { SessionMemberService } from '../../core/providers/session-member.service';
+import { MessageService } from '../../core/providers/message.service';
 import { CreateSessionDto, UpdateSessionDto, JoinSessionDto } from '../../core/dto/session.dto';
 import { CreateSessionMemberDto, UpdateSessionMemberDto, SessionMemberResponseDto } from '../../core/dto/session-member.dto';
+import { CreateMessageDto, UpdateMessageDto, MessageResponseDto, GetMessagesQueryDto } from '../../core/dto/message.dto';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { User } from '../../core/entities/user.entity';
@@ -14,6 +16,7 @@ export class SessionController {
   constructor(
     private readonly sessionService: SessionService,
     private readonly sessionMemberService: SessionMemberService,
+    private readonly messageService: MessageService,
   ) {}
 
   @Post()
@@ -177,5 +180,60 @@ export class SessionController {
     await this.sessionService.findById(sessionId, user);
     const count = await this.sessionMemberService.getActivePlayersCount(sessionId);
     return { count };
+  }
+
+  // ===== ENDPOINTS DE MENSAGENS =====
+
+  @Get(':id/messages')
+  async getMessages(
+    @Param('id') sessionId: string,
+    @Query() query: GetMessagesQueryDto,
+    @CurrentUser() user: User,
+  ): Promise<MessageResponseDto[]> {
+    return this.messageService.findAll(sessionId, user.id, query);
+  }
+
+  @Post(':id/messages')
+  @HttpCode(HttpStatus.CREATED)
+  async createMessage(
+    @Param('id') sessionId: string,
+    @Body() createMessageDto: CreateMessageDto,
+    @CurrentUser() user: User,
+  ): Promise<MessageResponseDto> {
+    return this.messageService.create(sessionId, createMessageDto, user.id);
+  }
+
+  @Get('messages/:messageId')
+  async getMessage(
+    @Param('messageId') messageId: string,
+    @CurrentUser() user: User,
+  ): Promise<MessageResponseDto> {
+    return this.messageService.findOne(messageId, user.id);
+  }
+
+  @Patch('messages/:messageId')
+  async updateMessage(
+    @Param('messageId') messageId: string,
+    @Body() updateMessageDto: UpdateMessageDto,
+    @CurrentUser() user: User,
+  ): Promise<MessageResponseDto> {
+    return this.messageService.update(messageId, updateMessageDto, user.id);
+  }
+
+  @Delete('messages/:messageId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteMessage(
+    @Param('messageId') messageId: string,
+    @CurrentUser() user: User,
+  ): Promise<void> {
+    return this.messageService.delete(messageId, user.id);
+  }
+
+  @Get(':id/messages/count')
+  async getMessageCount(
+    @Param('id') sessionId: string,
+    @CurrentUser() user: User,
+  ): Promise<{ count: number }> {
+    return this.messageService.getMessageCount(sessionId, user.id);
   }
 } 
