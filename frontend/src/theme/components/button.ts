@@ -14,6 +14,10 @@ export const ButtonOverrides: Components['MuiButton'] = {
         backgroundColor: baseTheme.palette.primary?.dark,
         boxShadow: `0 0 12px 2px ${baseTheme.palette.secondary?.main || '#E6A74A'}`,
       },
+      '&:disabled': {
+        backgroundColor: baseTheme.palette.primary?.main,
+        opacity: 0.5,
+      },
     },
   },
 };
