@@ -5,6 +5,7 @@ import typeorm from './config/db/database.config';
 import { UserModule } from './core/modules/user.module';
 import { SessionModule } from './core/modules/session.module';
 import { CharacterModule } from './core/modules/character.module';
+import { NoteModule } from './core/modules/note.module';
 import { AppController } from './api/controllers/app.controller';
 import { AppService } from './app.service';
 
@@ -22,6 +23,7 @@ import { AppService } from './app.service';
     UserModule,
     SessionModule,
     CharacterModule,
+    NoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],

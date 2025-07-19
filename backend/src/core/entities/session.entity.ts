@@ -3,6 +3,7 @@ import { User } from './user.entity';
 import { SessionMember } from './session-member.entity';
 import { Character } from './character.entity';
 import { Message } from './message.entity';
+import { Note } from './note.entity';
 import { Expose } from 'class-transformer';
 
 export enum SessionStatus {
@@ -79,4 +80,7 @@ export class Session {
 
   @OneToMany(() => Message, (message) => message.session)
   messages: Message[];
+
+  @OneToMany(() => Note, (note) => note.session)
+  notes: Note[];
 } 

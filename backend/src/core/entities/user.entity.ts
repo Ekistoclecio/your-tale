@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { SessionMember } from './session-member.entity';
 import { Character } from './character.entity';
 import { Message } from './message.entity';
+import { Note } from './note.entity';
 
 @Entity('users')
 export class User {
@@ -59,4 +60,7 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.sender)
   messages: Message[];
+
+  @OneToMany(() => Note, (note) => note.author)
+  notes: Note[];
 } 

@@ -2,9 +2,11 @@ import { Controller, Post, Get, Patch, Put, Delete, Param, Body, UseGuards, Requ
 import { SessionService } from '../../core/providers/session.service';
 import { SessionMemberService } from '../../core/providers/session-member.service';
 import { MessageService } from '../../core/providers/message.service';
+import { NoteService } from '../../core/providers/note.service';
 import { CreateSessionDto, UpdateSessionDto, JoinSessionDto } from '../../core/dto/session.dto';
 import { CreateSessionMemberDto, UpdateSessionMemberDto, SessionMemberResponseDto } from '../../core/dto/session-member.dto';
 import { CreateMessageDto, UpdateMessageDto, MessageResponseDto, GetMessagesQueryDto } from '../../core/dto/message.dto';
+import { CreateNoteDto, UpdateNoteDto, NoteResponseDto, GetNotesQueryDto } from '../../core/dto/note.dto';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { User } from '../../core/entities/user.entity';
@@ -17,6 +19,7 @@ export class SessionController {
     private readonly sessionService: SessionService,
     private readonly sessionMemberService: SessionMemberService,
     private readonly messageService: MessageService,
+    private readonly noteService: NoteService,
   ) {}
 
   @Post()
@@ -235,5 +238,60 @@ export class SessionController {
     @CurrentUser() user: User,
   ): Promise<{ count: number }> {
     return this.messageService.getMessageCount(sessionId, user.id);
+  }
+
+  // ===== ENDPOINTS DE NOTAS =====
+
+  @Get(':id/notes')
+  async getNotes(
+    @Param('id') sessionId: string,
+    @Query() query: GetNotesQueryDto,
+    @CurrentUser() user: User,
+  ): Promise<NoteResponseDto[]> {
+    return this.noteService.findAll(sessionId, user.id, query);
+  }
+
+  @Post(':id/notes')
+  @HttpCode(HttpStatus.CREATED)
+  async createNote(
+    @Param('id') sessionId: string,
+    @Body() createNoteDto: CreateNoteDto,
+    @CurrentUser() user: User,
+  ): Promise<NoteResponseDto> {
+    return this.noteService.create(sessionId, createNoteDto, user.id);
+  }
+
+  @Get('notes/:noteId')
+  async getNote(
+    @Param('noteId') noteId: string,
+    @CurrentUser() user: User,
+  ): Promise<NoteResponseDto> {
+    return this.noteService.findOne(noteId, user.id);
+  }
+
+  @Patch('notes/:noteId')
+  async updateNote(
+    @Param('noteId') noteId: string,
+    @Body() updateNoteDto: UpdateNoteDto,
+    @CurrentUser() user: User,
+  ): Promise<NoteResponseDto> {
+    return this.noteService.update(noteId, updateNoteDto, user.id);
+  }
+
+  @Delete('notes/:noteId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteNote(
+    @Param('noteId') noteId: string,
+    @CurrentUser() user: User,
+  ): Promise<void> {
+    return this.noteService.delete(noteId, user.id);
+  }
+
+  @Get(':id/notes/count')
+  async getNoteCount(
+    @Param('id') sessionId: string,
+    @CurrentUser() user: User,
+  ): Promise<{ count: number }> {
+    return this.noteService.getNoteCount(sessionId, user.id);
   }
 } 
