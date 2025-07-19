@@ -23,7 +23,9 @@ export const Badge = ({
       label={
         <Box display="flex" alignItems="center" gap={2}>
           <Icon width={20} height={20} />
-          <Typography variant="button">{config.label}</Typography>
+          <Typography variant="button" textTransform={'none'}>
+            {config.label}
+          </Typography>
         </Box>
       }
       color={config.color}
