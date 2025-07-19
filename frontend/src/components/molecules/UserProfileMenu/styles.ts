@@ -8,14 +8,4 @@ export const StyledMenu = styled(Menu)(({ theme }) => ({
     borderRadius: theme.shape.borderRadiusMedium,
     marginTop: theme.spacing(1),
   },
-
-  '& .MuiMenuItem-root': {
-    fontFamily: 'var(--font-cinzel)',
-    fontWeight: 600,
-    color: theme.palette.text.primary,
-    '&:hover': {
-      backgroundColor: theme.palette.action.hover,
-      color: theme.palette.primary.main,
-    },
-  },
 }));
