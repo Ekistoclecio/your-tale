@@ -1,3 +1,4 @@
+import { datePickerGlobalStyles } from '@/theme/base/datePicker';
 import { palette } from './palette';
 
 const baseBackground = palette.background?.default || '#1D1A2F'; // Azul noturno
@@ -65,4 +66,5 @@ export const globalStyles = {
   '::-webkit-scrollbar-corner': {
     background: 'transparent',
   },
+  ...datePickerGlobalStyles,
 } as const;
