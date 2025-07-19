@@ -77,7 +77,7 @@ export const SessionCard = ({ session, onEnterSession, onViewCharacter }: Sessio
 
         <S.ActionsBox>
           <MotionButton variant="contained" onClick={() => onEnterSession?.(session.id)}>
-            Entrar nesta sessão
+            Entrar na sessão
           </MotionButton>
 
           {session.connected && (
