@@ -15,6 +15,7 @@ export const StyledMenu = styled(Menu)(({ theme }) => ({
     color: theme.palette.text.primary,
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
+      color: theme.palette.primary.main,
     },
   },
 }));
