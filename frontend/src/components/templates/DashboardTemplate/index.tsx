@@ -5,6 +5,7 @@ import { Container, Stack } from '@mui/material';
 import { motion } from 'framer-motion';
 import { EnterCodeModal } from '../../molecules/EnterCodeModal';
 import { MySessionsEmptyState } from '../../molecules';
+import { CreateSessionModal } from '../../organisms';
 import { HeroBanner } from '../../molecules';
 import { AISuggestions } from '../../organisms';
 import { FloatingDice } from '../../atoms/FloatingDice';
@@ -209,7 +210,7 @@ export const DashboardTemplate = () => {
   const [publicSessionsPage, setPublicSessionsPage] = useState(1);
   const [userSessionsPage, setUserSessionsPage] = useState(1);
   const [enterCodeLoading, setEnterCodeLoading] = useState(false);
-
+  const [createSessionModalOpen, setCreateSessionModalOpen] = useState(false);
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
@@ -219,7 +220,7 @@ export const DashboardTemplate = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleCreateSession = () => console.log('Criar nova sessão');
+  const handleCreateSession = () => setCreateSessionModalOpen(true);
   const handleEnterCode = () => setEnterCodeModalOpen(true);
   const handleEnterCodeSubmit = async (code: string) => {
     setEnterCodeLoading(true);
@@ -305,15 +306,20 @@ export const DashboardTemplate = () => {
           </Stack>
         </motion.div>
       </Container>
-
       <FloatingDice />
-
       <EnterCodeModal
         open={enterCodeModalOpen}
         onClose={() => setEnterCodeModalOpen(false)}
         onSubmit={handleEnterCodeSubmit}
         loading={enterCodeLoading}
       />
+      {createSessionModalOpen && (
+        <CreateSessionModal
+          open={createSessionModalOpen}
+          onClose={() => setCreateSessionModalOpen(false)}
+          onSubmit={() => console.log('Criar nova sessão')}
+        />
+      )}
     </>
   );
 };
