@@ -6,6 +6,7 @@ import { CreateSessionDto, UpdateSessionDto } from '../dto/session.dto';
 import { User } from '../entities/user.entity';
 import { SessionMemberService } from './session-member.service';
 import { MemberRole, MemberStatus } from '../entities/session-member.entity';
+import { MessageService } from './message.service';
 
 @Injectable()
 export class SessionService {
@@ -13,6 +14,7 @@ export class SessionService {
     @InjectRepository(Session)
     private readonly sessionRepository: Repository<Session>,
     private readonly sessionMemberService: SessionMemberService,
+    private readonly messageService: MessageService,
   ) {}
 
   async create(createDto: CreateSessionDto, creator: User): Promise<Session> {
@@ -113,5 +115,21 @@ export class SessionService {
 
   private generateJoinCode(): string {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+
+  async startSession(id: string): Promise<Session> {
+    const session = await this.sessionRepository.findOne({ where: { id } });
+    if (!session) throw new NotFoundException('Session not found');
+    if (session.status !== SessionStatus.NOT_STARTED) throw new BadRequestException('Session already started');
+    // if (session.start_date > new Date()) throw new BadRequestException('Session start date is in the future');
+    // if (session.current_players < session.player_limit) throw new BadRequestException('Not enough players to start');
+
+    session.status = SessionStatus.ACTIVE;
+
+    if (session.is_ai_master) {
+      await this.messageService.startAiChat(id);
+    }
+
+    return this.sessionRepository.save(session);
   }
 } 

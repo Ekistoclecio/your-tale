@@ -3,10 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Message, MessageType, ChatType } from '../entities/message.entity';
 import { User } from '../entities/user.entity';
-import { Session } from '../entities/session.entity';
+import { Session, SessionStatus } from '../entities/session.entity';
 import { SessionMember } from '../entities/session-member.entity';
 import { CreateMessageDto, UpdateMessageDto, MessageResponseDto, GetMessagesQueryDto } from '../dto/message.dto';
 import { MemberRole } from '../entities/session-member.entity';
+import { LLMService } from './llm.service';
+import { LLMRequest } from '../interfaces/llm.interface';
+import { CharacterService } from './character.service';
+import { Character } from '../entities/character.entity';
 
 @Injectable()
 export class MessageService {
@@ -19,6 +23,8 @@ export class MessageService {
     private readonly sessionMemberRepository: Repository<SessionMember>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly llmService: LLMService,
+    private readonly characterService: CharacterService,
   ) {}
 
   async create(sessionId: string, createMessageDto: CreateMessageDto, userId: string): Promise<MessageResponseDto> {
@@ -52,6 +58,9 @@ export class MessageService {
       }
     }
 
+    const isMasterSession = session.is_ai_master;
+    const isMasterChat = chatType === ChatType.MASTER && membership.role === MemberRole.MASTER;
+
     // Criar a mensagem
     const message = this.messageRepository.create({
       ...createMessageDto,
@@ -63,7 +72,149 @@ export class MessageService {
 
     const savedMessage = await this.messageRepository.save(message);
 
+    if (isMasterSession) {
+      this.handleMasterAIMessage(savedMessage);
+    }
+
+    if (isMasterChat) {
+      await this.handleMasterChatMessage(savedMessage);
+    }
+
     return this.formatMessageResponse(savedMessage);
+  }
+
+  private async handleMasterChatMessage(message: Message): Promise<void> {
+    const messageHistory = await this.messageRepository.find({
+      where: {
+        session_id: message.session_id,
+        is_deleted: false,
+        chat_type: ChatType.MASTER,
+      },
+      order: {
+        timestamp: 'ASC',
+      },
+    });
+
+    const request: LLMRequest = {
+      messages: messageHistory.map(msg => ({
+        role: msg.type === MessageType.USER || msg.type === MessageType.SYSTEM ? 'user' : 'assistant',
+        content: msg.content,
+      }))
+    }
+
+    const response = await this.llmService.generateResponse('gemini', request);
+
+    const newMessage = this.messageRepository.create({
+      session_id: message.session_id,
+      content: response.content,
+      type: MessageType.AI,
+      chat_type: ChatType.MASTER,
+    })
+
+    await this.messageRepository.save(newMessage);
+  }
+
+  private handleAIChatContent(message: Message, sessionCharacters: Character[]): string {
+    if (message.type === MessageType.AI || message.type === MessageType.SYSTEM) {
+      return message.content;
+    }
+
+    const character = sessionCharacters.find(c => c.user_id === message.sender_id);
+
+    if (!character) {
+      throw new NotFoundException('Character not found');
+    }
+
+    return `
+      O jogador \`${character.name}\` enviou uma mensagem para você:
+
+      ${message.content}
+
+      Os atributos do jogador são:
+
+      ${JSON.stringify(character.status, null, 2)},
+      ${JSON.stringify(character.character_sheet, null, 2)}
+
+      Caso você ache que ele deve rolar um dado, basei-se em um desses atritubos.`
+    
+  }
+
+  private async handleMasterAIMessage(message: Message): Promise<void> {
+    const messageHistory = await this.messageRepository.find({
+      where: {
+        session_id: message.session_id,
+        is_deleted: false,
+        chat_type: ChatType.GENERAL,
+      },
+      order: {
+        timestamp: 'ASC',
+      },
+    });
+
+    const sessionCharacters = await this.characterService.findBySession(message.session_id, message.sender_id);
+
+    const request: LLMRequest = {
+      messages: messageHistory.map(msg => ({
+        role: msg.type === MessageType.USER || msg.type === MessageType.SYSTEM ? 'user' : 'assistant',
+        content: this.handleAIChatContent(msg, sessionCharacters),
+      }))
+    }
+
+    const response = await this.llmService.generateResponse('gemini', request);
+
+    const newMessage = this.messageRepository.create({
+      session_id: message.session_id,
+      content: response.content,
+      type: MessageType.AI,
+    });
+
+    await this.messageRepository.save(newMessage);
+  }
+
+  private async makeFirstChatMessage(session: Session): Promise<string> {
+
+    const characters = await this.characterService.findAllBySession(session.id);
+
+    return `Você agora é um mestre de RPG.
+    O tema da história que você contará é: ${session.title} - ${session.description}
+    Inicie a conversa agora com uma apresentação sobre a história.
+    Uma breve descrição dos personagens atuais:
+
+    ${characters.map(character => `${character.name}\n${character.status?.description}`).join('\n\n')}
+
+    *Observações sobre nosso chat:*
+    - Durante nossa conversa, trarei sempre informações sobre os status dos jogadores para que você se baseie neles para tomar decisões.
+    - Lembre de além de trazer o contexto da história, também criar uma situação inicial para os jogadores.
+    - Lembre-se, você não deve interpretar os personagens agora citados, eles são os jogadores, deve apenas dizer onde eles estão e o que acontece com eles de acordo com as ações ditas pelos jogadores.
+    - Caso o jogador deseje tomar alguma atitude, decida se ele vai precisar rolar um dado ou não, e se sim, qual o tipo de dado que ele deve rolar. 
+    - Lembre-se também, você é um mestre com personalidade calma e tranquila, então gosta de ajudar o máximo que puder os jogadores.
+    - Lembre-se, você é UM MESTRE DE MESA DE RPG, sendo assim, a história é contada em terceira pessoa e os únicos personagens são os jogadores e os NPCs que você insere na história.
+    `
+  }
+
+  async startAiChat(sessionId: string): Promise<void> {
+
+    const session = await this.sessionRepository.findOne({ where: { id: sessionId } });
+    if (!session) throw new NotFoundException('Session not found');
+    const chatMessages = await this.messageRepository.find({
+      where: {
+        session_id: sessionId,
+      }
+    });
+
+    if (chatMessages.length !== 0) {
+      throw new BadRequestException('Session already has messages');
+    }
+
+    const newMessage = this.messageRepository.create({
+      session_id: sessionId,
+      content: await this.makeFirstChatMessage(session),
+      type: MessageType.SYSTEM,
+    });
+
+    await this.messageRepository.save(newMessage);
+
+    await this.handleMasterAIMessage(newMessage);
   }
 
   async findAll(sessionId: string, userId: string, query: GetMessagesQueryDto = {}): Promise<MessageResponseDto[]> {

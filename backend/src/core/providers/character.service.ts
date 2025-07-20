@@ -162,4 +162,11 @@ export class CharacterService {
 
     await this.characterRepository.remove(character);
   }
+
+  async findAllBySession(sessionId: string): Promise<Character[]> {
+    return this.characterRepository.find({
+      where: { session_id: sessionId },
+      relations: ['user']
+    });
+  }
 } 

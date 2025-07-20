@@ -10,9 +10,13 @@ import { MessageService } from '../providers/message.service';
 import { NoteService } from '../providers/note.service';
 import { Note } from '../entities/note.entity';
 import { User } from '../entities/user.entity';
+import { CharacterModule } from './character.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Session, SessionMember, Message, Note, User])],
+  imports: [
+    TypeOrmModule.forFeature([Session, SessionMember, Message, Note, User]),
+    CharacterModule, // Remover LLMModule daqui
+  ],
   providers: [SessionService, SessionMemberService, MessageService, NoteService],
   controllers: [SessionController],
   exports: [SessionService, SessionMemberService, MessageService, NoteService],

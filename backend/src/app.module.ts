@@ -6,7 +6,8 @@ import { UserModule } from './core/modules/user.module';
 import { SessionModule } from './core/modules/session.module';
 import { CharacterModule } from './core/modules/character.module';
 import { NoteModule } from './core/modules/note.module';
-import { AppController } from './api/controllers/app.controller';
+import { LLMModule } from './core/modules/llm.module';
+import { AppController } from './core/controllers/app.controller';
 import { AppService } from './app.service';
 
 @Module({
@@ -24,6 +25,7 @@ import { AppService } from './app.service';
     SessionModule,
     CharacterModule,
     NoteModule,
+    LLMModule,
   ],
   controllers: [AppController],
   providers: [AppService],
