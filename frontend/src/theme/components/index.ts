@@ -13,6 +13,7 @@ import { SliderOverrides } from '@/theme/components/slider';
 import { RadioOverrides } from '@/theme/components/radio';
 import { FormLabelOverrides } from '@/theme/components/formLabel';
 import { MenuItemOverrides } from '@/theme/components/menuItem';
+import { SelectOverrides } from '@/theme/components/select';
 
 export const components: Components = {
   MuiButton: ButtonOverrides,
@@ -29,4 +30,5 @@ export const components: Components = {
   MuiRadio: RadioOverrides,
   MuiFormLabel: FormLabelOverrides,
   MuiMenuItem: MenuItemOverrides,
+  MuiSelect: SelectOverrides,
 };
