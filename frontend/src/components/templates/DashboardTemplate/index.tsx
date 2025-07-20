@@ -275,6 +275,7 @@ export const DashboardTemplate = () => {
             width="100%"
           >
             <SessionSection
+              id="public-sessions-section"
               title="Sessões abertas à aventura"
               icon={<Explore width={28} height={28} />}
               sessions={mockPublicSessions.slice(
@@ -289,6 +290,7 @@ export const DashboardTemplate = () => {
             />
 
             <SessionSection
+              id="user-sessions-section"
               title="Minhas campanhas"
               icon={<Scroll width={28} height={28} />}
               sessions={mockUserSessions.slice(

@@ -32,6 +32,7 @@ interface SessionSectionProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  id: string;
 }
 
 export const getSectionVariants = (theme: Theme): Variants => ({
@@ -69,6 +70,7 @@ export const SessionSection = ({
   page,
   totalPages,
   onPageChange,
+  id,
 }: SessionSectionProps) => {
   const theme = useTheme();
   const sectionVariants = getSectionVariants(theme);
@@ -78,6 +80,7 @@ export const SessionSection = ({
       initial="initial"
       whileHover="hovered"
       whileFocus="focused"
+      id={id}
     >
       <Stack direction="row" alignItems="center" spacing={2} justifyContent="center" mb={4}>
         {icon}
