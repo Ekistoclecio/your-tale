@@ -10,16 +10,14 @@ import {
   TextField,
   FormLabel,
   Select,
-  useTheme,
+  MenuItem,
 } from '@mui/material';
 import { PersonPin as PersonIcon, SmartToy as SmartToyIcon } from '@mui/icons-material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ReactNode } from 'react';
 import { narrativeStyles } from '@/schemas/form-validation/createSessionForm';
-import * as S from '../styles';
 
 export const SessionMasterConfig = () => {
-  const theme = useTheme();
   const {
     control,
     watch,
@@ -97,13 +95,6 @@ export const SessionMasterConfig = () => {
                 <FormControl fullWidth sx={{ mb: 2 }}>
                   <FormLabel>Estilo narrativo</FormLabel>
                   <Select
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          backgroundColor: theme.palette.background.default,
-                        },
-                      },
-                    }}
                     value={field.value}
                     onChange={field.onChange}
                     error={!!errors.aiNarrativeStyle}
@@ -116,9 +107,9 @@ export const SessionMasterConfig = () => {
                     }}
                   >
                     {narrativeStyles.map((style) => (
-                      <S.StyledMenuItem key={style} value={style}>
+                      <MenuItem key={style} value={style}>
                         {style}
-                      </S.StyledMenuItem>
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>

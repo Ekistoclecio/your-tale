@@ -1,4 +1,4 @@
-import { Dialog, Stack, Box, styled, alpha, Typography, MenuItem, Button } from '@mui/material';
+import { Dialog, Stack, Box, styled, alpha, Typography, Button } from '@mui/material';
 import { MotionButton } from '../../atoms/MotionButton';
 
 export const ModalContainer = styled(Dialog)(({ theme }) => ({
@@ -96,14 +96,5 @@ export const SubmitButton = styled(Button)(({ theme }) => ({
   '&:disabled': {
     background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%) !important`,
     color: `${theme.palette.text.disabled} !important`,
-  },
-}));
-
-export const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
-  backgroundColor: theme.palette.background.default,
-  color: theme.palette.text.primary,
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-    color: theme.palette.primary.main,
   },
 }));
