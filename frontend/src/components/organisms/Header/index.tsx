@@ -13,34 +13,33 @@ import Logo from '../../atoms/Logo';
 import { Avatar } from '../../atoms/Avatar';
 import { UserProfileMenu } from '../../molecules';
 import { MobileDrawerUserProfileMenu } from '../../molecules';
+import { UserProfileModal } from '@/components/organisms';
 import * as S from './styles';
 
 interface HeaderProps {
   onCreateSession: () => void;
   onEnterCode: () => void;
-  onProfile: () => void;
   onLogout: () => void;
   user?: {
     name: string;
+    email: string;
     avatar?: string;
   };
 }
 
-export const Header = ({
-  onCreateSession,
-  onEnterCode,
-  onProfile,
-  onLogout,
-  user,
-}: HeaderProps) => {
+export const Header = ({ onCreateSession, onEnterCode, onLogout, user }: HeaderProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-
+  const [userProfileModalOpen, setUserProfileModalOpen] = useState(false);
   const getDisplayName = (fullName: string) => {
     const names = fullName.trim().split(' ');
     if (names.length === 1) return names[0];
     if (names.length === 2) return fullName;
     return `${names[0]} ${names[names.length - 1]}`;
+  };
+
+  const handleSaveField = (field: 'name' | 'email', value: string) => {
+    console.log('Salvando campo:', field, value);
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -81,7 +80,7 @@ export const Header = ({
       label: 'Perfil',
       icon: <PersonIcon />,
       onClick: () => {
-        onProfile();
+        setUserProfileModalOpen(true);
         handleMenuClose();
       },
     },
@@ -144,6 +143,14 @@ export const Header = ({
       />
 
       <Toolbar />
+
+      <UserProfileModal
+        open={userProfileModalOpen}
+        onClose={() => setUserProfileModalOpen(false)}
+        user={user!}
+        onSaveField={handleSaveField}
+        loading={false}
+      />
     </>
   );
 };

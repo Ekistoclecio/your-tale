@@ -17,16 +17,13 @@ export default function PrivateLayout({ children }: PrivateLayoutProps) {
     console.log('Entrar com código');
   };
 
-  const handleProfile = () => {
-    console.log('Abrir perfil');
-  };
-
   const handleLogout = () => {
     console.log('Fazer logout');
   };
 
   const user = {
     name: 'John Doe',
+    email: 'john.doe@example.com',
     avatar: '',
   };
 
@@ -35,7 +32,6 @@ export default function PrivateLayout({ children }: PrivateLayoutProps) {
       <Header
         onCreateSession={handleCreateSession}
         onEnterCode={handleEnterCode}
-        onProfile={handleProfile}
         onLogout={handleLogout}
         user={user}
       />
