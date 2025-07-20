@@ -9,7 +9,7 @@ export const palette: Partial<Palette> = {
   },
   secondary: {
     main: '#E6A74A',
-    light: '#FFD88C',
+    light: '#FFC75D',
     dark: '#A96F1D',
     contrastText: '#1A1A1A',
   },

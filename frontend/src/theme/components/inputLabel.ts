@@ -10,10 +10,13 @@ export const InputLabelOverrides: Components['MuiInputLabel'] = {
 
       '&.Mui-focused': {
         color: baseTheme.palette.secondary?.main,
+        fontWeight: baseTheme.typography.fontWeightBold,
+        marginTop: '-4px',
       },
     },
     shrink: {
-      color: baseTheme.palette.secondary?.main,
+      fontWeight: baseTheme.typography.fontWeightBold,
+      marginTop: '-4px',
     },
   },
 };
