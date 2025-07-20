@@ -1,7 +1,11 @@
-import { createTheme } from '@mui/material/styles';
+'use client';
+import { createTheme, responsiveFontSizes, Theme } from '@mui/material/styles';
+import { components } from '@/theme/components';
+import { baseTheme } from '@/theme/base';
 
-export const theme = createTheme({
-  typography: {
-    fontFamily: 'var(--font-roboto)',
-  },
-});
+// Estende com componentes + aplica responsividade
+export const theme: Theme = responsiveFontSizes(
+  createTheme(baseTheme, {
+    components,
+  })
+);
