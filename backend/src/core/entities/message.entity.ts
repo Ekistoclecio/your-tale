@@ -28,7 +28,7 @@ export class Message {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', nullable: false })
+  @Column({ type: 'uuid', nullable: true })
   sender_id: string;
 
   @Column({ type: 'uuid', nullable: false })

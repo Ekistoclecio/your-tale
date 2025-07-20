@@ -113,6 +113,26 @@ export class SessionController {
     return this.sessionService.join(id, user, dto.join_code);
   }
 
+  @Post(':id/start')
+  @ApiOperation({ summary: 'Iniciar uma sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({
+    status: 200,
+    description: 'Sessão iniciada com sucesso',
+    type: Object,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Não foi possível iniciar a sessão',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Sessão não encontrada',
+  })
+  async startSession(@Param('id') id: string) {
+    return this.sessionService.startSession(id);
+  }
+
   // ===== ENDPOINTS DE MEMBROS =====
 
   @Post('members')

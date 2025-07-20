@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Note } from '../entities/note.entity';
 import { NoteService } from '../providers/note.service';
-import { NoteController } from '../../api/controllers/note.controller';
+import { NoteController } from '../controllers/note.controller';
 import { Session } from '../entities/session.entity';
 import { SessionMember } from '../entities/session-member.entity';
 import { User } from '../entities/user.entity';

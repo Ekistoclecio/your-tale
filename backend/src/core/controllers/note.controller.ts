@@ -1,10 +1,10 @@
 import { Controller, Post, Get, Patch, Delete, Param, Body, UseGuards, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { NoteService } from '../../core/providers/note.service';
-import { CreateNoteDto, UpdateNoteDto, NoteResponseDto, GetNotesQueryDto } from '../../core/dto/note.dto';
-import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { CurrentUser } from '../../core/decorators/current-user.decorator';
-import { User } from '../../core/entities/user.entity';
+import { NoteService } from '../providers/note.service';
+import { CreateNoteDto, UpdateNoteDto, NoteResponseDto, GetNotesQueryDto } from '../dto/note.dto';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { CurrentUser } from '../decorators/current-user.decorator';
+import { User } from '../entities/user.entity';
 
 @ApiTags('notes')
 @ApiBearerAuth('JWT-auth')
