@@ -5,3 +5,7 @@ export { HeroBanner } from './HeroBanner';
 export { UserProfileMenu } from './UserProfileMenu';
 export { MobileDrawerUserProfileMenu } from './MobileDrawerUserProfileMenu';
 export { EditableField } from './EditableField';
+export { AttributeInput } from './AttributeInput';
+export { SkillCheckbox } from './SkillCheckbox';
+export { CoinInputGroup } from './CoinInputGroup';
+export { BackstoryEditor } from './BackstoryEditor';
