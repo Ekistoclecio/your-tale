@@ -9,6 +9,7 @@ import { NoteModule } from './core/modules/note.module';
 import { LLMModule } from './core/modules/llm.module';
 import { AppController } from './core/controllers/app.controller';
 import { AppService } from './app.service';
+import { WebSocketModule } from './core/modules/websocket.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AppService } from './app.service';
     CharacterModule,
     NoteModule,
     LLMModule,
+    WebSocketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

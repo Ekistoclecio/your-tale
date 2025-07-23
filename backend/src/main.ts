@@ -3,10 +3,17 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
+import { WebSocketModule } from './core/modules/websocket.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
+  // Configurar CORS
+  app.enableCors({
+    origin: true, // Configure conforme necessário
+    credentials: true,
+  });
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
