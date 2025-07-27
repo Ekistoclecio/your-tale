@@ -17,10 +17,6 @@ export default function PrivateLayout({ children }: PrivateLayoutProps) {
     console.log('Entrar com código');
   };
 
-  const handleLogout = () => {
-    console.log('Fazer logout');
-  };
-
   const user = {
     name: 'John Doe',
     email: 'john.doe@example.com',
@@ -29,12 +25,7 @@ export default function PrivateLayout({ children }: PrivateLayoutProps) {
 
   return (
     <S.Wrapper>
-      <Header
-        onCreateSession={handleCreateSession}
-        onEnterCode={handleEnterCode}
-        onLogout={handleLogout}
-        user={user}
-      />
+      <Header onCreateSession={handleCreateSession} onEnterCode={handleEnterCode} user={user} />
       <S.Content>{children}</S.Content>
     </S.Wrapper>
   );

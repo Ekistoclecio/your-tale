@@ -15,11 +15,11 @@ import { UserProfileMenu } from '../../molecules';
 import { MobileDrawerUserProfileMenu } from '../../molecules';
 import { UserProfileModal } from '@/components/organisms';
 import * as S from './styles';
+import { signOut } from 'next-auth/react';
 
 interface HeaderProps {
   onCreateSession: () => void;
   onEnterCode: () => void;
-  onLogout: () => void;
   user?: {
     name: string;
     email: string;
@@ -27,7 +27,7 @@ interface HeaderProps {
   };
 }
 
-export const Header = ({ onCreateSession, onEnterCode, onLogout, user }: HeaderProps) => {
+export const Header = ({ onCreateSession, onEnterCode, user }: HeaderProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userProfileModalOpen, setUserProfileModalOpen] = useState(false);
@@ -88,7 +88,7 @@ export const Header = ({ onCreateSession, onEnterCode, onLogout, user }: HeaderP
       label: 'Sair',
       icon: <LogoutIcon />,
       onClick: () => {
-        onLogout();
+        signOut();
         handleMenuClose();
       },
     },

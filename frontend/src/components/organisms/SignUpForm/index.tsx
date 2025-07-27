@@ -2,13 +2,18 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Stack, TextField } from '@mui/material';
-import { MotionTypography } from '@/components/atoms/MotionTypography';
+import { Box, CircularProgress, Stack, TextField, Typography } from '@mui/material';
 import { MotionBox } from '@/components/atoms/MotionBox';
 import { MotionButton } from '@/components/atoms/MotionButton';
 import { SignUpFormData, signUpSchema } from '@/schemas/form-validation/signUpForm';
+import { authService } from '@/services/auth';
+import { useSnackbar } from 'notistack';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export const SignUpForm = () => {
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -17,18 +22,38 @@ export const SignUpForm = () => {
     resolver: zodResolver(signUpSchema),
   });
 
-  const onSubmit = (data: SignUpFormData) => {
-    // TODO: Implementar lógica de autenticação
-    console.log('Sign up attempt:', data);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onSubmit = async (data: SignUpFormData) => {
+    try {
+      setIsLoading(true);
+      const newUser = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      };
+      await authService.create(newUser);
+      enqueueSnackbar('Conta criada com sucesso', {
+        variant: 'success',
+      });
+      router.push('/sign-in');
+    } catch (error) {
+      console.error('Error creating user:', error);
+      enqueueSnackbar('Erro ao criar conta', {
+        variant: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={6}>
-        <MotionTypography variant="h3" align="center">
+        <Typography variant="h3" align="center">
           Criar conta
-        </MotionTypography>
-        <Stack spacing={2}>
+        </Typography>
+        <Stack spacing={4}>
           <MotionBox whileHover={{ scale: 1.02 }} whileFocus={{ scale: 1.02 }}>
             <TextField
               label="Nome"
@@ -83,8 +108,9 @@ export const SignUpForm = () => {
           variant="contained"
           fullWidth
           sx={{ mt: 8 }}
+          disabled={isLoading}
         >
-          Criar conta
+          {isLoading ? <CircularProgress size={24} /> : 'Criar conta'}
         </MotionButton>
       </Stack>
     </Box>

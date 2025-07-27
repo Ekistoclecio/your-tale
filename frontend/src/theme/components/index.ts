@@ -14,7 +14,8 @@ import { RadioOverrides } from '@/theme/components/radio';
 import { FormLabelOverrides } from '@/theme/components/formLabel';
 import { MenuItemOverrides } from '@/theme/components/menuItem';
 import { SelectOverrides } from '@/theme/components/select';
-
+import { CircularProgressOverrides } from '@/theme/components/circularProgress';
+import { FormHelperTextOverrides } from '@/theme/components/formHelperText';
 export const components: Components = {
   MuiButton: ButtonOverrides,
   MuiCard: CardOverrides,
@@ -31,4 +32,6 @@ export const components: Components = {
   MuiFormLabel: FormLabelOverrides,
   MuiMenuItem: MenuItemOverrides,
   MuiSelect: SelectOverrides,
+  MuiCircularProgress: CircularProgressOverrides,
+  MuiFormHelperText: FormHelperTextOverrides,
 };

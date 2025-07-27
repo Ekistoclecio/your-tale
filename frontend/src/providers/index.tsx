@@ -7,6 +7,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ptBR } from 'date-fns/locale';
+import { ConfiguredSnackbarProvider } from './snackbar';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -15,7 +16,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         <CssBaseline />
         <GlobalStyles styles={globalStyles} />
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
-          {children}
+          <ConfiguredSnackbarProvider>{children}</ConfiguredSnackbarProvider>
         </LocalizationProvider>
       </ThemeProvider>
     </AppRouterCacheProvider>
