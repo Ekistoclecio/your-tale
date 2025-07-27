@@ -11,11 +11,13 @@ import { NoteService } from '../providers/note.service';
 import { Note } from '../entities/note.entity';
 import { User } from '../entities/user.entity';
 import { CharacterModule } from './character.module';
+import { QueueModule } from './queue.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Session, SessionMember, Message, Note, User]),
-    CharacterModule, // Remover LLMModule daqui
+    CharacterModule,
+    QueueModule, // Importar QueueModule para ter acesso ao LLMQueueService
   ],
   providers: [SessionService, SessionMemberService, MessageService, NoteService],
   controllers: [SessionController],
