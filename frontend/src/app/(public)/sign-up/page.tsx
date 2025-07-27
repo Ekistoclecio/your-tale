@@ -1,3 +1,5 @@
+'use client';
+
 import { AuthTemplate } from '@/components/templates/AuthTemplate';
 import { SignUpForm } from '@/components/organisms/SignUpForm';
 import { MotionTypography } from '@/components/atoms/MotionTypography';

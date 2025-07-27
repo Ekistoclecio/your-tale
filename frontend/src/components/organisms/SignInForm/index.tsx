@@ -2,13 +2,19 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Stack, TextField } from '@mui/material';
+import { Box, CircularProgress, Stack, TextField } from '@mui/material';
 import { MotionTypography } from '@/components/atoms/MotionTypography';
 import { MotionBox } from '@/components/atoms/MotionBox';
 import { MotionButton } from '@/components/atoms/MotionButton';
 import { SignInFormData, signInSchema } from '@/schemas/form-validation/signInForm';
-
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useSnackbar } from 'notistack';
+import { useState } from 'react';
 export const SignInForm = () => {
+  const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -17,9 +23,23 @@ export const SignInForm = () => {
     resolver: zodResolver(signInSchema),
   });
 
-  const onSubmit = (data: SignInFormData) => {
-    // TODO: Implementar lógica de autenticação
+  const onSubmit = async (data: SignInFormData) => {
     console.log('Login attempt:', data);
+    try {
+      setIsLoading(true);
+      await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+      });
+      router.push('/');
+    } catch (error) {
+      console.error('Error logging in:', error);
+      enqueueSnackbar('Erro ao fazer login', {
+        variant: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -28,7 +48,7 @@ export const SignInForm = () => {
         <MotionTypography variant="h3" align="center">
           Entrar
         </MotionTypography>
-        <Stack spacing={2}>
+        <Stack spacing={4}>
           <MotionBox whileHover={{ scale: 1.02 }} whileFocus={{ scale: 1.02 }}>
             <TextField
               label="E-mail"
@@ -66,8 +86,9 @@ export const SignInForm = () => {
             variant="contained"
             fullWidth
             sx={{ mt: 8 }}
+            disabled={isLoading}
           >
-            Entrar
+            {isLoading ? <CircularProgress size={24} /> : 'Entrar'}
           </MotionButton>
         </Stack>
       </Stack>
