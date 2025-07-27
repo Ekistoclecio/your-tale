@@ -8,6 +8,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ptBR } from 'date-fns/locale';
 import { ConfiguredSnackbarProvider } from './snackbar';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/queries/client';
+import { SessionProvider } from 'next-auth/react';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +19,11 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         <CssBaseline />
         <GlobalStyles styles={globalStyles} />
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
-          <ConfiguredSnackbarProvider>{children}</ConfiguredSnackbarProvider>
+          <QueryClientProvider client={queryClient}>
+            <SessionProvider>
+              <ConfiguredSnackbarProvider>{children}</ConfiguredSnackbarProvider>
+            </SessionProvider>
+          </QueryClientProvider>
         </LocalizationProvider>
       </ThemeProvider>
     </AppRouterCacheProvider>

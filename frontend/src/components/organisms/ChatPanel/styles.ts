@@ -98,6 +98,7 @@ export const EmptyState = styled(Box)(({ theme }) => ({
   color: theme.palette.text.secondary,
   textAlign: 'center',
   padding: theme.spacing(2),
+  flex: '1 1 auto',
 }));
 
 // Seção de anotações

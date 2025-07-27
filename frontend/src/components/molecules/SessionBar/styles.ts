@@ -6,9 +6,8 @@ import { motion } from 'framer-motion';
 
 const statusColors = (theme: Theme) => ({
   active: theme.palette.success.main,
-  paused: theme.palette.warning.main,
+  not_started: theme.palette.info.main,
   ended: theme.palette.error.main,
-  default: theme.palette.info.main,
 });
 
 export const SessionBarContainer = styled(motion.div)(({ theme }) => ({
@@ -41,7 +40,7 @@ export const SessionTitle = styled(Typography)(({ theme }) => ({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  maxWidth: '300px',
+  maxWidth: '500px',
 }));
 
 export const LeftSection = styled(Box)({
@@ -69,7 +68,7 @@ export const RightSection = styled(Box)({
 export const SessionStatus = styled(Box)<{ status: string }>(({ theme, status }) => {
   const color =
     statusColors(theme)[status as keyof ReturnType<typeof statusColors>] ||
-    statusColors(theme).default;
+    statusColors(theme).not_started;
   return {
     display: 'flex',
     alignItems: 'center',
@@ -85,7 +84,7 @@ export const SessionStatus = styled(Box)<{ status: string }>(({ theme, status })
 export const StatusIndicator = styled(Box)<{ status: string }>(({ theme, status }) => {
   const color =
     statusColors(theme)[status as keyof ReturnType<typeof statusColors>] ||
-    statusColors(theme).default;
+    statusColors(theme).not_started;
   return {
     width: 12,
     height: 12,

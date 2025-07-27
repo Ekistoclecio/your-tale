@@ -40,7 +40,7 @@ export const ChatGeneral = ({
   messagesEndRef,
 }: ChatGeneralProps) => (
   <>
-    <S.MessagesArea>
+    <S.MessagesArea id="chat-general-messages">
       <AnimatePresence>
         {messages.length === 0 ? (
           <S.EmptyState>

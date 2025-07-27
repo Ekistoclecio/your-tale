@@ -1,7 +1,7 @@
 'use client';
 
 import { Typography, IconButton, Tooltip, useTheme } from '@mui/material';
-import { GroupAddRounded as InviteIcon, InfoRounded as InfoIcon } from '@mui/icons-material';
+import { GroupAddRounded as InviteIcon } from '@mui/icons-material';
 import { ButtonStartSession } from '@/components/atoms';
 import * as S from './styles';
 import { SessionInviteModal } from '../SessionInviteModal';
@@ -14,8 +14,6 @@ interface SessionBarProps {
   status: SessionStatus;
   isMaster?: boolean;
   onStartSession?: () => void;
-  onShowInfo?: () => void;
-  loading?: boolean;
   joinCode: string;
 }
 
@@ -24,22 +22,19 @@ export const SessionBar = ({
   status,
   isMaster = false,
   onStartSession,
-  onShowInfo,
-  loading = false,
   joinCode,
 }: SessionBarProps) => {
   const theme = useTheme();
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [isLoadingStartSession, setIsLoadingStartSession] = useState(false);
   const getStatusText = () => {
     switch (status) {
+      case 'not_started':
+        return 'Aguardando';
       case 'active':
         return 'Ativa';
-      case 'paused':
-        return 'Pausada';
       case 'ended':
         return 'Finalizada';
-      default:
-        return 'Aguardando';
     }
   };
 
@@ -58,7 +53,7 @@ export const SessionBar = ({
             </Typography>
           </S.SessionStatus>
 
-          {!isMaster && (
+          {/* {!isMaster && (
             <Tooltip title="Informações da sessão" arrow>
               <IconButton
                 size="small"
@@ -74,7 +69,7 @@ export const SessionBar = ({
                 <InfoIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          )}
+          )} */}
         </S.LeftSection>
 
         <S.CenterSection>
@@ -102,8 +97,12 @@ export const SessionBar = ({
 
               <ButtonStartSession
                 status={status}
-                onClick={onStartSession || (() => {})}
-                loading={loading}
+                onClick={async () => {
+                  setIsLoadingStartSession(true);
+                  await onStartSession?.();
+                  setIsLoadingStartSession(false);
+                }}
+                loading={isLoadingStartSession}
                 size="small"
               />
             </>

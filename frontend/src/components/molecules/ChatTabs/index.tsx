@@ -46,7 +46,7 @@ export const ChatTabs = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
-          style={{ flexGrow: 1 }}
+          style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}
         >
           {children}
         </S.TabPanel>

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { TokenAvatar } from '@/components/atoms';
 import type P5 from 'p5';
 import map from '@/assets/images/map.jpg';
+import { Character } from '@/schemas/entities/character';
 
 const MapContainer = styled(Card)(({ theme }) => ({
   padding: 1,
@@ -36,25 +37,13 @@ const TokensOverlay = styled(Box)({
   '& > *': { pointerEvents: 'auto' },
 });
 
-interface Player {
-  id: string;
-  name: string;
-  playerName: string;
-  avatar?: string;
-  hp: { current: number; max: number };
-  mana?: { current: number; max: number };
-  status: 'alive' | 'unconscious' | 'dead';
-  position: { x: number; y: number };
-}
-
 interface BoardMapProps {
-  players: Player[];
-  mapImage?: string;
+  players: Character[];
   isMaster?: boolean;
   onTokenMove?: (playerId: string, newPosition: { x: number; y: number }) => void;
 }
 
-export const BoardMap = ({ players, mapImage, isMaster = false, onTokenMove }: BoardMapProps) => {
+export const BoardMap = ({ players, isMaster = false, onTokenMove }: BoardMapProps) => {
   const sketchRef = useRef<HTMLDivElement>(null);
   const p5InstanceRef = useRef<P5 | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -93,6 +82,7 @@ export const BoardMap = ({ players, mapImage, isMaster = false, onTokenMove }: B
       if (!sketchRef.current) return;
 
       const p5 = (await import('p5')).default;
+      if (p5InstanceRef.current) return
 
       const sketch = (p: P5) => {
         let backgroundImg: P5.Image | null = null;
@@ -114,7 +104,7 @@ export const BoardMap = ({ players, mapImage, isMaster = false, onTokenMove }: B
 
           // Carrega a imagem usando async (p5.js 2.0)
           backgroundImg = await new Promise((resolve) => {
-            p.loadImage(mapImage || map.src, (img) => resolve(img));
+            p.loadImage(map.src, (img) => resolve(img));
           });
 
           const aspect = (backgroundImg?.height || 0) / (backgroundImg?.width || 0);
@@ -186,18 +176,18 @@ export const BoardMap = ({ players, mapImage, isMaster = false, onTokenMove }: B
 
       <TokensOverlay>
         {players.map((p) => {
-          const abs = toAbsolutePosition(toRelativePosition(p.position));
+          const abs = toAbsolutePosition(toRelativePosition(p.character_sheet.position as { x: number; y: number }));
           return (
             <TokenAvatar
               key={p.id}
-              src={p.avatar}
+              src={p.character_sheet.avatar as string}
               alt={p.name}
               size={32}
-              status={p.status}
+              status={p.status.hitPoints.current > 0 ? 'alive' : 'dead'}
               isDraggable={isMaster}
               position={{ x: abs.x, y: abs.y }}
               onDrag={(np) => handleTokenMove(p.id, { x: np.x, y: np.y })}
-              tooltip={`${p.name} (${p.playerName})`}
+              tooltip={`${p.name} (${p.character_sheet.playerName})`}
             />
           );
         })}

@@ -1,3 +1,5 @@
+'use client';
+
 import { IconButton, useTheme } from '@mui/material';
 import { SnackbarProvider } from 'notistack';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
