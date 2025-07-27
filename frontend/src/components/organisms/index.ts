@@ -13,3 +13,6 @@ export { AttacksAndSpellsForm } from './AttacksAndSpellsForm';
 export { InventoryForm } from './InventoryForm';
 export { TraitsAndAbilitiesForm } from './TraitsAndAbilitiesForm';
 export { AppearanceAndBackstoryForm } from './AppearanceAndBackstoryForm';
+export { BoardMap } from './BoardMap';
+export { ChatPanel } from './ChatPanel';
+export { CharacterModal } from './CharacterModal';
