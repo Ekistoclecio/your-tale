@@ -11,6 +11,7 @@ import { LLMService } from './llm.service';
 import { LLMRequest } from '../interfaces/llm.interface';
 import { CharacterService } from './character.service';
 import { Character } from '../entities/character.entity';
+import { LLMQueueService } from './llm-queue.service';
 
 @Injectable()
 export class MessageService {
@@ -25,6 +26,7 @@ export class MessageService {
     private readonly userRepository: Repository<User>,
     private readonly llmService: LLMService,
     private readonly characterService: CharacterService,
+    private readonly llmQueueService: LLMQueueService,
   ) {}
 
   async create(sessionId: string, createMessageDto: CreateMessageDto, userId: string): Promise<MessageResponseDto> {
@@ -102,16 +104,40 @@ export class MessageService {
       }))
     }
 
-    const response = await this.llmService.generateResponse('gemini', request);
+    // Adicionar job à fila em vez de processar diretamente
+    const jobId = await this.llmQueueService.addLLMJob(
+      message.session_id,
+      message.sender_id,
+      request,
+      {
+        concurrency: 2,
+        maxRetries: 3,
+        backoffDelay: 5000,
+      }
+    );
 
-    const newMessage = this.messageRepository.create({
+    // Criar uma mensagem temporária indicando que a resposta está sendo processada
+    const processingMessage = this.messageRepository.create({
       session_id: message.session_id,
-      content: response.content,
+      content: `Processando resposta do AI... (Job ID: ${jobId})`,
       type: MessageType.AI,
       chat_type: ChatType.MASTER,
-    })
+    });
 
-    await this.messageRepository.save(newMessage);
+    await this.messageRepository.save(processingMessage);
+
+    // TODO: Implementar webhook ou polling para atualizar a mensagem quando o job for concluído
+    // Por enquanto, vamos processar de forma síncrona para manter a funcionalidade
+    try {
+      const response = await this.llmService.generateResponse('gemini', request);
+      
+      // Atualizar a mensagem com a resposta real
+      processingMessage.content = response.content;
+      await this.messageRepository.save(processingMessage);
+    } catch (error) {
+      processingMessage.content = `Erro ao processar resposta: ${error.message}`;
+      await this.messageRepository.save(processingMessage);
+    }
   }
 
   private handleAIChatContent(message: Message, sessionCharacters: Character[]): string {
@@ -160,15 +186,39 @@ export class MessageService {
       }))
     }
 
-    const response = await this.llmService.generateResponse('gemini', request);
+    // Adicionar job à fila em vez de processar diretamente
+    const jobId = await this.llmQueueService.addLLMJob(
+      message.session_id,
+      message.sender_id,
+      request,
+      {
+        concurrency: 2,
+        maxRetries: 3,
+        backoffDelay: 5000,
+      }
+    );
 
-    const newMessage = this.messageRepository.create({
+    // Criar uma mensagem temporária indicando que a resposta está sendo processada
+    const processingMessage = this.messageRepository.create({
       session_id: message.session_id,
-      content: response.content,
+      content: `Processando resposta do AI... (Job ID: ${jobId})`,
       type: MessageType.AI,
     });
 
-    await this.messageRepository.save(newMessage);
+    await this.messageRepository.save(processingMessage);
+
+    // TODO: Implementar webhook ou polling para atualizar a mensagem quando o job for concluído
+    // Por enquanto, vamos processar de forma síncrona para manter a funcionalidade
+    try {
+      const response = await this.llmService.generateResponse('gemini', request);
+      
+      // Atualizar a mensagem com a resposta real
+      processingMessage.content = response.content;
+      await this.messageRepository.save(processingMessage);
+    } catch (error) {
+      processingMessage.content = `Erro ao processar resposta: ${error.message}`;
+      await this.messageRepository.save(processingMessage);
+    }
   }
 
   private async makeFirstChatMessage(session: Session): Promise<string> {

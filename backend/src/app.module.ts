@@ -7,9 +7,9 @@ import { SessionModule } from './core/modules/session.module';
 import { CharacterModule } from './core/modules/character.module';
 import { NoteModule } from './core/modules/note.module';
 import { LLMModule } from './core/modules/llm.module';
+import { QueueModule } from './core/modules/queue.module';
 import { AppController } from './core/controllers/app.controller';
 import { AppService } from './app.service';
-import { WebSocketModule } from './core/modules/websocket.module';
 
 @Module({
   imports: [
@@ -27,7 +27,7 @@ import { WebSocketModule } from './core/modules/websocket.module';
     CharacterModule,
     NoteModule,
     LLMModule,
-    WebSocketModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],
