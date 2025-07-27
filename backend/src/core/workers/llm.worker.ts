@@ -1,5 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
+import { Logger, Inject, forwardRef } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { LLMQueueJob, LLMQueueResult } from '../interfaces/queue.interface';
 import { LLMService } from '../providers/llm.service';
@@ -11,6 +11,7 @@ export class LLMWorker extends WorkerHost {
 
   constructor(
     private readonly llmService: LLMService,
+    @Inject(forwardRef(() => QueueResultService))
     private readonly queueResultService: QueueResultService,
   ) {
     super();

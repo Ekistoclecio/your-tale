@@ -1,16 +1,20 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { Message } from '../entities/message.entity';
 import { LLMQueueService } from '../providers/llm-queue.service';
-import { QueueResultService } from '../providers/queue-result.service';
 import { LLMWorker } from '../workers/llm.worker';
 import { QueueController } from '../controllers/queue.controller';
 import { LLMModule } from './llm.module';
+import { ChatModule } from './chat.module';
+import { QueueResultService } from '../providers/queue-result.service';
+import { WebSocketQueueService } from '../providers/websocket-queue.service';
 
 @Module({
   imports: [
+    ConfigModule,
     TypeOrmModule.forFeature([Message]),
     BullModule.forRootAsync({
       imports: [ConfigModule],
@@ -48,9 +52,15 @@ import { LLMModule } from './llm.module';
 
     }),
     LLMModule,
+    forwardRef(() => ChatModule),
   ],
   controllers: [QueueController],
-  providers: [LLMQueueService, QueueResultService, LLMWorker],
-  exports: [LLMQueueService, QueueResultService, BullModule],
+  providers: [
+    LLMQueueService, 
+    LLMWorker,
+    QueueResultService,
+    WebSocketQueueService,
+  ],
+  exports: [LLMQueueService, BullModule, QueueResultService],
 })
 export class QueueModule {} 
