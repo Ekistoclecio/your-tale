@@ -4,6 +4,8 @@ import { Typography, IconButton, Tooltip, useTheme } from '@mui/material';
 import { GroupAddRounded as InviteIcon, InfoRounded as InfoIcon } from '@mui/icons-material';
 import { ButtonStartSession } from '@/components/atoms';
 import * as S from './styles';
+import { SessionInviteModal } from '../SessionInviteModal';
+import { useState } from 'react';
 
 type SessionStatus = 'not_started' | 'active' | 'paused' | 'ended';
 
@@ -12,9 +14,9 @@ interface SessionBarProps {
   status: SessionStatus;
   isMaster?: boolean;
   onStartSession?: () => void;
-  onInvitePlayer?: () => void;
   onShowInfo?: () => void;
   loading?: boolean;
+  joinCode: string;
 }
 
 export const SessionBar = ({
@@ -22,12 +24,12 @@ export const SessionBar = ({
   status,
   isMaster = false,
   onStartSession,
-  onInvitePlayer,
   onShowInfo,
   loading = false,
+  joinCode,
 }: SessionBarProps) => {
   const theme = useTheme();
-
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const getStatusText = () => {
     switch (status) {
       case 'active':
@@ -42,49 +44,25 @@ export const SessionBar = ({
   };
 
   return (
-    <S.SessionBarContainer
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <S.LeftSection>
-        <S.SessionStatus status={status}>
-          <S.StatusIndicator status={status} />
-          <Typography variant="button" color="text.secondary">
-            {getStatusText()}
-          </Typography>
-        </S.SessionStatus>
+    <>
+      <S.SessionBarContainer
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <S.LeftSection>
+          <S.SessionStatus status={status}>
+            <S.StatusIndicator status={status} />
+            <Typography variant="button" color="text.secondary">
+              {getStatusText()}
+            </Typography>
+          </S.SessionStatus>
 
-        {!isMaster && (
-          <Tooltip title="Informações da sessão" arrow>
-            <IconButton
-              size="small"
-              onClick={onShowInfo}
-              sx={{
-                color: theme.palette.text.secondary,
-                '&:hover': {
-                  color: theme.palette.secondary.main,
-                  backgroundColor: `${theme.palette.secondary.main}10`,
-                },
-              }}
-            >
-              <InfoIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        )}
-      </S.LeftSection>
-
-      <S.CenterSection>
-        <S.SessionTitle variant="h5">{title}</S.SessionTitle>
-      </S.CenterSection>
-
-      <S.RightSection>
-        {isMaster && (
-          <>
-            <Tooltip title="Convidar jogador" arrow>
+          {!isMaster && (
+            <Tooltip title="Informações da sessão" arrow>
               <IconButton
                 size="small"
-                onClick={onInvitePlayer}
+                onClick={onShowInfo}
                 sx={{
                   color: theme.palette.text.secondary,
                   '&:hover': {
@@ -93,19 +71,51 @@ export const SessionBar = ({
                   },
                 }}
               >
-                <InviteIcon fontSize="small" />
+                <InfoIcon fontSize="small" />
               </IconButton>
             </Tooltip>
+          )}
+        </S.LeftSection>
 
-            <ButtonStartSession
-              status={status}
-              onClick={onStartSession || (() => {})}
-              loading={loading}
-              size="small"
-            />
-          </>
-        )}
-      </S.RightSection>
-    </S.SessionBarContainer>
+        <S.CenterSection>
+          <S.SessionTitle variant="h5">{title}</S.SessionTitle>
+        </S.CenterSection>
+
+        <S.RightSection>
+          {isMaster && (
+            <>
+              <Tooltip title="Convidar jogador" arrow>
+                <IconButton
+                  size="small"
+                  onClick={() => setInviteModalOpen(true)}
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    '&:hover': {
+                      color: theme.palette.secondary.main,
+                      backgroundColor: `${theme.palette.secondary.main}10`,
+                    },
+                  }}
+                >
+                  <InviteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+
+              <ButtonStartSession
+                status={status}
+                onClick={onStartSession || (() => {})}
+                loading={loading}
+                size="small"
+              />
+            </>
+          )}
+        </S.RightSection>
+      </S.SessionBarContainer>
+      <SessionInviteModal
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        sessionTitle={title}
+        joinCode={joinCode}
+      />
+    </>
   );
 };
