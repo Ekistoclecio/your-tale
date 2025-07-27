@@ -8,7 +8,6 @@ import { MySessionsEmptyState } from '../../molecules';
 import { CreateSessionModal } from '../../organisms';
 import { HeroBanner } from '../../molecules';
 import { AISuggestions } from '../../organisms';
-import { FloatingDice } from '../../atoms/FloatingDice';
 import { SessionSection } from '../../organisms/SessionSection';
 import Scroll from '@/assets/icons/scroll.svg';
 import Explore from '@/assets/icons/explore.svg';
@@ -308,7 +307,6 @@ export const DashboardTemplate = () => {
           </Stack>
         </motion.div>
       </Container>
-      <FloatingDice />
       <EnterCodeModal
         open={enterCodeModalOpen}
         onClose={() => setEnterCodeModalOpen(false)}
