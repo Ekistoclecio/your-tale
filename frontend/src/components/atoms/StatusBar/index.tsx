@@ -71,8 +71,8 @@ export const StatusBar = ({
 
       <S.BarTrack sx={{ height: barHeight }}>
         <S.BarFill
-          fillcolor={barColor}
-          barheight={barHeight}
+          fillColor={barColor}
+          barHeight={barHeight}
           initial={animated ? { width: 0 } : { width: `${percentage}%` }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: animated ? 0.8 : 0, ease: 'easeOut' }}
