@@ -1,11 +1,6 @@
 import NextAuth, { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { jwtDecode } from 'jwt-decode';
-import { ApiServiceInstance } from '@/services/client';
-
-export interface LoginTokenDecoded {
-  id: number;
-}
+import { authService } from '@/services/auth';
 
 const nextAuthOptions: NextAuthOptions = {
   providers: [
@@ -17,45 +12,51 @@ const nextAuthOptions: NextAuthOptions = {
       },
 
       async authorize(credentials) {
-        const { data: loginToken } = await ApiServiceInstance.post<string>('/auth', {
-          email: credentials?.email,
-          password: credentials?.password,
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const data = await authService.login({
+          email: credentials.email,
+          password: credentials.password,
         });
 
-        if (loginToken) {
-          const decodedLoginToken = jwtDecode<LoginTokenDecoded>(loginToken);
-          return {
-            id: decodedLoginToken.id,
-            accessToken: loginToken,
-          };
-        }
+        if (!data?.token || !data?.user) return null;
 
-        return null;
+        return {
+          ...data.user,
+          accessToken: data.token,
+        };
       },
     }),
   ],
+
   pages: {
     signIn: '/sign-in',
     error: '/sign-in',
   },
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.user = {
-          id: Number(user.id),
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
         };
-        token.accessToken = (user as User & { accessToken: string }).accessToken;
+        token.accessToken = user.accessToken;
       }
       return token;
     },
+
     async session({ session, token }) {
       session.user = token.user as User;
-      session.accessToken = token.accessToken as string;
+      session.accessToken = token.accessToken;
       return session;
     },
   },
 };
 
 const handler = NextAuth(nextAuthOptions);
-
 export { handler as GET, handler as POST };
