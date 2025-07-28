@@ -1,6 +1,6 @@
 'use client';
 
-import { useTheme } from '@mui/material';
+import { CircularProgress, useTheme } from '@mui/material';
 import {
   PlayArrowRounded as PlayIcon,
   PauseRounded as PauseIcon,
@@ -48,7 +48,7 @@ export const ButtonStartSession = ({
       onClick={onClick}
       disabled={disabled || loading || isEndedSession}
     >
-      {loading ? 'Carregando...' : config.text}
+      {loading ? <CircularProgress size={20} /> : config.text}
     </S.StyledButton>
   );
 };

@@ -1,90 +1,110 @@
 'use client';
 
 import { Box, useTheme, useMediaQuery } from '@mui/material';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { PlayerList, SessionBar } from '@/components/molecules';
 import { BoardMap, ChatPanel } from '@/components/organisms';
 import * as S from './styles';
+import { useSession } from 'next-auth/react';
+import { useSnackbar } from 'notistack';
+import { useStartSession } from '@/queries/session/mutation';
+import { SessionData } from '@/app/(private)/session/[id]/page';
+import { Character } from '@/schemas/entities/character';
 
-interface SessionData {
-  id: string;
-  title: string;
-  status: 'not_started' | 'active' | 'paused' | 'ended';
-  currentUser: {
-    id: string;
-    role: 'player' | 'master';
-  };
-  players: Array<{
-    id: string;
-    name: string;
-    playerName: string;
-    avatar?: string;
-    level: number;
-    class: string;
-    race: string;
-    hp: { current: number; max: number };
-    mana?: { current: number; max: number };
-    status: 'alive' | 'unconscious' | 'dead';
-    position: { x: number; y: number };
-    isOnline?: boolean;
-    attributes: {
-      strength: { value: number; modifier: number };
-      dexterity: { value: number; modifier: number };
-      constitution: { value: number; modifier: number };
-      intelligence: { value: number; modifier: number };
-      wisdom: { value: number; modifier: number };
-      charisma: { value: number; modifier: number };
-    };
-    conditions: string[];
-    appearance: string;
-    backstory: string;
-    personality: string;
-    ideals: string;
-    bonds: string;
-    flaws: string;
-    notes: string;
-    inventory: Array<{ id: string; name: string; quantity: number; description?: string }>;
-  }>;
-  joinCode: string;
-  mapImage?: string;
-  messages: Array<{
-    id: string;
-    senderId: string;
-    senderName: string;
-    content: string;
-    timestamp: Date;
-    type: 'user' | 'ai' | 'system';
-    chatType: 'general' | 'master';
-    senderRole?: 'player' | 'master';
-    avatar?: string;
-  }>;
-  notes: Array<{
-    id: string;
-    title: string;
-    content: string;
-    timestamp: Date;
-  }>;
-}
+// interface SessionData {
+//   id: string;
+//   title: string;
+//   status: 'not_started' | 'active' | 'paused' | 'ended';
+//   currentUser: {
+//     id: string;
+//     role: 'player' | 'master';
+//   };
+//   players: Array<{
+//     id: string;
+//     name: string;
+//     playerName: string;
+//     avatar?: string;
+//     level: number;
+//     class: string;
+//     race: string;
+//     hp: { current: number; max: number };
+//     mana?: { current: number; max: number };
+//     status: 'alive' | 'unconscious' | 'dead';
+//     position: { x: number; y: number };
+//     isOnline?: boolean;
+//     attributes: {
+//       strength: { value: number; modifier: number };
+//       dexterity: { value: number; modifier: number };
+//       constitution: { value: number; modifier: number };
+//       intelligence: { value: number; modifier: number };
+//       wisdom: { value: number; modifier: number };
+//       charisma: { value: number; modifier: number };
+//     };
+//     conditions: string[];
+//     appearance: string;
+//     backstory: string;
+//     personality: string;
+//     ideals: string;
+//     bonds: string;
+//     flaws: string;
+//     notes: string;
+//     inventory: Array<{ id: string; name: string; quantity: number; description?: string }>;
+//   }>;
+//   joinCode: string;
+//   mapImage?: string;
+//   messages: Array<{
+//     id: string;
+//     senderId: string;
+//     senderName: string;
+//     content: string;
+//     timestamp: Date;
+//     type: 'user' | 'ai' | 'system';
+//     chatType: 'general' | 'master';
+//     senderRole?: 'player' | 'master';
+//     avatar?: string;
+//   }>;
+//   notes: Array<{
+//     id: string;
+//     title: string;
+//     content: string;
+//     timestamp: Date;
+//   }>;
+// }
 
 interface GameSessionLayoutProps {
   sessionData: SessionData;
+  updateSessionData: (session: SessionData) => void;
 }
 
-export const GameSessionLayout = ({ sessionData }: GameSessionLayoutProps) => {
+export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessionLayoutProps) => {
   const theme = useTheme();
+  const { enqueueSnackbar } = useSnackbar();
+  const { data: session } = useSession();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
-  const isMaster = sessionData.currentUser.role === 'master';
+  const isMaster = useMemo(() => sessionData.creator.id === session?.user?.id && !sessionData.is_ai_master, [sessionData, session]);
 
-  // Handlers
-  const handleStartSession = () => console.log('Iniciando sessão...');
-  const handleSendMessage = (content: string, chatType: 'general' | 'master') =>
-    console.log('Enviando mensagem:', { content, chatType });
-  const handleRollDice = (exp: string) => console.log('Rolando dados:', exp);
+  const { mutateAsync: startSession } = useStartSession();
+
+  const handleStartSession = async () => {
+    try{
+      await startSession(sessionData.id);
+      updateSessionData({ ...sessionData, status: 'active' });
+      enqueueSnackbar('Sessão iniciada com sucesso', { variant: 'success' });
+    }catch{
+      enqueueSnackbar('Erro ao iniciar sessão', { variant: 'error' });
+    }
+  };
+
+  const handleRollDice = (exp?: string) => console.log('Rolando dados:', exp || '1d20');
+
   const handleTokenMove = (id: string, pos: { x: number; y: number }) =>
     console.log('Movendo token:', { id, pos });
-  const handlePlayerClick = (p: SessionData['players'][0]) => console.log('Clicou no jogador:', p);
+
+  const handleSaveCharacter = (character: Character) => {
+    updateSessionData({ ...sessionData, characters: sessionData.characters.map((c) => c.id === character.id ? character : c) });
+  };
 
   return (
     <S.LayoutContainer>
@@ -92,20 +112,19 @@ export const GameSessionLayout = ({ sessionData }: GameSessionLayoutProps) => {
         <SessionBar
           title={sessionData.title}
           status={sessionData.status}
-          isMaster={isMaster}
+          isMaster={sessionData.creator.id === session?.user?.id}
           onStartSession={handleStartSession}
-          joinCode={sessionData.joinCode}
+          joinCode={sessionData.join_code}
         />
 
         <S.MainContainer>
           {/* Painel Esquerdo */}
           <S.LeftPanel sx={{ display: { xs: 'none', lg: 'block' } }}>
             <PlayerList
-              players={sessionData.players}
-              currentUserId={sessionData.currentUser.id}
+              players={sessionData.characters}
+              currentUserId={sessionData.creator.id}
               userRole={isMaster ? 'master' : 'player'}
-              onPlayerClick={handlePlayerClick}
-              onSaveCharacter={(c) => console.log('Salvar personagem:', c)}
+              onSaveCharacter={handleSaveCharacter}
             />
           </S.LeftPanel>
 
@@ -118,8 +137,7 @@ export const GameSessionLayout = ({ sessionData }: GameSessionLayoutProps) => {
               style={{ height: '100%' }}
             >
               <BoardMap
-                players={sessionData.players}
-                mapImage={sessionData.mapImage}
+                players={sessionData.characters}
                 isMaster={isMaster}
                 onTokenMove={handleTokenMove}
               />
@@ -129,15 +147,11 @@ export const GameSessionLayout = ({ sessionData }: GameSessionLayoutProps) => {
           {/* Painel Direito */}
           <S.RightPanel sx={{ display: { xs: 'none', lg: 'block' } }}>
             <ChatPanel
-              // @ts-expect-error: TODO: fix this
-              messages={sessionData.messages}
-              currentUserId={sessionData.currentUser.id}
+              sessionId={sessionData.id}
+              currentUserId={session?.user?.id || ''}
               isMaster={isMaster}
-              // @ts-expect-error: TODO: fix this
-              onSendMessage={handleSendMessage}
-              // @ts-expect-error: TODO: fix this
               onRollDice={handleRollDice}
-              notes={sessionData.notes || []}
+              notes={[]}
             />
           </S.RightPanel>
         </S.MainContainer>
@@ -150,15 +164,11 @@ export const GameSessionLayout = ({ sessionData }: GameSessionLayoutProps) => {
             style={{ display: mobileChatOpen ? 'flex' : 'none' }}
           >
             <ChatPanel
-              // @ts-expect-error: TODO: fix this
-              messages={sessionData.messages}
-              currentUserId={sessionData.currentUser.id}
+              sessionId={sessionData.id}
+              currentUserId={session?.user?.id || ''}
               isMaster={isMaster}
-              // @ts-expect-error: TODO: fix this
-              onSendMessage={handleSendMessage}
-              // @ts-expect-error: TODO: fix this
               onRollDice={handleRollDice}
-              notes={sessionData.notes || []}
+              notes={[]}
             />
           </S.MobileChatOverlay>
         )}

@@ -5,7 +5,8 @@ import { Box, TextField, IconButton, Card, List, ListItem } from '@mui/material'
 export const ChatContainer = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  height: '100%',
+  height: 'calc(100vh - 140px)',
+  maxHeight: 'calc(100vh - 140px)', // Altura máxima para não crescer além da página
   backgroundColor: `${theme.palette.background.card}20`,
   border: `1px solid ${theme.palette.secondary.main}40`,
   borderRadius: theme.shape.borderRadiusMedium,
@@ -17,11 +18,11 @@ export const ChatContainer = styled(Card)(({ theme }) => ({
 // Área de mensagens
 export const MessagesArea = styled(Box)(({ theme }) => ({
   flex: '1 1 auto',
+  minHeight: 0, // Importante para o flex funcionar corretamente
   overflowY: 'auto',
   padding: theme.spacing(1),
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'flex-end',
   gap: theme.spacing(0.5),
   '&::-webkit-scrollbar': {
     width: 6,
@@ -47,6 +48,7 @@ export const MessageInput = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(1),
   alignItems: 'flex-end',
+  flexShrink: 0, // Impede que o input encolha
 }));
 
 export const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -94,10 +96,11 @@ export const EmptyState = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  height: '100%',
   color: theme.palette.text.secondary,
   textAlign: 'center',
   padding: theme.spacing(2),
+  flex: '1 1 auto',
+  minHeight: '200px', // Altura mínima para o estado vazio
 }));
 
 // Seção de anotações

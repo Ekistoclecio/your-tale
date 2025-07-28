@@ -26,6 +26,7 @@ export const MainContainer = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
   flex: 1,
   height: 'calc(100vh - 140px)', // Altura ajustada pelo header + barra da sessão
+  minHeight: '500px', // Altura mínima para garantir que o chat tenha espaço
   [theme.breakpoints.down('lg')]: {
     flexDirection: 'column',
     height: 'auto',
@@ -52,6 +53,9 @@ export const CenterPanel = styled(Box)(({ theme }) => ({
 export const RightPanel = styled(Box)(({ theme }) => ({
   width: '350px',
   flexShrink: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
   [theme.breakpoints.down('lg')]: {
     width: '100%',
     order: 2,

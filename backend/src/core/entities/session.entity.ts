@@ -1,4 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Unique, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  Unique,
+  OneToMany,
+} from 'typeorm';
 import { User } from './user.entity';
 import { SessionMember } from './session-member.entity';
 import { Character } from './character.entity';
@@ -37,6 +47,7 @@ export class Session {
   @Column()
   player_limit: number;
 
+  @Expose()
   @Column({ default: false })
   is_ai_master: boolean;
 
@@ -50,7 +61,8 @@ export class Session {
   })
   status: SessionStatus;
 
-  @ManyToOne(() => User, { nullable: false })
+  @Expose()
+  @ManyToOne(() => User, { nullable: false, eager: true })
   @JoinColumn({ name: 'creatorId' })
   creator: User;
 
@@ -83,4 +95,4 @@ export class Session {
 
   @OneToMany(() => Note, (note) => note.session)
   notes: Note[];
-} 
+}

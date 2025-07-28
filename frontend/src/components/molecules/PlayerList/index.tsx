@@ -6,45 +6,16 @@ import { AnimatePresence } from 'framer-motion';
 import { Avatar, StatusBar, StatusIcon } from '@/components/atoms';
 import { CharacterModal } from '@/components/organisms';
 import * as S from './styles';
-
-export interface Player {
-  id: string;
-  name: string;
-  playerName: string;
-  avatar?: string;
-  level: number;
-  class: string;
-  race: string;
-  hp: { current: number; max: number };
-  mana?: { current: number; max: number };
-  status: 'alive' | 'unconscious' | 'dead';
-  position: { x: number; y: number };
-  isOnline?: boolean;
-  attributes: {
-    strength: { value: number; modifier: number };
-    dexterity: { value: number; modifier: number };
-    constitution: { value: number; modifier: number };
-    intelligence: { value: number; modifier: number };
-    wisdom: { value: number; modifier: number };
-    charisma: { value: number; modifier: number };
-  };
-  conditions: string[];
-  appearance: string;
-  backstory: string;
-  personality: string;
-  ideals: string;
-  bonds: string;
-  flaws: string;
-  notes: string;
-  inventory: Array<{ id: string; name: string; quantity: number; description?: string }>;
-}
+import { Character } from '@/schemas/entities/character';
+import { useUpdateCharacter } from '@/queries/character/mutation';
+import { useSnackbar } from 'notistack';
 
 export interface PlayerListProps {
-  players: Player[];
-  onPlayerClick?: (player: Player) => void;
+  players: Character[];
+  onPlayerClick?: (player: Character) => void;
   currentUserId?: string;
   userRole?: 'player' | 'master';
-  onSaveCharacter?: (character: Player) => void;
+  onSaveCharacter?: (character: Character) => void;
 }
 
 export const PlayerList = ({
@@ -55,23 +26,23 @@ export const PlayerList = ({
   onSaveCharacter,
 }: PlayerListProps) => {
   const theme = useTheme();
-  const [selectedCharacter, setSelectedCharacter] = useState<Player | null>(null);
+  const { enqueueSnackbar } = useSnackbar();
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const getStatusIcon = (status: Player['status']) => {
-    switch (status) {
-      case 'alive':
-        return 'healthy';
-      case 'unconscious':
-        return 'unconscious';
-      case 'dead':
-        return 'dead';
-      default:
-        return 'healthy';
+  const { mutateAsync: updateCharacter } = useUpdateCharacter();
+
+  const getStatusIcon = (status: Character['status']) => {
+    if(status.hitPoints.current > 0) {
+      return 'healthy';
     }
+    if(status.hitPoints.current <= 0) {
+      return 'dead';
+    }
+    return 'healthy';
   };
 
-  const handlePlayerClick = (player: Player) => {
+  const handlePlayerClick = (player: Character) => {
     setSelectedCharacter(player);
     setModalOpen(true);
     onPlayerClick?.(player);
@@ -82,12 +53,17 @@ export const PlayerList = ({
     setSelectedCharacter(null);
   };
 
-  const handleSaveCharacter = (updatedCharacter: Player) => {
-    onSaveCharacter?.(updatedCharacter);
-    setTimeout(() => {
+  const handleSaveCharacter = async (updatedCharacter: Character) => {
+    try {
+      await updateCharacter(updatedCharacter);
+      onSaveCharacter?.(updatedCharacter);
       setModalOpen(false);
       setSelectedCharacter(null);
-    }, 1000);
+      enqueueSnackbar('Personagem atualizado com sucesso', { variant: 'success' });
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar('Erro ao atualizar personagem', { variant: 'error' });
+    }
   };
 
   return (
@@ -132,11 +108,11 @@ export const PlayerList = ({
                   borderColor: theme.palette.secondary.main,
                   backgroundColor: `${theme.palette.secondary.main}15`,
                 }),
-                ...(player.isOnline === false && { opacity: 0.6, filter: 'grayscale(30%)' }),
+                ...(player.status.hitPoints.current <= 0 && { opacity: 0.6, filter: 'grayscale(30%)' }),
               }}
             >
               <Badge
-                color={player.isOnline === false ? 'error' : 'success'}
+                color={player.status.hitPoints.current <= 0 ? 'error' : 'success'}
                 variant="dot"
                 overlap="circular"
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
@@ -145,7 +121,7 @@ export const PlayerList = ({
                 }}
               >
                 <Avatar
-                  src={player.avatar}
+                  src={player.character_sheet.avatar as string}
                   alt={player.name}
                   sx={{ width: 40, height: 40 }}
                   animationVariant="subtleBounce"
@@ -154,7 +130,7 @@ export const PlayerList = ({
 
               <Box sx={{ maxWidth: '100%', width: '100%', overflow: 'hidden' }}>
                 <S.PlayerInfo>
-                  <Tooltip title={`${player.name} (${player.playerName})`} placement="right" arrow>
+                  <Tooltip title={`${player.name} (${player.character_sheet.playerName})`} placement="right" arrow>
                     <S.PlayerName>{player.name}</S.PlayerName>
                   </Tooltip>
                 </S.PlayerInfo>
@@ -167,8 +143,8 @@ export const PlayerList = ({
                       tooltip={`Status: ${player.status}`}
                     />
                     <StatusBar
-                      current={player.hp.current}
-                      max={player.hp.max}
+                      current={player.status.hitPoints.current}
+                      max={player.status.hitPoints.maximum}
                       type="hp"
                       size="small"
                       showNumbers
@@ -176,16 +152,16 @@ export const PlayerList = ({
                     />
                   </Box>
 
-                  {player.mana && (
+                  {Boolean(player.status.mana) && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <StatusIcon
                         status="mana"
                         size="small"
-                        tooltip={`Mana: ${player.mana.current}/${player.mana.max}`}
+                        tooltip={`Mana: ${player.status.mana.current}/${player.status.mana.maximum}`}
                       />
                       <StatusBar
-                        current={player.mana.current}
-                        max={player.mana.max}
+                        current={player.status.mana.current}
+                        max={player.status.mana.maximum}
                         type="mana"
                         size="small"
                         showNumbers
@@ -215,7 +191,7 @@ export const PlayerList = ({
         character={selectedCharacter}
         currentUserId={currentUserId || ''}
         userRole={userRole}
-        onSave={(character) => handleSaveCharacter(character as Player)}
+        onSave={handleSaveCharacter}
       />
     </S.PlayerListContainer>
   );

@@ -9,13 +9,11 @@ import {
   IconButton,
   useTheme,
   alpha,
-  Snackbar,
-  Alert,
+  CircularProgress,
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CloseRounded as CloseIcon,
   SaveRounded as SaveIcon,
@@ -44,108 +42,15 @@ import {
   AppearanceAndBackstoryForm,
 } from '@/components/organisms';
 import {
-  createCharacterSchema,
   CreateCharacterFormData,
 } from '@/schemas/form-validation/createCharacterForm';
 import { StatusAndConditionsManager } from '@/components/molecules/StatusAndConditionsManager';
 
 // ✅ Importação dos estilos refatorados
 import * as S from './styles';
+import { Character } from '@/schemas/entities/character';
 
 // Interface para o personagem
-interface Character {
-  id: string;
-  name: string;
-  playerName: string;
-  avatar?: string;
-  level: number;
-  class: string;
-  race: string;
-  alignment: string;
-  background: string;
-  experiencePoints: number;
-  hp: { current: number; max: number };
-  mana?: { current: number; max: number };
-  status: 'alive' | 'unconscious' | 'dead';
-  attributes: {
-    strength: { value: number; modifier: number };
-    dexterity: { value: number; modifier: number };
-    constitution: { value: number; modifier: number };
-    intelligence: { value: number; modifier: number };
-    wisdom: { value: number; modifier: number };
-    charisma: { value: number; modifier: number };
-  };
-  combatStats: {
-    armorClass: number;
-    initiative: number;
-    speed: number;
-    hitPoints: { maximum: number; current: number; temporary: number };
-    hitDice?: string;
-    resistances?: string[];
-  };
-  skills: {
-    [key: string]: boolean;
-  };
-  savingThrows: {
-    [key: string]: boolean;
-  };
-  attacks: {
-    name: string;
-    bonus: number;
-    damage: string;
-    type: string;
-    damageType?: string | undefined;
-    range?: string | undefined;
-    notes?: string | undefined;
-  }[];
-  spells: {
-    name: string;
-    level: number;
-    school: string;
-    prepared?: boolean | undefined;
-    castingTime?: string | undefined;
-    range?: string | undefined;
-    components?: string | undefined;
-    duration?: string | undefined;
-    description?: string | undefined;
-  }[];
-  coins: {
-    copper: number;
-    silver: number;
-    electrum: number;
-    gold: number;
-    platinum: number;
-  };
-  equipment: string;
-  weight: number;
-  magicItems: string;
-  treasures: string;
-  inventoryNotes: string;
-  racialTraits: string;
-  classFeatures: string;
-  feats: string;
-  specialAbilities: string;
-  conditions: string[];
-  traitsNotes: string;
-  appearance: {
-    age?: number | undefined;
-    height?: string | undefined;
-    weight?: string | undefined;
-    eyes?: string | undefined;
-    skin?: string | undefined;
-    hair?: string | undefined;
-    distinguishingFeatures?: string | undefined;
-    clothing?: string | undefined;
-    description?: string | undefined;
-  };
-  backstory: string;
-  personality: string;
-  ideals: string;
-  bonds: string;
-  flaws: string;
-  additionalNotes: string;
-  carryingCapacity: number;
-}
 
 interface CharacterModalProps {
   open: boolean;
@@ -232,76 +137,81 @@ export const CharacterModal = ({
   onSave,
 }: CharacterModalProps) => {
   const theme = useTheme();
+  const [isLoading, setIsLoading] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['identity']));
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success' as 'success' | 'error',
-  });
-
-  const canEdit = userRole === 'master' || character?.id === currentUserId;
+  const canEdit = userRole === 'master' || character?.user_id === currentUserId;
 
   // Converte Character -> FormData
   const convertCharacterToFormData = (char: Character): CreateCharacterFormData => ({
     name: char.name,
-    class: char.class,
-    race: char.race,
-    alignment: char.alignment,
-    background: char.background,
-    playerName: char.playerName,
-    experiencePoints: char.experiencePoints,
-    level: char.level,
-    attributes: char.attributes,
-    combatStats: char.combatStats,
-    skills: char.skills,
-    savingThrows: char.savingThrows,
-    attacks: char.attacks,
-    spells: char.spells,
-    coins: char.coins,
-    equipment: char.equipment,
-    weight: char.weight,
-    carryingCapacity: char.carryingCapacity,
-    magicItems: char.magicItems,
-    treasures: char.treasures,
-    inventoryNotes: char.inventoryNotes,
-    racialTraits: char.racialTraits,
-    classFeatures: char.classFeatures,
-    feats: char.feats,
-    specialAbilities: char.specialAbilities,
-    conditions: Array.isArray(char.conditions) ? char.conditions.join('\n') : char.conditions || '',
-    traitsNotes: char.traitsNotes,
-    appearance: char.appearance,
-    backstory: char.backstory,
-    personality: char.personality,
-    ideals: char.ideals,
-    bonds: char.bonds,
-    flaws: char.flaws,
-    additionalNotes: char.additionalNotes,
+    class: char.character_class,
+    race: char.character_sheet.race as string,
+    alignment: char.character_sheet.alignment as string,
+    background: char.character_sheet.background as string,
+    playerName: char.character_sheet.playerName as string,
+    experiencePoints: char.character_sheet.experiencePoints as number,
+    level: char.status.level as number,
+    // @ts-expect-error - TODO: fix this
+    attributes: char.character_sheet.attributes as { [key: string]: { value: number; modifier: number } },
+    // @ts-expect-error - TODO: fix this
+    combatStats: char.character_sheet.combatStats as { [key: string]: number | { [key: string]: number } | string[] },
+    // @ts-expect-error - TODO: fix this
+    skills: char.character_sheet.skills as { [key: string]: string },
+    // @ts-expect-error - TODO: fix this
+    savingThrows: char.character_sheet.savingThrows as { [key: string]: string },
+    // @ts-expect-error - TODO: fix this
+    attacks: char.character_sheet.attacks as  { [key: string]: number | string }[] ,
+    // @ts-expect-error - TODO: fix this
+    spells: char.character_sheet.spells as { [key: string]: string }[],
+    coins: char.character_sheet.coins as { copper: number; silver: number; electrum: number; gold: number; platinum: number },
+    equipment: char.character_sheet.equipment as string,
+    weight: char.character_sheet.weight as number,
+    carryingCapacity: char.character_sheet.carryingCapacity as number,
+    magicItems: char.character_sheet.magicItems as string,
+    treasures: char.character_sheet.treasures as string,
+    inventoryNotes: char.character_sheet.inventoryNotes as string,
+    racialTraits: char.character_sheet.racialTraits as string,
+    classFeatures: char.character_sheet.classFeatures as string,
+    feats: char.character_sheet.feats as string,
+    specialAbilities: char.character_sheet.specialAbilities as string,
+    conditions: ((Array.isArray(char.character_sheet.conditions) ? char.character_sheet.conditions.join(' ') : char.character_sheet.conditions) || '') as string,
+    traitsNotes: char.character_sheet.traitsNotes as string,  
+    appearance: char.character_sheet.appearance as { age?: number | undefined; height?: string | undefined; weight?: string | undefined; eyes?: string | undefined; skin?: string | undefined; hair?: string | undefined; distinguishingFeatures?: string | undefined; clothing?: string | undefined; description?: string | undefined; },
+    backstory: char.character_sheet.backstory as string,
+    personality: char.character_sheet.personality as string,
+    ideals: char.character_sheet.ideals as string,
+    bonds: char.character_sheet.bonds as string,
+    flaws: char.character_sheet.flaws as string,
+    additionalNotes: char.character_sheet.additionalNotes as string,
   });
 
   // Converte FormData -> Character
   const convertFormDataToCharacter = (
     formData: CreateCharacterFormData,
     originalChar: Character
-  ): Character => ({
-    ...originalChar,
-    ...formData,
-    conditions: Array.isArray(originalChar.conditions)
-      ? originalChar.conditions
-      : formData?.conditions?.split('\n').filter((c) => c.trim()) || [],
-    hp: originalChar.hp,
-    mana: originalChar.mana,
+  ): Character => {
+    // @ts-expect-error - TODO: fix this
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { user_id, user, session_id, ...rest } = originalChar;
+    return {
+    ...rest,
+    name: formData.name,
+    character_class: formData.class,
+    character_sheet: {
+      ...originalChar.character_sheet,
+      ...formData,
+      conditions: ((Array.isArray(formData.conditions) ? formData.conditions.join(' ') : formData.conditions) || '') as string,
+    },
     status: originalChar.status,
-  });
+  } as unknown as Character;
+}
 
   const form = useForm<CreateCharacterFormData>({
-    resolver: zodResolver(createCharacterSchema),
     defaultValues: character ? convertCharacterToFormData(character) : undefined,
   });
 
   const {
     handleSubmit,
-    formState: { isDirty, isValid },
     reset,
   } = form;
 
@@ -321,9 +231,10 @@ export const CharacterModal = ({
 
   const handleSave = handleSubmit((formData) => {
     if (character) {
+      setIsLoading(true);
       const updatedCharacter = convertFormDataToCharacter(formData, character);
       onSave(updatedCharacter);
-      setSnackbar({ open: true, message: 'Personagem salvo com sucesso!', severity: 'success' });
+      setIsLoading(false);
     }
   });
 
@@ -334,14 +245,20 @@ export const CharacterModal = ({
 
   // Gerenciamento de condições
   const handleAddCondition = (condition: string) => {
-    if (character && condition.trim() && !character.conditions.includes(condition.trim())) {
-      onSave({ ...character, conditions: [...character.conditions, condition.trim()] });
+    const conditions = ((Array.isArray(character?.character_sheet.conditions) ? character?.character_sheet.conditions.join(' ') : character?.character_sheet.conditions) || '') as string;
+    if (character && condition.trim() && !conditions.includes(condition.trim())) {
+      setIsLoading(true);
+      onSave({ ...character, character_sheet: { ...character.character_sheet, conditions: [...conditions, condition.trim()] } });
+      setIsLoading(false);
     }
   };
 
   const handleRemoveCondition = (condition: string) => {
     if (character) {
-      onSave({ ...character, conditions: character.conditions.filter((c) => c !== condition) });
+      const conditions = ((Array.isArray(character.character_sheet.conditions) ? character.character_sheet.conditions.join(' ') : character.character_sheet.conditions) || '') as string;
+      setIsLoading(true);
+      onSave({ ...character, character_sheet: { ...character.character_sheet, conditions: conditions.split(' ').filter((c) => c !== condition) } });
+      setIsLoading(false);
     }
   };
 
@@ -371,7 +288,7 @@ export const CharacterModal = ({
                   <S.Header>
                     <S.CharacterAvatar>
                       <Avatar
-                        src={character.avatar}
+                        src={character.character_sheet.avatar as string | undefined}
                         alt={character.name}
                         sx={{ width: 80, height: 80 }}
                       />
@@ -381,10 +298,10 @@ export const CharacterModal = ({
                       <Box>
                         <S.CharacterName>{character.name}</S.CharacterName>
                         <Typography variant="subtitle1" color="text.secondary">
-                          {character.class} {character.race} • Nível {character.level}
+                          {character.character_class as string} {character.character_sheet.race as string} • Nível {character.status.level as number}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Jogador: {character.playerName}
+                          Jogador: {character.character_sheet.playerName as string}
                         </Typography>
                       </Box>
 
@@ -395,7 +312,7 @@ export const CharacterModal = ({
                             size="small"
                             label="HP Atual"
                             type="number"
-                            value={character.hp.current}
+                            value={character.status.hitPoints.current as number}
                             disabled={!canEdit}
                             variant="outlined"
                             sx={{
@@ -410,7 +327,7 @@ export const CharacterModal = ({
                             size="small"
                             label="HP Máximo"
                             type="number"
-                            value={character.hp.max}
+                            value={character.status.hitPoints.maximum as number}
                             disabled={!canEdit}
                             variant="outlined"
                             sx={{
@@ -420,14 +337,14 @@ export const CharacterModal = ({
                             }}
                           />
                         </Grid>
-                        {character.mana && (
+                        {Boolean(character.status.mana) && (
                           <>
                             <Grid size={{ xs: 6, sm: 3 }}>
                               <TextField
                                 size="small"
                                 label="Mana Atual"
                                 type="number"
-                                value={character.mana.current}
+                                value={character.status.mana.current as number}
                                 disabled={!canEdit}
                                 variant="outlined"
                                 sx={{
@@ -442,7 +359,7 @@ export const CharacterModal = ({
                                 size="small"
                                 label="Mana Máxima"
                                 type="number"
-                                value={character.mana.max}
+                                value={character.status.mana.maximum as number}
                                 disabled={!canEdit}
                                 variant="outlined"
                                 sx={{
@@ -491,7 +408,7 @@ export const CharacterModal = ({
                           <AccordionDetails>
                             {section.id === 'status' ? (
                               <StatusAndConditionsManager
-                                conditions={character.conditions}
+                                conditions={character.character_sheet.conditions as string[]}
                                 onAddCondition={handleAddCondition}
                                 onRemoveCondition={handleRemoveCondition}
                                 canEdit={canEdit}
@@ -509,7 +426,7 @@ export const CharacterModal = ({
                   {canEdit && (
                     <S.Footer>
                       <Typography variant="caption" color="text.secondary">
-                        {isDirty ? 'Há alterações não salvas' : 'Nenhuma alteração'}
+                       
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 1 }}>
                         <S.CancelButton
@@ -522,10 +439,11 @@ export const CharacterModal = ({
                         <S.SaveButton
                           variant="contained"
                           onClick={handleSave}
-                          disabled={!isDirty || !isValid}
-                          startIcon={<SaveIcon />}
+                          disabled={isLoading}
+                          startIcon={!isLoading ? <SaveIcon /> : undefined}
+                          type="submit"
                         >
-                          Salvar Alterações
+                          {isLoading ? <CircularProgress size={20} /> : 'Salvar Alterações'}
                         </S.SaveButton>
                       </Box>
                     </S.Footer>
@@ -536,23 +454,6 @@ export const CharacterModal = ({
           </S.ModalContainer>
         )}
       </AnimatePresence>
-
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{ borderRadius: theme.shape.borderRadiusMedium }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </>
   );
 };

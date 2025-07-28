@@ -28,9 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${pirataOne.variable} ${cinzel.variable}`}>
+        <body>
       <AppProviders>
-        <body>{children}</body>
+          {children}
       </AppProviders>
+          </body>
     </html>
   );
 }
