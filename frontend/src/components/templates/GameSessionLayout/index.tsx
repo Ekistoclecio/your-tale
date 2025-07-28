@@ -97,10 +97,7 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
     }
   };
 
-  const handleSendMessage = (content: string, chatType: 'general' | 'master') =>
-    console.log('Enviando mensagem:', { content, chatType });
-  
-  const handleRollDice = (exp: string) => console.log('Rolando dados:', exp);
+  const handleRollDice = (exp?: string) => console.log('Rolando dados:', exp || '1d20');
 
   const handleTokenMove = (id: string, pos: { x: number; y: number }) =>
     console.log('Movendo token:', { id, pos });
@@ -150,10 +147,9 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
           {/* Painel Direito */}
           <S.RightPanel sx={{ display: { xs: 'none', lg: 'block' } }}>
             <ChatPanel
-              messages={[]}
-              currentUserId={sessionData.creator.id}
+              sessionId={sessionData.id}
+              currentUserId={session?.user?.id || ''}
               isMaster={isMaster}
-              onSendMessage={handleSendMessage}
               onRollDice={handleRollDice}
               notes={[]}
             />
@@ -168,10 +164,9 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
             style={{ display: mobileChatOpen ? 'flex' : 'none' }}
           >
             <ChatPanel
-              messages={[]}
-              currentUserId={sessionData.creator.id}
+              sessionId={sessionData.id}
+              currentUserId={session?.user?.id || ''}
               isMaster={isMaster}
-              onSendMessage={handleSendMessage}
               onRollDice={handleRollDice}
               notes={[]}
             />

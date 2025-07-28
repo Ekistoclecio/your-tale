@@ -3,7 +3,7 @@
 import { Typography } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SendRounded as SendIcon } from '@mui/icons-material';
-import { MessageBubble } from '@/components/atoms';
+import { MessageBubble, TypingIndicator } from '@/components/atoms';
 import * as S from '../styles';
 
 interface Message {
@@ -13,19 +13,27 @@ interface Message {
   content: string;
   timestamp: Date;
   type: 'user' | 'ai' | 'system';
-  chatType: 'general' | 'ai';
+  chatType: 'general' | 'ai' | 'master';
   senderRole?: 'player' | 'master';
   avatar?: string;
+}
+
+interface TypingUser {
+  id: string;
+  name: string;
 }
 
 interface ChatAIProps {
   messages: Message[];
   loading: boolean;
+  isLoadingMessages?: boolean;
   messageInput: string;
   setMessageInput: (v: string) => void;
   onSendMessage: () => void;
   onKeyPress: (e: React.KeyboardEvent) => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  typingUsers?: TypingUser[];
+  currentUserId?: string;
 }
 
 export const ChatAI = ({
@@ -36,21 +44,24 @@ export const ChatAI = ({
   onSendMessage,
   onKeyPress,
   messagesEndRef,
+  typingUsers = [],
+  currentUserId,
 }: ChatAIProps) => (
   <>
-    <S.MessagesArea>
+    <S.MessagesArea id="chat-ai-messages">
+
       <AnimatePresence>
         {messages.length === 0 ? (
           <S.EmptyState>
             <Typography variant="h6" sx={{ mb: 1, opacity: 0.7 }}>
-              Assistente IA
+              Chat com IA
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.6 }}>
-              Converse com o assistente de IA para ajuda narrativa e sugestões para sua sessão.
+              Converse com a IA para obter ajuda na sessão. Apenas o mestre pode usar este chat.
             </Typography>
           </S.EmptyState>
         ) : (
-          messages.map((message, index) => (
+          messages.map((message) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 20 }}
@@ -58,11 +69,18 @@ export const ChatAI = ({
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <MessageBubble {...message} isOwner={index % 2 !== 0} />
+              <MessageBubble 
+                {...message} 
+                isOwner={message.senderId === currentUserId} 
+              />
             </motion.div>
           ))
         )}
       </AnimatePresence>
+
+      {/* Typing Indicators */}
+      <TypingIndicator users={typingUsers} />
+
       <div ref={messagesEndRef} />
     </S.MessagesArea>
 
@@ -70,7 +88,7 @@ export const ChatAI = ({
       <S.StyledTextField
         multiline
         maxRows={3}
-        placeholder="Pergunte algo ao assistente IA..."
+        placeholder="Fale com a IA assistente..."
         value={messageInput}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessageInput(e.target.value)}
         onKeyPress={onKeyPress}

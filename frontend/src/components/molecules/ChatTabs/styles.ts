@@ -6,6 +6,7 @@ export const ChatTabsContainer = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
+  minHeight: 0, // Importante para o flex funcionar corretamente
 });
 
 export const StyledTabs = styled(Tabs)(({ theme }) => ({
@@ -48,4 +49,8 @@ export const StyledTab = styled(Tab)(({ theme }) => ({
 export const TabPanel = styled(motion.div)({
   height: '100%',
   overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+  flex: '1 1 auto',
+  minHeight: 0, // Importante para o flex funcionar corretamente
 });
