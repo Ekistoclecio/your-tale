@@ -9,6 +9,7 @@ import { NoteModule } from './core/modules/note.module';
 import { LLMModule } from './core/modules/llm.module';
 import { QueueModule } from './core/modules/queue.module';
 import { ChatModule } from './core/modules/chat.module';
+import { RpgUtilsModule } from './core/modules/rpg-utils.module';
 import { JwtGlobalModule } from './core/modules/jwt.module';
 import { AppController } from './core/controllers/app.controller';
 import { AppService } from './app.service';
@@ -32,6 +33,7 @@ import { AppService } from './app.service';
     LLMModule,
     QueueModule,
     ChatModule,
+    RpgUtilsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
