@@ -12,6 +12,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { User } from '../../core/entities/user.entity';
 import { MemberRole } from '../../core/entities/session-member.entity';
+import { PaginatedResponseDto } from '../../core/dto/pagination.dto';
 
 @ApiTags('sessions')
 @ApiBearerAuth('JWT-auth')
@@ -385,14 +386,28 @@ export class SessionController {
   @ApiQuery({ name: 'limit', required: false, type: String })
   @ApiResponse({ 
     status: 200, 
-    description: 'Lista de mensagens da sessão',
-    type: [MessageResponseDto]
+    description: 'Lista paginada de mensagens da sessão',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/MessageResponseDto' }
+        },
+        currentPage: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 5 },
+        totalItems: { type: 'number', example: 100 },
+        itemsPerPage: { type: 'number', example: 20 },
+        hasNextPage: { type: 'boolean', example: true },
+        hasPreviousPage: { type: 'boolean', example: false }
+      }
+    }
   })
   async getMessages(
     @Param('id') sessionId: string,
     @Query() query: GetMessagesQueryDto,
     @CurrentUser() user: User,
-  ): Promise<MessageResponseDto[]> {
+  ): Promise<PaginatedResponseDto<MessageResponseDto>> {
     return this.messageService.findAll(sessionId, user.id, query);
   }
 
@@ -495,14 +510,28 @@ export class SessionController {
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiResponse({ 
     status: 200, 
-    description: 'Lista de notas da sessão',
-    type: [NoteResponseDto]
+    description: 'Lista paginada de notas da sessão',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/NoteResponseDto' }
+        },
+        currentPage: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 3 },
+        totalItems: { type: 'number', example: 50 },
+        itemsPerPage: { type: 'number', example: 20 },
+        hasNextPage: { type: 'boolean', example: true },
+        hasPreviousPage: { type: 'boolean', example: false }
+      }
+    }
   })
   async getNotes(
     @Param('id') sessionId: string,
     @Query() query: GetNotesQueryDto,
     @CurrentUser() user: User,
-  ): Promise<NoteResponseDto[]> {
+  ): Promise<PaginatedResponseDto<NoteResponseDto>> {
     return this.noteService.findAll(sessionId, user.id, query);
   }
 

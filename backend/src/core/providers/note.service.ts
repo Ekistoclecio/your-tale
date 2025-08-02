@@ -7,6 +7,7 @@ import { Session } from '../entities/session.entity';
 import { SessionMember } from '../entities/session-member.entity';
 import { CreateNoteDto, UpdateNoteDto, NoteResponseDto, GetNotesQueryDto } from '../dto/note.dto';
 import { MemberRole } from '../entities/session-member.entity';
+import { PaginatedResponseDto } from '../dto/pagination.dto';
 
 @Injectable()
 export class NoteService {
@@ -50,7 +51,7 @@ export class NoteService {
     return this.formatNoteResponse(savedNote);
   }
 
-  async findAll(sessionId: string, userId: string, query: GetNotesQueryDto = {}): Promise<NoteResponseDto[]> {
+  async findAll(sessionId: string, userId: string, query: GetNotesQueryDto = {}): Promise<PaginatedResponseDto<NoteResponseDto>> {
     // Verificar se o usuário tem acesso à sessão
     const membership = await this.sessionMemberRepository.findOne({
       where: { session: { id: sessionId }, user: { id: userId }, role: MemberRole.MASTER },
@@ -91,11 +92,27 @@ export class NoteService {
     const limit = parseInt(query.limit || '50') || 50;
     const offset = (page - 1) * limit;
 
-    queryBuilder = queryBuilder.skip(offset).take(limit);
+    // Contar total de itens
+    const totalItems = await queryBuilder.getCount();
 
+    // Aplicar paginação na query
+    queryBuilder = queryBuilder.skip(offset).take(limit);
     const notes = await queryBuilder.getMany();
 
-    return notes.map(note => this.formatNoteResponse(note));
+    // Calcular informações de paginação
+    const totalPages = Math.ceil(totalItems / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      data: notes.map(note => this.formatNoteResponse(note)),
+      currentPage: page,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage,
+      hasPreviousPage,
+    };
   }
 
   async findOne(id: string, userId: string): Promise<NoteResponseDto> {
