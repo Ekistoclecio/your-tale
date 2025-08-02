@@ -7,8 +7,6 @@ export async function authMiddleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const { pathname } = req.nextUrl;
 
-  console.log('token', token);
-
   if (!token && !PUBLIC_ROUTES.includes(pathname) && !pathname.startsWith('/api/auth')) {
     return NextResponse.redirect(new URL('/sign-in', req.url));
   }
