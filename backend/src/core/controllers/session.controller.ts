@@ -99,6 +99,30 @@ export class SessionController {
     return this.sessionService.findPublicSessions(query);
   }
 
+  @Get('by-code/:code')
+  @ApiOperation({ summary: 'Buscar ID da sessão por código de acesso' })
+  @ApiParam({ name: 'code', description: 'Código de acesso da sessão', example: 'ABC123' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'ID da sessão encontrada',
+    schema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          example: '550e8400-e29b-41d4-a716-446655440000'
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Sessão não encontrada' 
+  })
+  async getSessionByCode(@Param('code') code: string) {
+    return this.sessionService.findByJoinCode(code);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obter detalhes de uma sessão específica' })
   @ApiParam({ name: 'id', description: 'ID da sessão' })

@@ -185,4 +185,13 @@ export class SessionService {
 
     return this.sessionRepository.save(session);
   }
+
+  async findByJoinCode(joinCode: string): Promise<{ id: string }> {
+    const session = await this.sessionRepository.findOne({ 
+      where: { join_code: joinCode }
+    });
+    if (!session) throw new NotFoundException('Session not found');
+    
+    return { id: session.id };
+  }
 } 
