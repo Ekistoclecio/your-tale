@@ -1,4 +1,3 @@
-
 import { Session } from '@/schemas/entities/session';
 import { ApiService } from '@/services/client';
 
@@ -30,6 +29,26 @@ class SessionService extends ApiService {
     super('sessions/');
   }
 
+  getPublicSessions = async (page: number, limit: number) => {
+    const { data } = await this.get<Session[]>('public', {
+      params: {
+        page,
+        limit,
+      },
+    });
+    return data;
+  };
+
+  getMySessions = async (page: number, limit: number) => {
+    const { data } = await this.get<Session[]>('my', {
+      params: {
+        page,
+        limit,
+      },
+    });
+    return data;
+  };
+
   getSessionById = async (id: string) => {
     const { data } = await this.get<Session>(`${id}`);
     return data;
@@ -42,18 +61,18 @@ class SessionService extends ApiService {
 
   getMessages = async (sessionId: string, params: GetMessagesParams = {}) => {
     const queryParams = new URLSearchParams();
-    
+
     if (params.chat_type) {
       queryParams.append('chat_type', params.chat_type);
     }
     if (params.page) {
       queryParams.append('page', params.page.toString());
     }
-    queryParams.append('limit', "9999");
+    queryParams.append('limit', '9999');
 
     const queryString = queryParams.toString();
     const url = `${sessionId}/messages${queryString ? `?${queryString}` : ''}`;
-    
+
     const { data } = await this.get<Message[]>(url);
     return data;
   };

@@ -4,6 +4,8 @@ export const MINUTE = 60 * 1000;
 export const HOUR = 60 * MINUTE;
 export const DAY = 24 * HOUR;
 
+export const DEFAULT_LIMIT = 10;
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
