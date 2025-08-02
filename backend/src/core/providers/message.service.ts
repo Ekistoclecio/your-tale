@@ -13,6 +13,7 @@ import { CharacterService } from './character.service';
 import { Character } from '../entities/character.entity';
 import { LLMQueueService } from './llm-queue.service';
 import { LLMQueueResult } from '../interfaces/queue.interface';
+import { PaginatedResponseDto } from '../dto/pagination.dto';
 
 @Injectable()
 export class MessageService {
@@ -274,7 +275,7 @@ export class MessageService {
     await this.handleMasterAIMessage(newMessage);
   }
 
-  async findAll(sessionId: string, userId: string, query: GetMessagesQueryDto = {}): Promise<MessageResponseDto[]> {
+  async findAll(sessionId: string, userId: string, query: GetMessagesQueryDto = {}): Promise<PaginatedResponseDto<MessageResponseDto>> {
     // Verificar se o usuário tem acesso à sessão
     const membership = await this.sessionMemberRepository.findOne({
       where: { session: { id: sessionId }, user: { id: userId } },
@@ -309,11 +310,27 @@ export class MessageService {
     const limit = parseInt(query.limit || '50') || 50;
     const offset = (page - 1) * limit;
 
-    queryBuilder = queryBuilder.skip(offset).take(limit);
+    // Contar total de itens
+    const totalItems = await queryBuilder.getCount();
 
+    // Aplicar paginação na query
+    queryBuilder = queryBuilder.skip(offset).take(limit);
     const messages = await queryBuilder.getMany();
 
-    return messages.map(message => this.formatMessageResponse(message));
+    // Calcular informações de paginação
+    const totalPages = Math.ceil(totalItems / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      data: messages.map(message => this.formatMessageResponse(message)),
+      currentPage: page,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage,
+      hasPreviousPage,
+    };
   }
 
   async findOne(id: string, userId: string): Promise<MessageResponseDto> {
