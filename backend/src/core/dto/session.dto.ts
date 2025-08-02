@@ -154,4 +154,22 @@ export class JoinSessionDto {
   })
   @IsString()
   join_code: string;
+}
+
+export class GetSessionsQueryDto {
+  @ApiPropertyOptional({
+    description: 'Número da página para paginação',
+    example: '1'
+  })
+  @IsOptional()
+  @IsString()
+  page?: string;
+
+  @ApiPropertyOptional({
+    description: 'Número de sessões por página',
+    example: '10'
+  })
+  @IsOptional()
+  @IsString()
+  limit?: string;
 } 

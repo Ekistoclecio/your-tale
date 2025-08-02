@@ -4,7 +4,7 @@ import { SessionService } from '../../core/providers/session.service';
 import { SessionMemberService } from '../../core/providers/session-member.service';
 import { MessageService } from '../../core/providers/message.service';
 import { NoteService } from '../../core/providers/note.service';
-import { CreateSessionDto, UpdateSessionDto, JoinSessionDto } from '../../core/dto/session.dto';
+import { CreateSessionDto, UpdateSessionDto, JoinSessionDto, GetSessionsQueryDto } from '../../core/dto/session.dto';
 import { CreateSessionMemberDto, UpdateSessionMemberDto, SessionMemberResponseDto } from '../../core/dto/session-member.dto';
 import { CreateMessageDto, UpdateMessageDto, MessageResponseDto, GetMessagesQueryDto } from '../../core/dto/message.dto';
 import { CreateNoteDto, UpdateNoteDto, NoteResponseDto, GetNotesQueryDto } from '../../core/dto/note.dto';
@@ -44,24 +44,59 @@ export class SessionController {
 
   @Get('my')
   @ApiOperation({ summary: 'Listar sessões do usuário logado' })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
   @ApiResponse({ 
     status: 200, 
-    description: 'Lista de sessões do usuário',
-    type: [Object]
+    description: 'Lista paginada de sessões do usuário',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/Session' }
+        },
+        currentPage: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 3 },
+        totalItems: { type: 'number', example: 25 },
+        itemsPerPage: { type: 'number', example: 10 },
+        hasNextPage: { type: 'boolean', example: true },
+        hasPreviousPage: { type: 'boolean', example: false }
+      }
+    }
   })
-  async mySessions(@CurrentUser() user: User) {
-    return this.sessionService.findMySessions(user);
+  async mySessions(
+    @CurrentUser() user: User,
+    @Query() query: GetSessionsQueryDto,
+  ) {
+    return this.sessionService.findMySessions(user, query);
   }
 
   @Get('public')
   @ApiOperation({ summary: 'Listar sessões públicas disponíveis' })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
   @ApiResponse({ 
     status: 200, 
-    description: 'Lista de sessões públicas',
-    type: [Object]
+    description: 'Lista paginada de sessões públicas',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/Session' }
+        },
+        currentPage: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 5 },
+        totalItems: { type: 'number', example: 50 },
+        itemsPerPage: { type: 'number', example: 10 },
+        hasNextPage: { type: 'boolean', example: true },
+        hasPreviousPage: { type: 'boolean', example: false }
+      }
+    }
   })
-  async publicSessions() {
-    return this.sessionService.findPublicSessions();
+  async publicSessions(@Query() query: GetSessionsQueryDto) {
+    return this.sessionService.findPublicSessions(query);
   }
 
   @Get(':id')

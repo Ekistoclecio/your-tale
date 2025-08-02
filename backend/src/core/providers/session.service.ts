@@ -2,11 +2,12 @@ import { Injectable, NotFoundException, BadRequestException, ForbiddenException 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Session, SessionStatus } from '../entities/session.entity';
-import { CreateSessionDto, UpdateSessionDto } from '../dto/session.dto';
+import { CreateSessionDto, UpdateSessionDto, GetSessionsQueryDto } from '../dto/session.dto';
 import { User } from '../entities/user.entity';
 import { SessionMemberService } from './session-member.service';
 import { MemberRole, MemberStatus } from '../entities/session-member.entity';
 import { MessageService } from './message.service';
+import { PaginatedResponseDto } from '../dto/pagination.dto';
 
 @Injectable()
 export class SessionService {
@@ -43,24 +44,76 @@ export class SessionService {
     return savedSession;
   }
 
-  async findMySessions(user: User): Promise<Session[]> {
+  async findMySessions(user: User, query: GetSessionsQueryDto = {}): Promise<PaginatedResponseDto<Session>> {
     // Buscar sessões onde o usuário é criador ou membro
-    const sessions = await this.sessionRepository
+    let queryBuilder = this.sessionRepository
       .createQueryBuilder('session')
       .leftJoin('session.members', 'member')
       .where('session.creator.id = :userId', { userId: user.id })
       .orWhere('member.userId = :userId', { userId: user.id })
-      .orderBy('session.updated_at', 'DESC')
-      .getMany();
-    
-    return sessions;
+      .orderBy('session.updated_at', 'DESC');
+
+    // Aplicar paginação
+    const page = parseInt(query.page || '1') || 1;
+    const limit = parseInt(query.limit || '10') || 10;
+    const offset = (page - 1) * limit;
+
+    // Contar total de itens
+    const totalItems = await queryBuilder.getCount();
+
+    // Aplicar paginação na query
+    queryBuilder = queryBuilder.skip(offset).take(limit);
+    const sessions = await queryBuilder.getMany();
+
+    // Calcular informações de paginação
+    const totalPages = Math.ceil(totalItems / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      data: sessions,
+      currentPage: page,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage,
+      hasPreviousPage,
+    };
   }
 
-  async findPublicSessions(): Promise<Session[]> {
-    return this.sessionRepository.find({
-      where: { is_public: true, status: SessionStatus.NOT_STARTED },
-      order: { start_date: 'ASC' },
-    });
+  async findPublicSessions(query: GetSessionsQueryDto = {}): Promise<PaginatedResponseDto<Session>> {
+    let queryBuilder = this.sessionRepository
+      .createQueryBuilder('session')
+      .where('session.is_public = :isPublic', { isPublic: true })
+      .andWhere('session.status = :status', { status: SessionStatus.NOT_STARTED })
+      .orderBy('session.start_date', 'ASC');
+
+    // Aplicar paginação
+    const page = parseInt(query.page || '1') || 1;
+    const limit = parseInt(query.limit || '10') || 10;
+    const offset = (page - 1) * limit;
+
+    // Contar total de itens
+    const totalItems = await queryBuilder.getCount();
+
+    // Aplicar paginação na query
+    queryBuilder = queryBuilder.skip(offset).take(limit);
+    const sessions = await queryBuilder.getMany();
+
+    // Calcular informações de paginação
+    const totalPages = Math.ceil(totalItems / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      data: sessions,
+      currentPage: page,
+      totalPages,
+      totalItems,
+      itemsPerPage: limit,
+      hasNextPage,
+      hasPreviousPage,
+    };
   }
 
   async findById(id: string, user: User): Promise<Session> {
