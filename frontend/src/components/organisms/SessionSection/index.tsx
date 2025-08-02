@@ -5,21 +5,7 @@ import { SessionCard, SessionCardSkeleton } from '../../molecules/SessionCard';
 import * as S from './styles';
 import { Theme, useTheme } from '@mui/material/styles';
 import { Variants } from 'framer-motion';
-
-interface Session {
-  id: string;
-  name: string;
-  description?: string;
-  master: {
-    name: string;
-    avatar?: string;
-    type: 'ai' | 'human';
-  };
-  status: 'active' | 'ended' | 'scheduled';
-  lastAccess?: string;
-  scheduledDate?: string;
-  connected?: boolean;
-}
+import { Session } from '@/schemas/entities/session';
 
 interface SessionSectionProps {
   title: string;
@@ -27,12 +13,11 @@ interface SessionSectionProps {
   sessions: Session[];
   loading?: boolean;
   emptyState?: React.ReactNode;
-  onEnterSession?: (id: string) => void;
-  onViewCharacter?: (id: string) => void;
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
   id: string;
+  isMySessions?: boolean;
 }
 
 export const getSectionVariants = (theme: Theme): Variants => ({
@@ -65,12 +50,11 @@ export const SessionSection = ({
   sessions,
   loading = false,
   emptyState,
-  onEnterSession,
-  onViewCharacter,
   page,
   totalPages,
   onPageChange,
   id,
+  isMySessions = false,
 }: SessionSectionProps) => {
   const theme = useTheme();
   const sectionVariants = getSectionVariants(theme);
@@ -91,12 +75,7 @@ export const SessionSection = ({
           ? Array.from({ length: 3 }).map((_, index) => <SessionCardSkeleton key={index} />)
           : sessions.length > 0
             ? sessions.map((session) => (
-                <SessionCard
-                  key={session.id}
-                  session={session}
-                  onEnterSession={onEnterSession}
-                  onViewCharacter={onViewCharacter}
-                />
+                <SessionCard key={session.id} session={session} isMySessions={isMySessions} />
               ))
             : emptyState || null}
       </S.List>

@@ -6,26 +6,13 @@ import { MotionCard } from '../../atoms/MotionCard';
 import { Badge } from '../../atoms/Badge';
 import { Avatar } from '../../atoms/Avatar';
 import * as S from './styles';
-
-interface Session {
-  id: string;
-  name: string;
-  description?: string;
-  master: {
-    name: string;
-    avatar?: string;
-    type: 'ai' | 'human';
-  };
-  status: 'active' | 'ended' | 'scheduled';
-  lastAccess?: string;
-  scheduledDate?: string;
-  connected?: boolean;
-}
+import { Session } from '@/schemas/entities/session';
+import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface SessionCardProps {
   session: Session;
-  onEnterSession?: (sessionId: string) => void;
-  onViewCharacter?: (sessionId: string) => void;
+  isMySessions?: boolean;
 }
 
 export const SessionCardSkeleton = () => (
@@ -37,30 +24,52 @@ export const SessionCardSkeleton = () => (
   </MotionCard>
 );
 
-export const SessionCard = ({ session, onEnterSession, onViewCharacter }: SessionCardProps) => {
+export const SessionCard = ({ session, isMySessions = false }: SessionCardProps) => {
+  const router = useRouter();
+  const canEnterSession = useMemo(() => {
+    return (
+      (session.current_players < session.players_limit &&
+        (session.status !== 'active' ||
+          (session.status === 'active' && session.join_after_start && !session.is_ai_master))) ||
+      isMySessions
+    );
+  }, [session, isMySessions]);
+
   const getStatusText = () => {
-    if (session.status === 'scheduled' && session.scheduledDate) {
-      return <strong>Agendada para {session.scheduledDate}</strong>;
+    if (session.status === 'active') {
+      return <strong>Ativa</strong>;
+    } else if (session.start_date && session.status === 'not_started') {
+      return <strong>Agendada para {session.start_date}</strong>;
+    } else if (session.status === 'ended') {
+      return <strong>Encerrada</strong>;
     }
-    return session.lastAccess ? <strong>Último acesso: {session.lastAccess}</strong> : '';
+    return <strong>Não iniciada</strong>;
+  };
+
+  const handleEnterSession = () => {
+    if (isMySessions) {
+      router.push(`/session/${session.id}`);
+    } else {
+      router.push(`/session/${session.id}/create_character`);
+    }
   };
 
   return (
     <S.Card cardVariant="session">
       <S.Container>
         <Box>
-          <S.Title variant="h4">{session.name}</S.Title>
+          <S.Title variant="h4">{session.title}</S.Title>
 
           <Stack direction="row" alignItems="center" gap={3} my={3}>
             <S.MasterInfo>
               <Avatar
-                src={session.master.avatar}
-                alt={session.master.name}
+                src={session.creator?.avatar}
+                alt={session.creator?.name ?? 'Mestre IA'}
                 sx={{ width: 28, height: 28, backgroundColor: 'primary.main' }}
               />
-              <S.MasterName variant="body2">{session.master.name}</S.MasterName>
+              <S.MasterName variant="body2">{session.creator?.name ?? 'Mestre IA'}</S.MasterName>
             </S.MasterInfo>
-            <Badge badgeVariant={session.master.type} />
+            <Badge badgeVariant={session.is_ai_master ? 'ai' : 'human'} />
           </Stack>
 
           <S.DescriptionBox>
@@ -76,15 +85,17 @@ export const SessionCard = ({ session, onEnterSession, onViewCharacter }: Sessio
         </Box>
 
         <S.ActionsBox>
-          <MotionButton variant="contained" onClick={() => onEnterSession?.(session.id)}>
-            Entrar na sessão
-          </MotionButton>
+          {canEnterSession && (
+            <MotionButton variant="contained" onClick={handleEnterSession}>
+              {isMySessions ? 'Ir para sessão' : 'Entrar na sessão'}
+            </MotionButton>
+          )}
 
-          {session.connected && (
+          {/* {isMySessions && (
             <S.CharacterButton variant="outlined" onClick={() => onViewCharacter?.(session.id)}>
               Ver ficha
             </S.CharacterButton>
-          )}
+          )} */}
         </S.ActionsBox>
       </S.Container>
     </S.Card>
