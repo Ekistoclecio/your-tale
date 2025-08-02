@@ -1,16 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Container, Stack } from '@mui/material';
 import { motion } from 'framer-motion';
-import { EnterCodeModal } from '../../molecules/EnterCodeModal';
 import { MySessionsEmptyState } from '../../molecules';
-import { CreateSessionModal } from '../../organisms';
 import { HeroBanner } from '../../molecules';
 import { AISuggestions } from '../../organisms';
 import { SessionSection } from '../../organisms/SessionSection';
 import Scroll from '@/assets/icons/scroll.svg';
 import Explore from '@/assets/icons/explore.svg';
+import { animationVariants } from '@/constants/animation';
+import { fetchGetMySessions, fetchGetPublicSessions } from '@/queries/session/fetch';
+import { useSnackbar } from 'notistack';
+import { Session } from '@/schemas/entities/session';
+import { DEFAULT_LIMIT } from '@/queries/client';
 
 // Dados mockados para demonstração
 const mockPublicSessions = [
@@ -204,33 +207,58 @@ const mockUserSessions = [
 ];
 
 export const DashboardTemplate = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const [enterCodeModalOpen, setEnterCodeModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [publicSessionsPage, setPublicSessionsPage] = useState(1);
-  const [userSessionsPage, setUserSessionsPage] = useState(1);
-  const [enterCodeLoading, setEnterCodeLoading] = useState(false);
   const [createSessionModalOpen, setCreateSessionModalOpen] = useState(false);
-  const ITEMS_PER_PAGE = 10;
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+  const [sessions, setSessions] = useState<{
+    public: Session[];
+    user: Session[];
+  }>({
+    public: [],
+    user: [],
+  });
+
+  const [publicSessionsPagination, setPublicSessionsPagination] = useState({
+    page: 1,
+    totalItens: 0,
+    isFetching: false,
+  });
+  const [userSessionsPagination, setUserSessionsPagination] = useState({
+    page: 1,
+    totalItens: 0,
+    isFetching: false,
+  });
+
+  const handleGetPublicSessions = async (page: number = publicSessionsPagination.page) => {
+    if (publicSessionsPagination.isFetching) return;
+    try {
+      setPublicSessionsPagination((prev) => ({ ...prev, isFetching: true }));
+      const publicSessions = await fetchGetPublicSessions(page);
+      setSessions((prev) => ({ ...prev, public: publicSessions }));
+    } catch {
+      enqueueSnackbar('Erro ao buscar sessões públicas', { variant: 'error' });
+    } finally {
+      setPublicSessionsPagination({ ...publicSessionsPagination, isFetching: false });
+    }
+  };
+
+  const handleGetMySessions = async (page: number = userSessionsPagination.page) => {
+    if (userSessionsPagination.isFetching) return;
+    try {
+      setUserSessionsPagination((prev) => ({ ...prev, isFetching: true }));
+      const mySessions = await fetchGetMySessions(page);
+      setSessions((prev) => ({ ...prev, user: mySessions }));
+    } catch {
+      enqueueSnackbar('Erro ao buscar sessões do usuário', { variant: 'error' });
+    } finally {
+      setUserSessionsPagination({ ...userSessionsPagination, isFetching: false });
+    }
+  };
 
   const handleCreateSession = () => setCreateSessionModalOpen(true);
   const handleEnterCode = () => setEnterCodeModalOpen(true);
-  const handleEnterCodeSubmit = async (code: string) => {
-    setEnterCodeLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setEnterCodeLoading(false);
-    setEnterCodeModalOpen(false);
-    console.log('Entrar com código:', code);
-  };
 
-  const handleEnterSession = (sessionId: string) => console.log('Entrar na sessão:', sessionId);
-  const handleViewCharacter = (sessionId: string) => console.log('Ver ficha da sessão:', sessionId);
   const handleViewSessions = () => {
     const userSessionsSection = document.getElementById('user-sessions-section');
     if (userSessionsSection) {
@@ -238,24 +266,19 @@ export const DashboardTemplate = () => {
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
+  useEffect(() => {
+    handleGetPublicSessions();
+    handleGetMySessions();
+  }, []);
 
   return (
     <>
       <Container maxWidth="xl" sx={{ pt: 3, pb: 6, overflow: 'visible' }}>
-        <motion.div variants={containerVariants} initial="hidden" animate="visible">
-          <motion.div variants={itemVariants} style={{ marginBottom: '2rem' }}>
+        <motion.div variants={animationVariants.staggerChildren} initial="hidden" animate="visible">
+          <motion.div
+            variants={animationVariants.fadeSlideInChildren}
+            style={{ marginBottom: '2rem' }}
+          >
             <HeroBanner
               onCreateSession={handleCreateSession}
               onEnterCode={handleEnterCode}
@@ -263,7 +286,10 @@ export const DashboardTemplate = () => {
             />
           </motion.div>
 
-          <motion.div variants={itemVariants} style={{ marginBottom: '2rem' }}>
+          <motion.div
+            variants={animationVariants.fadeSlideInChildren}
+            style={{ marginBottom: '2rem' }}
+          >
             <AISuggestions />
           </motion.div>
 
@@ -277,49 +303,35 @@ export const DashboardTemplate = () => {
               id="public-sessions-section"
               title="Sessões abertas à aventura"
               icon={<Explore width={28} height={28} />}
-              sessions={mockPublicSessions.slice(
-                (publicSessionsPage - 1) * ITEMS_PER_PAGE,
-                publicSessionsPage * ITEMS_PER_PAGE
-              )}
-              loading={loading}
-              onEnterSession={handleEnterSession}
-              page={publicSessionsPage}
-              totalPages={Math.ceil(mockPublicSessions.length / ITEMS_PER_PAGE)}
-              onPageChange={setPublicSessionsPage}
+              sessions={sessions.public}
+              loading={publicSessionsPagination.isFetching}
+              page={publicSessionsPagination.page}
+              totalPages={Math.ceil(publicSessionsPagination.totalItens / DEFAULT_LIMIT)}
+              onPageChange={(page) => handleGetPublicSessions(page)}
             />
 
             <SessionSection
               id="user-sessions-section"
               title="Minhas campanhas"
               icon={<Scroll width={28} height={28} />}
-              sessions={mockUserSessions.slice(
-                (userSessionsPage - 1) * ITEMS_PER_PAGE,
-                userSessionsPage * ITEMS_PER_PAGE
-              )}
-              loading={loading}
-              onEnterSession={handleEnterSession}
-              onViewCharacter={handleViewCharacter}
+              sessions={sessions.user}
+              loading={userSessionsPagination.isFetching}
               emptyState={<MySessionsEmptyState onCreateSession={handleCreateSession} />}
-              page={userSessionsPage}
-              totalPages={Math.ceil(mockUserSessions.length / ITEMS_PER_PAGE)}
-              onPageChange={setUserSessionsPage}
+              page={userSessionsPagination.page}
+              totalPages={Math.ceil(userSessionsPagination.totalItens / DEFAULT_LIMIT)}
+              onPageChange={(page) => handleGetMySessions(page)}
+              isMySessions={true}
             />
           </Stack>
         </motion.div>
       </Container>
-      <EnterCodeModal
-        open={enterCodeModalOpen}
-        onClose={() => setEnterCodeModalOpen(false)}
-        onSubmit={handleEnterCodeSubmit}
-        loading={enterCodeLoading}
-      />
+      {/* <EnterCodeModal open={enterCodeModalOpen} onClose={() => setEnterCodeModalOpen(false)} />
       {createSessionModalOpen && (
         <CreateSessionModal
           open={createSessionModalOpen}
           onClose={() => setCreateSessionModalOpen(false)}
-          onSubmit={() => console.log('Criar nova sessão')}
         />
-      )}
+      )} */}
     </>
   );
 };
