@@ -5,6 +5,7 @@ import { CreateNoteDto, UpdateNoteDto, NoteResponseDto, GetNotesQueryDto } from 
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { User } from '../entities/user.entity';
+import { PaginatedResponseDto } from '../dto/pagination.dto';
 
 @ApiTags('notes')
 @ApiBearerAuth('JWT-auth')
@@ -24,14 +25,28 @@ export class NoteController {
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiResponse({ 
     status: 200, 
-    description: 'Lista de notas da sessão',
-    type: [NoteResponseDto]
+    description: 'Lista paginada de notas da sessão',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/NoteResponseDto' }
+        },
+        currentPage: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 3 },
+        totalItems: { type: 'number', example: 50 },
+        itemsPerPage: { type: 'number', example: 20 },
+        hasNextPage: { type: 'boolean', example: true },
+        hasPreviousPage: { type: 'boolean', example: false }
+      }
+    }
   })
   async getNotes(
     @Param('sessionId') sessionId: string,
     @Query() query: GetNotesQueryDto,
     @CurrentUser() user: User,
-  ): Promise<NoteResponseDto[]> {
+  ): Promise<PaginatedResponseDto<NoteResponseDto>> {
     return this.noteService.findAll(sessionId, user.id, query);
   }
 
