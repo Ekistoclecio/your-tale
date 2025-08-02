@@ -1,6 +1,6 @@
 'use client';
 
-import { Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { SessionCard, SessionCardSkeleton } from '../../molecules/SessionCard';
 import * as S from './styles';
 import { Theme, useTheme } from '@mui/material/styles';
@@ -71,13 +71,17 @@ export const SessionSection = ({
         <S.Title variant="h4">{title}</S.Title>
       </Stack>
       <S.List>
-        {loading
-          ? Array.from({ length: 3 }).map((_, index) => <SessionCardSkeleton key={index} />)
-          : sessions.length > 0
-            ? sessions.map((session) => (
-                <SessionCard key={session.id} session={session} isMySessions={isMySessions} />
-              ))
-            : emptyState || null}
+        {loading ? (
+          Array.from({ length: 3 }).map((_, index) => <SessionCardSkeleton key={index} />)
+        ) : sessions.length > 0 ? (
+          sessions.map((session) => (
+            <SessionCard key={session.id} session={session} isMySessions={isMySessions} />
+          ))
+        ) : (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+            {emptyState}
+          </Box>
+        )}
       </S.List>
 
       {!loading && sessions.length > 0 && (
