@@ -6,10 +6,9 @@ import { Box, CircularProgress, Stack, TextField, Typography } from '@mui/materi
 import { MotionBox } from '@/components/atoms/MotionBox';
 import { MotionButton } from '@/components/atoms/MotionButton';
 import { SignUpFormData, signUpSchema } from '@/schemas/form-validation/signUpForm';
-import { authService } from '@/services/auth';
 import { useSnackbar } from 'notistack';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCreateUser } from '@/queries/auth/mutation';
 
 export const SignUpForm = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -22,17 +21,16 @@ export const SignUpForm = () => {
     resolver: zodResolver(signUpSchema),
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const { mutateAsync: createUser, isPending } = useCreateUser();
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
-      setIsLoading(true);
       const newUser = {
         name: data.name,
         email: data.email,
         password: data.password,
       };
-      await authService.create(newUser);
+      await createUser(newUser);
       enqueueSnackbar('Conta criada com sucesso', {
         variant: 'success',
       });
@@ -42,8 +40,6 @@ export const SignUpForm = () => {
       enqueueSnackbar('Erro ao criar conta', {
         variant: 'error',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -108,9 +104,9 @@ export const SignUpForm = () => {
           variant="contained"
           fullWidth
           sx={{ mt: 8 }}
-          disabled={isLoading}
+          disabled={isPending}
         >
-          {isLoading ? <CircularProgress size={24} /> : 'Criar conta'}
+          {isPending ? <CircularProgress size={24} /> : 'Criar conta'}
         </MotionButton>
       </Stack>
     </Box>
