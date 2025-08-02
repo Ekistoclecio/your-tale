@@ -12,6 +12,7 @@ import { LLMRequest } from '../interfaces/llm.interface';
 import { CharacterService } from './character.service';
 import { Character } from '../entities/character.entity';
 import { LLMQueueService } from './llm-queue.service';
+import { LLMQueueResult } from '../interfaces/queue.interface';
 
 @Injectable()
 export class MessageService {
@@ -63,6 +64,10 @@ export class MessageService {
     const isMasterSession = session.is_ai_master;
     const isMasterChat = chatType === ChatType.MASTER && membership.role === MemberRole.MASTER;
 
+    if (isMasterSession && isMasterChat) {
+      throw new BadRequestException('Master chat is not allowed in master session');
+    }
+
     // Criar a mensagem
     const message = this.messageRepository.create({
       ...createMessageDto,
@@ -79,13 +84,13 @@ export class MessageService {
     }
 
     if (isMasterChat) {
-      await this.handleMasterChatMessage(savedMessage);
+      return await this.handleMasterChatMessage(savedMessage);
     }
 
     return this.formatMessageResponse(savedMessage);
   }
 
-  private async handleMasterChatMessage(message: Message): Promise<void> {
+  private async handleMasterChatMessage(message: Message): Promise<MessageResponseDto> {
     const messageHistory = await this.messageRepository.find({
       where: {
         session_id: message.session_id,
@@ -96,6 +101,8 @@ export class MessageService {
         timestamp: 'ASC',
       },
     });
+
+    console.log('messageHistory', messageHistory);
 
     const request: LLMRequest = {
       messages: messageHistory.map(msg => ({
@@ -126,18 +133,19 @@ export class MessageService {
 
     await this.messageRepository.save(processingMessage);
 
-    // TODO: Implementar webhook ou polling para atualizar a mensagem quando o job for concluído
-    // Por enquanto, vamos processar de forma síncrona para manter a funcionalidade
-    try {
-      const response = await this.llmService.generateResponse('gemini', request);
-      
-      // Atualizar a mensagem com a resposta real
-      processingMessage.content = response.content;
-      await this.messageRepository.save(processingMessage);
-    } catch (error) {
-      processingMessage.content = `Erro ao processar resposta: ${error.message}`;
-      await this.messageRepository.save(processingMessage);
+    // Aguardar a conclusão do job usando Promise
+    const result = await this.waitForJobCompletionWithPromise(jobId);
+    
+    // Atualizar a mensagem com o resultado
+    if (result.success && result.response) {
+      processingMessage.content = result.response.content;
+    } else {
+      processingMessage.content = `Erro ao processar resposta: ${result.error || 'Erro desconhecido'}`;
     }
+    
+    await this.messageRepository.save(processingMessage);
+
+    return this.formatMessageResponse(processingMessage);
   }
 
   private handleAIChatContent(message: Message, sessionCharacters: Character[]): string {
@@ -207,18 +215,17 @@ export class MessageService {
 
     await this.messageRepository.save(processingMessage);
 
-    // TODO: Implementar webhook ou polling para atualizar a mensagem quando o job for concluído
-    // Por enquanto, vamos processar de forma síncrona para manter a funcionalidade
-    try {
-      const response = await this.llmService.generateResponse('gemini', request);
-      
-      // Atualizar a mensagem com a resposta real
-      processingMessage.content = response.content;
-      await this.messageRepository.save(processingMessage);
-    } catch (error) {
-      processingMessage.content = `Erro ao processar resposta: ${error.message}`;
-      await this.messageRepository.save(processingMessage);
+    // Aguardar a conclusão do job usando Promise
+    const result = await this.waitForJobCompletionWithPromise(jobId);
+    
+    // Atualizar a mensagem com o resultado
+    if (result.success && result.response) {
+      processingMessage.content = result.response.content;
+    } else {
+      processingMessage.content = `Erro ao processar resposta: ${result.error || 'Erro desconhecido'}`;
     }
+    
+    await this.messageRepository.save(processingMessage);
   }
 
   private async makeFirstChatMessage(session: Session): Promise<string> {
@@ -433,5 +440,45 @@ export class MessageService {
         avatar: message.sender.avatar,
       } : undefined,
     };
+  }
+
+  // Método mais eficiente usando Promise para aguardar conclusão do job
+  private async waitForJobCompletionWithPromise(jobId: string, timeoutMs: number = 60000): Promise<LLMQueueResult> {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error(`Job timeout after ${timeoutMs}ms`));
+      }, timeoutMs);
+
+      const checkJob = async () => {
+        try {
+          const status = await this.llmQueueService.getJobStatus(jobId);
+          
+          if (status.status === 'completed') {
+            clearTimeout(timeout);
+            resolve(status.result);
+            return;
+          }
+          
+          if (status.status === 'failed') {
+            clearTimeout(timeout);
+            resolve({
+              success: false,
+              error: status.failedReason || 'Job failed',
+              processingTime: 0,
+              retryCount: 0,
+            });
+            return;
+          }
+          
+          // Se ainda está processando, verificar novamente em 1 segundo
+          setTimeout(checkJob, 1000);
+        } catch (error) {
+          clearTimeout(timeout);
+          reject(error);
+        }
+      };
+
+      checkJob();
+    });
   }
 } 

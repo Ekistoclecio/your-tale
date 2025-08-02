@@ -52,14 +52,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
 
-      console.log('token', token);
-
       // Verificar e decodificar o token
       const payload = this.jwtService.verify(token);
       const user = await this.userService.findById(payload.sub);
 
-      console.log('payload', payload);
-      
       if (!user) {
         console.log(`Client ${client.id} disconnected: User not found`);
         client.disconnect();
@@ -135,7 +131,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       // Entrar na sala da sessão
       await this.chatService.joinSession(user.id, sessionId, client);
-      console.log('asdadadsadsadads')
       
       client.emit('joined_session', { 
         sessionId,
