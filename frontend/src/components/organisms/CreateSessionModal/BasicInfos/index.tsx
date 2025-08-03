@@ -55,7 +55,7 @@ export const BasicInfos = () => {
       />
 
       <Controller
-        name="isPublic"
+        name="is_public"
         control={control}
         render={({ field }) => (
           <Stack spacing={2}>

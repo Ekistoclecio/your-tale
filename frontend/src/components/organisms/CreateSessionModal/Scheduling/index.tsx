@@ -8,7 +8,7 @@ export const Scheduling = () => {
   return (
     <>
       <Controller
-        name="startDate"
+        name="start_date"
         control={control}
         render={({ field }) => (
           <DateTimePicker

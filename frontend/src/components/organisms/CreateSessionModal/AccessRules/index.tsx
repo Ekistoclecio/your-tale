@@ -8,7 +8,7 @@ export const AccessRules = () => {
   return (
     <>
       <Controller
-        name="allowNewPlayersAfterStart"
+        name="join_after_start"
         control={control}
         render={({ field }) => (
           <FormControlLabel
@@ -20,7 +20,7 @@ export const AccessRules = () => {
       />
 
       <Controller
-        name="playerLimit"
+        name="player_limit"
         control={control}
         render={({ field }) => (
           <Box sx={{ mb: 2 }}>

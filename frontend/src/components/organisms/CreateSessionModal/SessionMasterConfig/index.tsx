@@ -24,18 +24,22 @@ export const SessionMasterConfig = () => {
     formState: { errors },
   } = useFormContext();
 
-  const masterType = watch('masterType');
+  const isAiMaster = watch('is_ai_master');
 
   return (
     <>
       <Controller
-        name="masterType"
+        name="is_ai_master"
         control={control}
         render={({ field }) => (
           <FormControl component="fieldset" sx={{ mb: 2 }}>
-            <RadioGroup value={field.value} onChange={(e) => field.onChange(e.target.value)} row>
+            <RadioGroup
+              value={String(field.value)}
+              onChange={(e) => field.onChange(e.target.value === 'true')}
+              row
+            >
               <FormControlLabel
-                value="human"
+                value="false"
                 control={<Radio />}
                 label={
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -47,7 +51,7 @@ export const SessionMasterConfig = () => {
                 }
               />
               <FormControlLabel
-                value="ai"
+                value="true"
                 control={<Radio />}
                 label={
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -65,7 +69,7 @@ export const SessionMasterConfig = () => {
 
       {/* Campos condicionais para mestre IA */}
       <AnimatePresence>
-        {masterType === 'ai' && (
+        {isAiMaster && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -73,7 +77,7 @@ export const SessionMasterConfig = () => {
             transition={{ duration: 0.3 }}
           >
             <Controller
-              name="aiTheme"
+              name="ai_theme"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -81,15 +85,15 @@ export const SessionMasterConfig = () => {
                   fullWidth
                   label="Temática da história"
                   placeholder="Ex: fantasia sombria, steampunk"
-                  error={!!errors.aiTheme}
-                  helperText={(errors.aiTheme?.message as string) || ''}
+                  error={!!errors.ai_theme}
+                  helperText={(errors.ai_theme?.message as string) || ''}
                   sx={{ mb: 2 }}
                 />
               )}
             />
 
             <Controller
-              name="aiNarrativeStyle"
+              name="ai_narrative_style"
               control={control}
               render={({ field }) => (
                 <FormControl fullWidth sx={{ mb: 2 }}>
@@ -97,7 +101,7 @@ export const SessionMasterConfig = () => {
                   <Select
                     value={field.value}
                     onChange={field.onChange}
-                    error={!!errors.aiNarrativeStyle}
+                    error={!!errors.ai_narrative_style}
                     displayEmpty
                     renderValue={(value: unknown): ReactNode => {
                       if (value === '') {
@@ -117,7 +121,7 @@ export const SessionMasterConfig = () => {
             />
 
             <Controller
-              name="aiCampaignDescription"
+              name="ai_campaign_description"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -127,8 +131,8 @@ export const SessionMasterConfig = () => {
                   placeholder="Descreva o início da aventura..."
                   multiline
                   rows={4}
-                  error={!!errors.aiCampaignDescription}
-                  helperText={(errors.aiCampaignDescription?.message as string) || ''}
+                  error={!!errors.ai_campaign_description}
+                  helperText={(errors.ai_campaign_description?.message as string) || ''}
                   sx={{ mb: 2 }}
                 />
               )}
