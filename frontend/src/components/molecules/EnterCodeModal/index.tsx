@@ -30,7 +30,7 @@ export const EnterCodeModal = ({ open, onClose }: EnterCodeModalProps) => {
     setError('');
     setLoading(true);
     try {
-      const sessionId = await fetchGetSessionIdByCode(code.trim());
+      const { id: sessionId } = await fetchGetSessionIdByCode(code.trim());
       onClose();
       router.push(`/session/${sessionId}/create_character`);
     } catch {

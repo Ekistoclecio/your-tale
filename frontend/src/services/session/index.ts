@@ -62,7 +62,7 @@ class SessionService extends ApiService {
   };
 
   getSessionIdByCode = async (code: string) => {
-    const { data } = await this.get<string>(`by-code/${code}`);
+    const { data } = await this.get<{ id: string }>(`by-code/${code}`);
     return data;
   };
 
