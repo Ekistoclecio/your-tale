@@ -11,7 +11,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+// import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CharacterIdentityForm,
   AttributesForm,
@@ -24,7 +24,7 @@ import {
 } from '@/components/organisms';
 import { MotionButton } from '@/components/atoms';
 import {
-  createCharacterSchema,
+  // createCharacterSchema,
   CreateCharacterFormData,
 } from '@/schemas/form-validation/createCharacterForm';
 import * as S from './styles';
@@ -76,7 +76,7 @@ export const CharacterFormTemplate = ({
   const [activeStep, setActiveStep] = useState(0);
 
   const form = useForm<CreateCharacterFormData>({
-    resolver: zodResolver(createCharacterSchema),
+    // resolver: zodResolver(createCharacterSchema),
     defaultValues: {
       name: '',
       character_class: '',
