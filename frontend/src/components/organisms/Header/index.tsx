@@ -17,6 +17,7 @@ import { CreateSessionModal, UserProfileModal } from '@/components/organisms';
 import * as S from './styles';
 import { signOut } from 'next-auth/react';
 import { User } from '@/schemas/entities/user';
+import Link from 'next/link';
 
 interface HeaderProps {
   user?: User;
@@ -100,8 +101,9 @@ export const Header = ({ user }: HeaderProps) => {
             >
               <MenuIcon />
             </IconButton>
-
-            <Logo variant="horizontal" theme="light" width={180} height={45} />
+            <Link href="/">
+              <Logo variant="horizontal" theme="light" width={180} height={45} />
+            </Link>
           </S.LeftBox>
 
           {user && (

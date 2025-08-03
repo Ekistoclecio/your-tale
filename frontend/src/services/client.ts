@@ -53,6 +53,14 @@ class ApiService {
     return await this.api.patch<T>(url, data, config);
   };
 
+  public put = async <T>(
+    url: string,
+    data: object,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => {
+    return await this.api.put<T>(url, data, config);
+  };
+
   public delete = async <T>(
     url: string,
     config?: AxiosRequestConfig

@@ -12,6 +12,8 @@ import { useStartSession } from '@/queries/session/mutation';
 import { SessionData } from '@/app/(private)/session/[id]/page';
 import { Character } from '@/schemas/entities/character';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useUpdateCharacter } from '@/queries/character/mutation';
+import { Note } from '@/schemas/entities/notes';
 
 interface GameSessionLayoutProps {
   sessionData: SessionData;
@@ -28,6 +30,8 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
     () => sessionData.creator?.id === session?.user?.id && !sessionData.is_ai_master,
     [sessionData, session]
   );
+
+  const { mutateAsync: updateCharacter } = useUpdateCharacter();
 
   // Hook do WebSocket
   const { onlineUsers } = useWebSocket({
@@ -55,13 +59,33 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
 
   const handleRollDice = (exp?: string) => console.log('Rolando dados:', exp || '1d20');
 
-  const handleTokenMove = (id: string, pos: { x: number; y: number }) =>
+  const handleTokenMove = async (id: string, pos: { x: number; y: number }) => {
     console.log('Movendo token:', { id, pos });
+    const updatedCharacters = sessionData.characters
+      .map((c) => (c.id === id ? { ...c, position: pos } : c))
+      .find((c) => c.id === id);
+    try {
+      await updateCharacter(updatedCharacters as Character);
+      updateSessionData({
+        ...sessionData,
+        characters: sessionData.characters.map((c) => (c.id === id ? { ...c, position: pos } : c)),
+      });
+    } catch {
+      enqueueSnackbar('Erro ao atualizar personagem', { variant: 'error' });
+    }
+  };
 
   const handleSaveCharacter = (character: Character) => {
     updateSessionData({
       ...sessionData,
       characters: sessionData.characters.map((c) => (c.id === character.id ? character : c)),
+    });
+  };
+
+  const handleUpdateNotes = (notes: Note[]) => {
+    updateSessionData({
+      ...sessionData,
+      notes,
     });
   };
 
@@ -111,7 +135,8 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
               currentUserId={session?.user?.id || ''}
               isMaster={isMaster}
               onRollDice={handleRollDice}
-              notes={[]}
+              notes={sessionData.notes}
+              onUpdateNotes={handleUpdateNotes}
             />
           </S.RightPanel>
         </S.MainContainer>

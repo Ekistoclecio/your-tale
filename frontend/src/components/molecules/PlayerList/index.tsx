@@ -70,7 +70,7 @@ export const PlayerList = ({
 
   // Contar usuários online e offline
   const onlineCount = onlineUsers.length;
-  const offlineCount = players.length - onlineCount;
+  const offlineCount = players.length - onlineCount >= 0 ? players.length - onlineCount : 0;
 
   return (
     <>

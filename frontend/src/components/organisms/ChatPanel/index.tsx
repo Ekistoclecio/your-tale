@@ -10,6 +10,7 @@ import { useWebSocket, ChatMessage } from '@/hooks/useWebSocket';
 import { useSnackbar } from 'notistack';
 import { ConnectionStatus } from '@/components/atoms';
 import { Box } from '@mui/material';
+import { Note } from '@/schemas/entities/notes';
 
 // Debounce simples para scroll
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,13 +23,6 @@ const useDebouncedScroll = (ref: React.RefObject<HTMLDivElement | null>, deps: a
   }, deps);
 };
 
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  timestamp: Date;
-}
-
 interface ChatPanelProps {
   sessionId: string;
   currentUserId: string;
@@ -36,6 +30,7 @@ interface ChatPanelProps {
   onRollDice?: (expression?: string) => void;
   loading?: boolean;
   notes?: Note[];
+  onUpdateNotes: (notes: Note[]) => void;
 }
 
 export const ChatPanel = ({
@@ -45,15 +40,13 @@ export const ChatPanel = ({
   onRollDice,
   loading = false,
   notes = [],
+  onUpdateNotes,
 }: ChatPanelProps) => {
   const { enqueueSnackbar } = useSnackbar();
 
   const [activeTab, setActiveTab] = useState<'general' | 'ai' | 'notes'>('general');
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const [noteTitle, setNoteTitle] = useState('');
-  const [noteContent, setNoteContent] = useState('');
-  const [editingNote, setEditingNote] = useState<string | null>(null);
 
   // ✅ WebSocket callbacks memoizados
   const handleConnectionChange = useCallback(
@@ -142,36 +135,6 @@ export const ChatPanel = ({
     }
   }, [onRollDice, sendMessage, currentChatType]);
 
-  const formatNoteDate = useCallback(
-    (date: Date) =>
-      date.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    []
-  );
-
-  // ✅ Handlers de notas (ainda placeholders, mas prontos para lógica futura)
-  const handleAddNote = useCallback(() => {
-    console.log('add note');
-  }, []);
-
-  const handleEditNote = useCallback((note: Note) => {
-    setEditingNote(note.id);
-    console.log('edit note', note);
-  }, []);
-
-  const handleDeleteNote = useCallback((id: string) => {
-    console.log('delete note', id);
-  }, []);
-
-  const handleCancelEdit = useCallback(() => {
-    setEditingNote(null);
-    console.log('cancel edit');
-  }, []);
-
   return (
     <S.ChatContainer elevation={0}>
       {/* Status de conexão */}
@@ -212,21 +175,7 @@ export const ChatPanel = ({
         )}
 
         {/* Notas */}
-        {activeTab === 'notes' && (
-          <ChatNotes
-            notes={notes}
-            noteTitle={noteTitle}
-            noteContent={noteContent}
-            editingNote={editingNote}
-            setNoteTitle={setNoteTitle}
-            setNoteContent={setNoteContent}
-            handleAddNote={handleAddNote}
-            handleEditNote={handleEditNote}
-            handleDeleteNote={handleDeleteNote}
-            handleCancelEdit={handleCancelEdit}
-            formatNoteDate={formatNoteDate}
-          />
-        )}
+        {activeTab === 'notes' && <ChatNotes notes={notes} onUpdateNotes={onUpdateNotes} />}
       </ChatTabs>
     </S.ChatContainer>
   );
