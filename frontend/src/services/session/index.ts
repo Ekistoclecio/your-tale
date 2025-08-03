@@ -41,7 +41,7 @@ class SessionService extends ApiService {
   };
 
   registerMember = async (sessionId: string) => {
-    const { data } = await this.post<Session>(`join/${sessionId}`, {});
+    const { data } = await this.post<Session>(`${sessionId}/members/join`, {});
     return data;
   };
 
