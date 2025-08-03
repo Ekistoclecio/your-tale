@@ -11,66 +11,7 @@ import { useSnackbar } from 'notistack';
 import { useStartSession } from '@/queries/session/mutation';
 import { SessionData } from '@/app/(private)/session/[id]/page';
 import { Character } from '@/schemas/entities/character';
-
-// interface SessionData {
-//   id: string;
-//   title: string;
-//   status: 'not_started' | 'active' | 'paused' | 'ended';
-//   currentUser: {
-//     id: string;
-//     role: 'player' | 'master';
-//   };
-//   players: Array<{
-//     id: string;
-//     name: string;
-//     playerName: string;
-//     avatar?: string;
-//     level: number;
-//     class: string;
-//     race: string;
-//     hp: { current: number; max: number };
-//     mana?: { current: number; max: number };
-//     status: 'alive' | 'unconscious' | 'dead';
-//     position: { x: number; y: number };
-//     isOnline?: boolean;
-//     attributes: {
-//       strength: { value: number; modifier: number };
-//       dexterity: { value: number; modifier: number };
-//       constitution: { value: number; modifier: number };
-//       intelligence: { value: number; modifier: number };
-//       wisdom: { value: number; modifier: number };
-//       charisma: { value: number; modifier: number };
-//     };
-//     conditions: string[];
-//     appearance: string;
-//     backstory: string;
-//     personality: string;
-//     ideals: string;
-//     bonds: string;
-//     flaws: string;
-//     notes: string;
-//     inventory: Array<{ id: string; name: string; quantity: number; description?: string }>;
-//   }>;
-//   joinCode: string;
-//   mapImage?: string;
-//   messages: Array<{
-//     id: string;
-//     senderId: string;
-//     senderName: string;
-//     content: string;
-//     timestamp: Date;
-//     type: 'user' | 'ai' | 'system';
-//     chatType: 'general' | 'master';
-//     senderRole?: 'player' | 'master';
-//     avatar?: string;
-//   }>;
-//   notes: Array<{
-//     id: string;
-//     title: string;
-//     content: string;
-//     timestamp: Date;
-//   }>;
-// }
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface GameSessionLayoutProps {
   sessionData: SessionData;
@@ -87,6 +28,18 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
     () => sessionData.creator?.id === session?.user?.id && !sessionData.is_ai_master,
     [sessionData, session]
   );
+
+  // Hook do WebSocket
+  const { onlineUsers } = useWebSocket({
+    sessionId: sessionData.id,
+    onConnectionChange: (connected) => {
+      console.log('Status da conexão WebSocket:', connected);
+    },
+    onError: (error) => {
+      console.error('Erro no WebSocket:', error);
+      enqueueSnackbar(`Erro de conexão: ${error}`, { variant: 'error' });
+    },
+  });
 
   const { mutateAsync: startSession } = useStartSession();
 
@@ -128,6 +81,7 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
           <S.LeftPanel sx={{ display: { xs: 'none', lg: 'block' } }}>
             <PlayerList
               players={sessionData.characters}
+              onlineUsers={onlineUsers}
               currentUserId={session?.user?.id || ''}
               userRole={isMaster ? 'master' : 'player'}
               onSaveCharacter={handleSaveCharacter}

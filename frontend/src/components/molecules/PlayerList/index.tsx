@@ -12,6 +12,7 @@ import { useSnackbar } from 'notistack';
 
 export interface PlayerListProps {
   players: Character[];
+  onlineUsers?: string[]; // Array de IDs dos usuários online
   onPlayerClick?: (player: Character) => void;
   currentUserId?: string;
   userRole?: 'player' | 'master';
@@ -20,6 +21,7 @@ export interface PlayerListProps {
 
 export const PlayerList = ({
   players,
+  onlineUsers = [],
   onPlayerClick,
   currentUserId,
   userRole = 'player',
@@ -66,6 +68,10 @@ export const PlayerList = ({
     }
   };
 
+  // Contar usuários online e offline
+  const onlineCount = onlineUsers.length;
+  const offlineCount = players.length - onlineCount;
+
   return (
     <>
       <S.PlayerListContainer elevation={0}>
@@ -80,14 +86,14 @@ export const PlayerList = ({
             <S.StatusTag type="online">
               <span />
               <p>
-                <b>{players.length}</b> ONLINE
+                <b>{onlineCount}</b> ONLINE
               </p>
             </S.StatusTag>
 
             <S.StatusTag type="offline">
               <span />
               <p>
-                <b>{players.length}</b> OFFLINE
+                <b>{offlineCount}</b> OFFLINE
               </p>
             </S.StatusTag>
           </Box>
@@ -116,7 +122,11 @@ export const PlayerList = ({
                 }}
               >
                 <Badge
-                  color={player.status.hitPoints.current <= 0 ? 'error' : 'success'}
+                  color={
+                    onlineUsers.some((onlineUserID) => onlineUserID === player.user_id)
+                      ? 'success'
+                      : 'error'
+                  }
                   variant="dot"
                   overlap="circular"
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

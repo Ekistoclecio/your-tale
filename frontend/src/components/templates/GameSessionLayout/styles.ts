@@ -51,7 +51,7 @@ export const CenterPanel = styled(Box)(({ theme }) => ({
 }));
 
 export const RightPanel = styled(Box)(({ theme }) => ({
-  width: '350px',
+  width: '30%',
   flexShrink: 0,
   display: 'flex',
   flexDirection: 'column',
