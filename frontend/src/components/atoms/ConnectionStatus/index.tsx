@@ -26,11 +26,11 @@ interface ConnectionStatusProps {
   isReconnecting?: boolean;
 }
 
-export const ConnectionStatus = ({ 
-  isConnected, 
-  isAuthenticated, 
-  error, 
-  isReconnecting = false 
+export const ConnectionStatus = ({
+  isConnected,
+  isAuthenticated,
+  error,
+  isReconnecting = false,
 }: ConnectionStatusProps) => {
   // Função para determinar a cor do status (pode ser usada no futuro)
   // const getStatusColor = () => {
@@ -42,11 +42,11 @@ export const ConnectionStatus = ({
   // };
 
   const getStatusText = () => {
-    if (error) return 'Erro de Conexão';
-    if (isReconnecting) return 'Reconectando...';
-    if (isConnected && isAuthenticated) return 'Conectado';
-    if (isConnected && !isAuthenticated) return 'Conectando...';
-    return 'Desconectado';
+    if (error) return 'Erro de conexão com o chat';
+    if (isReconnecting) return 'Reconectando ao chat...';
+    if (isConnected && isAuthenticated) return 'Conectado ao chat';
+    if (isConnected && !isAuthenticated) return 'Conectando ao chat...';
+    return 'Desconectado do chat';
   };
 
   const getStatusIcon = () => {
@@ -62,7 +62,7 @@ export const ConnectionStatus = ({
       <Typography variant="caption" color="text.secondary">
         {getStatusText()}
       </Typography>
-      <Chip 
+      <Chip
         label={isAuthenticated ? 'Autenticado' : 'Não Autenticado'}
         size="small"
         color={isAuthenticated ? 'success' : 'default'}
@@ -75,4 +75,4 @@ export const ConnectionStatus = ({
       )}
     </StatusContainer>
   );
-}; 
+};

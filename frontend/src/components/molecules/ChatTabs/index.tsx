@@ -29,7 +29,7 @@ export const ChatTabs = ({
   if (!isMaster) {
     return (
       <S.ChatTabsContainer>
-        <S.StyledTabs value="general" sx={{ pointerEvents: 'none' }}>
+        {/* <S.StyledTabs value="general" sx={{ pointerEvents: 'none' }}>
           <S.StyledTab
             value="general"
             icon={
@@ -38,9 +38,9 @@ export const ChatTabs = ({
               </Badge>
             }
             label="Chat Geral"
-            sx={{ width: '100%' }}
+            sx={{ width: '100%', flexGrow: 1, textAlign: 'center' }}
           />
-        </S.StyledTabs>
+        </S.StyledTabs> */}
 
         <S.TabPanel
           initial={{ opacity: 0 }}
