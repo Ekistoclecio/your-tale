@@ -3,29 +3,18 @@
 import { Header } from '@/components/organisms';
 import { ReactNode } from 'react';
 import * as S from './layoutStyles';
+import { useSession } from 'next-auth/react';
 
 interface PrivateLayoutProps {
   children: ReactNode;
 }
 
 export default function PrivateLayout({ children }: PrivateLayoutProps) {
-  const handleCreateSession = () => {
-    console.log('Criar nova sessão');
-  };
-
-  const handleEnterCode = () => {
-    console.log('Entrar com código');
-  };
-
-  const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    avatar: '',
-  };
+  const { data: session } = useSession();
 
   return (
     <S.Wrapper>
-      <Header onCreateSession={handleCreateSession} onEnterCode={handleEnterCode} user={user} />
+      <Header user={session?.user} />
       <S.Content>{children}</S.Content>
     </S.Wrapper>
   );
