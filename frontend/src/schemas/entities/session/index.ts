@@ -13,7 +13,7 @@ export const sessionSchema = z.object({
   start_date: z.string().optional(),
   join_after_start: z.boolean(),
   current_players: z.number(),
-  players_limit: z.number(),
+  player_limit: z.number(),
 });
 
 export type Session = z.infer<typeof sessionSchema>;

@@ -30,7 +30,7 @@ export const SessionCard = ({ session, isMySessions = false }: SessionCardProps)
   const router = useRouter();
   const canEnterSession = useMemo(() => {
     return (
-      (session.current_players < session.players_limit &&
+      (session.current_players < session.player_limit &&
         (session.status !== 'active' ||
           (session.status === 'active' && session.join_after_start && !session.is_ai_master))) ||
       isMySessions
