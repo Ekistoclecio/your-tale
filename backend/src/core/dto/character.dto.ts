@@ -103,3 +103,23 @@ export class UpdateCharacterDto {
   @IsString()
   character_class?: string;
 } 
+
+export class CharacterValidationErrorDto {
+  @ApiProperty({
+    description: 'Mensagem de erro',
+    example: 'User does not have an active character in this session'
+  })
+  message: string;
+
+  @ApiProperty({
+    description: 'Indica se o usuário é o mestre da sessão',
+    example: false
+  })
+  isMaster: boolean;
+
+  @ApiProperty({
+    description: 'Código de erro',
+    example: 'CHARACTER_NOT_FOUND'
+  })
+  errorCode: string;
+} 
