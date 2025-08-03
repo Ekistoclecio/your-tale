@@ -132,9 +132,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       // Entrar na sala da sessão
       await this.chatService.joinSession(user.id, sessionId, client);
       
+      // Obter lista de usuários online na sessão (excluindo o usuário atual)
+      const onlineUsers = await this.chatService.getOnlineUsersInSession(sessionId);
+      const otherOnlineUsers = onlineUsers.filter(userId => userId !== user.id);
+      
       client.emit('joined_session', { 
         sessionId,
-        message: 'Successfully joined session chat' 
+        message: 'Successfully joined session chat',
+        onlineUsers: otherOnlineUsers // Lista de usuários que já estavam na sessão
       });
       
       // Notificar outros usuários na sessão
@@ -246,6 +251,37 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       
     } catch (error) {
       console.error('Typing stop error:', error);
+    }
+  }
+
+  @SubscribeMessage('get_online_users')
+  @UseGuards(WsJwtAuthGuard)
+  async handleGetOnlineUsers(
+    @MessageBody() data: { sessionId: string },
+    @ConnectedSocket() client: Socket,
+    @WsCurrentUser() user: User,
+  ) {
+    try {
+      const { sessionId } = data;
+      
+      // Verificar se o usuário tem acesso à sessão
+      const canJoin = await this.chatService.canUserJoinSession(user.id, sessionId);
+      if (!canJoin) {
+        client.emit('error', { message: 'Access denied to this session' });
+        return;
+      }
+
+      // Obter lista de usuários online na sessão
+      const onlineUsers = await this.chatService.getOnlineUsersInSession(sessionId);
+      
+      client.emit('online_users', { 
+        sessionId,
+        onlineUsers
+      });
+      
+    } catch (error) {
+      console.error('Get online users error:', error);
+      client.emit('error', { message: error.message });
     }
   }
 } 
