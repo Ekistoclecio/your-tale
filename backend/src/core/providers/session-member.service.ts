@@ -5,6 +5,7 @@ import { SessionMember, MemberRole, MemberStatus } from '../entities/session-mem
 import { Session } from '../entities/session.entity';
 import { User } from '../entities/user.entity';
 import { CreateSessionMemberDto, UpdateSessionMemberDto, SessionMemberResponseDto } from '../dto/session-member.dto';
+import { SessionService } from './session.service';
 
 @Injectable()
 export class SessionMemberService {
@@ -15,6 +16,7 @@ export class SessionMemberService {
     private sessionRepository: Repository<Session>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private sessionService: SessionService,
   ) {}
 
   async create(createDto: CreateSessionMemberDto): Promise<SessionMemberResponseDto> {
@@ -143,14 +145,19 @@ export class SessionMemberService {
     await this.sessionMemberRepository.remove(member);
   }
 
-  async joinSession(sessionId: string, userId: string, role: MemberRole = MemberRole.PLAYER): Promise<SessionMemberResponseDto> {
-    return this.create({
-      sessionId,
-      userId,
-      role,
-      status: MemberStatus.ACTIVE,
-      joined_at: new Date().toISOString(),
-    });
+  async joinSession(sessionId: string, userId: string, role: MemberRole = MemberRole.PLAYER): Promise<Session> {
+    const session = await this.sessionRepository.findOne({ where: { id: sessionId } });
+    if (!session) {
+      throw new NotFoundException('Session not found');
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.sessionService.join(user, session.join_code);
   }
 
   async leaveSession(sessionId: string, userId: string): Promise<SessionMemberResponseDto> {

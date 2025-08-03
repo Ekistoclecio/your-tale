@@ -16,6 +16,7 @@ import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { User } from '../../core/entities/user.entity';
 import { MemberRole } from '../../core/entities/session-member.entity';
 import { PaginatedResponseDto } from '../../core/dto/pagination.dto';
+import { Session } from '../entities/session.entity';
 
 @ApiTags('sessions')
 @ApiBearerAuth('JWT-auth')
@@ -367,9 +368,8 @@ export class SessionController {
     @Param('id') sessionId: string,
     @Body() body: { role?: MemberRole },
     @CurrentUser() user: User,
-  ): Promise<SessionMemberResponseDto> {
+  ): Promise<Session> {
     // Verificar se a sessão existe e se o usuário pode acessá-la
-    await this.sessionService.findById(sessionId, user);
     return this.sessionMemberService.joinSession(sessionId, user.id, body.role);
   }
 
