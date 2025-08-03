@@ -138,6 +138,10 @@ export const CharacterFormTemplate = ({
           clothing: '',
           description: '',
         },
+        position: {
+          x: 400,
+          y: 400,
+        },
         backstory: '',
         personality: '',
         ideals: '',
