@@ -7,7 +7,7 @@ export const useCreateCharacter = () => {
   return useMutation({
     mutationFn: characterService.createCharacter,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['characters'] });
+      queryClient.invalidateQueries({ queryKey: ['characters'], refetchType: 'active' });
     },
   });
 };

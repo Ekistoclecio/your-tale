@@ -34,19 +34,20 @@ export default function SessionLayout({ children }: SessionLayoutProps) {
         enqueueSnackbar('Erro ao conectar a sessão, por favor tente novamente mais tarde.', {
           variant: 'error',
         });
-        router.push(`/session`);
+        router.push(`/`);
       } else if (isSessionRoot && axiosError.response?.status === 403) {
         router.push(`/session/${id}/create_character`);
       }
     }
   }, [error, isSessionRoot, enqueueSnackbar, router, id]);
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
         <Loading />
       </Box>
     );
+  }
 
   return <>{children}</>;
 }
