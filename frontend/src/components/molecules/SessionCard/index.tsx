@@ -71,7 +71,9 @@ export const SessionCard = ({ session, isMySessions = false }: SessionCardProps)
             <S.MasterInfo>
               <Avatar
                 src={session.creator?.avatar}
-                alt={session.creator?.name ?? 'Mestre IA'}
+                alt={
+                  session.creator?.name ?? (session.is_ai_master ? 'Mestre IA' : 'Mestre humano')
+                }
                 sx={{ width: 28, height: 28, backgroundColor: 'primary.main' }}
               />
               <S.MasterName variant="body2">{session.creator?.name ?? 'Mestre IA'}</S.MasterName>
