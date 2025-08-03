@@ -5,7 +5,6 @@ import { SessionMember, MemberRole, MemberStatus } from '../entities/session-mem
 import { Session } from '../entities/session.entity';
 import { User } from '../entities/user.entity';
 import { CreateSessionMemberDto, UpdateSessionMemberDto, SessionMemberResponseDto } from '../dto/session-member.dto';
-import { SessionService } from './session.service';
 
 @Injectable()
 export class SessionMemberService {
@@ -16,7 +15,6 @@ export class SessionMemberService {
     private sessionRepository: Repository<Session>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private sessionService: SessionService,
   ) {}
 
   async create(createDto: CreateSessionMemberDto): Promise<SessionMemberResponseDto> {
@@ -145,7 +143,7 @@ export class SessionMemberService {
     await this.sessionMemberRepository.remove(member);
   }
 
-  async joinSession(sessionId: string, userId: string, role: MemberRole = MemberRole.PLAYER): Promise<Session> {
+  async joinSession(sessionId: string, userId: string, role: MemberRole = MemberRole.PLAYER): Promise<SessionMemberResponseDto> {
     const session = await this.sessionRepository.findOne({ where: { id: sessionId } });
     if (!session) {
       throw new NotFoundException('Session not found');
@@ -157,7 +155,37 @@ export class SessionMemberService {
       throw new NotFoundException('User not found');
     }
 
-    return this.sessionService.join(user, session.join_code);
+    // Verificar se o usuário já é membro da sessão
+    const existingMember = await this.sessionMemberRepository.findOne({
+      where: { sessionId, userId },
+    });
+
+    if (existingMember) {
+      throw new ConflictException('User is already a member of this session');
+    }
+
+    // Verificar limite de jogadores se for um player
+    if (role === MemberRole.PLAYER) {
+      const activePlayers = await this.sessionMemberRepository.count({
+        where: { sessionId, role: MemberRole.PLAYER, status: MemberStatus.ACTIVE },
+      });
+
+      if (activePlayers >= session.player_limit) {
+        throw new BadRequestException('Session player limit reached');
+      }
+    }
+
+    // Criar o membro da sessão
+    const member = this.sessionMemberRepository.create({
+      sessionId,
+      userId,
+      role,
+      status: MemberStatus.ACTIVE,
+      joined_at: new Date(),
+    });
+
+    const savedMember = await this.sessionMemberRepository.save(member);
+    return this.mapToResponseDto(savedMember);
   }
 
   async leaveSession(sessionId: string, userId: string): Promise<SessionMemberResponseDto> {
