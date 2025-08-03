@@ -20,7 +20,7 @@ export default function SessionLayout({ children }: SessionLayoutProps) {
 
   const isSessionRoot = pathname === `/session/${id}`;
   const isSessionCreateCharacter = pathname === `/session/${id}/create_character`;
-  const { error, isLoading } = useVerifyCharacterInSessionQuery(id);
+  const { error, isLoading, isSuccess } = useVerifyCharacterInSessionQuery(id);
   useEffect(() => {
     if (error) {
       const axiosError = error as AxiosError<{ errorCode: string }>;
@@ -39,7 +39,13 @@ export default function SessionLayout({ children }: SessionLayoutProps) {
         router.push(`/session/${id}/create_character`);
       }
     }
-  }, [error, isSessionRoot, enqueueSnackbar, router, id]);
+
+    if (isSuccess) {
+      if (isSessionCreateCharacter) {
+        router.push(`/session/${id}`);
+      }
+    }
+  }, [error, enqueueSnackbar, router, id, isSuccess]);
 
   if (isLoading) {
     return (
