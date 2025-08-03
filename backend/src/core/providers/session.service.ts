@@ -143,23 +143,26 @@ export class SessionService {
     return this.sessionRepository.save(session);
   }
 
-  async join(id: string, user: User, join_code: string): Promise<Session> {
-    const session = await this.sessionRepository.findOne({ where: { id }, relations: ['creator'] });
+  async join(user: User, join_code: string): Promise<Session> {
+    const session = await this.sessionRepository.findOne({ where: { join_code }, relations: ['creator'] });
     if (!session) throw new NotFoundException('Session not found');
     if (session.join_code !== join_code) throw new BadRequestException('Invalid join code');
-    if (session.status !== SessionStatus.NOT_STARTED && !session.join_after_start) throw new BadRequestException('Cannot join after start');
+    if (session.status !== SessionStatus.NOT_STARTED) {
+      if (session.is_ai_master) throw new BadRequestException('Cannot join after start in a session with AI master');
+      if (session.join_after_start) throw new BadRequestException('Cannot join after start');
+    }
     
     // Verificar se o usuário já é membro
-    const existingMember = await this.sessionMemberService.findBySessionAndUser(id, user.id).catch(() => null);
+    const existingMember = await this.sessionMemberService.findBySessionAndUser(session.id, user.id).catch(() => null);
     if (existingMember) {
       throw new BadRequestException('User is already a member of this session');
     }
     
     // Adicionar usuário como membro da sessão
-    await this.sessionMemberService.joinSession(id, user.id, MemberRole.PLAYER);
+    await this.sessionMemberService.joinSession(session.id, user.id, MemberRole.PLAYER);
     
     // Atualizar contador de jogadores
-    const activePlayersCount = await this.sessionMemberService.getActivePlayersCount(id);
+    const activePlayersCount = await this.sessionMemberService.getActivePlayersCount(session.id);
     session.current_players = activePlayersCount;
     session.last_activity = new Date();
     

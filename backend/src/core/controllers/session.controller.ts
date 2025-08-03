@@ -156,9 +156,10 @@ export class SessionController {
     return this.sessionService.update(id, dto, user);
   }
 
-  @Post(':id/join')
+  @Post('join/:join_code')
   @ApiOperation({ summary: 'Entrar em uma sessão usando código de acesso' })
   @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiParam({ name: 'join_code', description: 'Código de acesso da sessão' })
   @ApiResponse({ 
     status: 200, 
     description: 'Entrou na sessão com sucesso',
@@ -168,9 +169,11 @@ export class SessionController {
     status: 400, 
     description: 'Código de acesso inválido' 
   })
-  @ApiBody({ type: JoinSessionDto })
-  async join(@Param('id') id: string, @Body() dto: JoinSessionDto, @CurrentUser() user: User) {
-    return this.sessionService.join(id, user, dto.join_code);
+  async join(
+    @Param('join_code') join_code: string, 
+    @CurrentUser() user: User
+  ) {
+    return this.sessionService.join(user, join_code);
   }
 
   @Post(':id/start')
