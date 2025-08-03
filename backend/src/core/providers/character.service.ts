@@ -189,7 +189,7 @@ export class CharacterService {
       throw new NotFoundException('Session not found');
     }
     
-    const isMaster = session.creator.id === userId;
+    const isMaster = session.creator.id === userId && !session.is_ai_master;
 
     // Verificar se o usuário tem pelo menos um personagem ativo na sessão
     const character = await this.characterRepository.findOne({
