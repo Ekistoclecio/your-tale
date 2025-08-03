@@ -100,7 +100,7 @@ class SessionService extends ApiService {
     const queryString = queryParams.toString();
     const url = `${sessionId}/messages${queryString ? `?${queryString}` : ''}`;
 
-    const { data } = await this.get<Message[]>(url);
+    const { data } = await this.get<{ data: Message[] }>(url);
     return data;
   };
 }

@@ -48,10 +48,10 @@ export interface UseWebSocketReturn {
 
 const SERVER_URL = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'http://localhost:3001';
 
-export const useWebSocket = ({ 
-  sessionId, 
-  onConnectionChange, 
-  onError 
+export const useWebSocket = ({
+  sessionId,
+  onConnectionChange,
+  onError,
 }: UseWebSocketProps): UseWebSocketReturn => {
   const { data: session } = useSession();
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -62,7 +62,7 @@ export const useWebSocket = ({
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const onConnectionChangeRef = useRef(onConnectionChange);
   const onErrorRef = useRef(onError);
@@ -78,10 +78,10 @@ export const useWebSocket = ({
     if (!session?.accessToken || !sessionId) return;
 
     console.log('🔌 Conectando ao WebSocket...');
-    
+
     const newSocket = io(`${SERVER_URL}/chat`, {
       auth: {
-        token: session.accessToken
+        token: session.accessToken,
       },
       transports: ['websocket', 'polling'],
       timeout: 20000, // 20 segundos de timeout
@@ -90,7 +90,7 @@ export const useWebSocket = ({
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      autoConnect: true
+      autoConnect: true,
     });
 
     // Eventos de conexão
@@ -112,7 +112,7 @@ export const useWebSocket = ({
       console.error('❌ Detalhes do erro:', {
         message: error.message,
         name: error.name,
-        stack: error.stack
+        stack: error.stack,
       });
       setIsConnected(false);
       setIsAuthenticated(false);
@@ -140,7 +140,7 @@ export const useWebSocket = ({
     newSocket.on('connected', (data) => {
       console.log('🔐 Autenticado com sucesso:', data);
       setIsAuthenticated(true);
-      
+
       // Entrar na sessão automaticamente
       newSocket.emit('join_session', { sessionId });
     });
@@ -148,51 +148,63 @@ export const useWebSocket = ({
     // Eventos de sessão
     newSocket.on('joined_session', (data) => {
       console.log('🎮 Entrou na sessão:', data);
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        sender: { id: 'system', name: 'Sistema' },
-        content: `Entrou na sessão: ${data.sessionId || sessionId}`,
-        timestamp: new Date().toISOString(),
-        type: 'system',
-        chat_type: 'general'
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: { id: 'system', name: 'Sistema' },
+          content: `Entrou na sessão: ${data.sessionId || sessionId}`,
+          timestamp: new Date().toISOString(),
+          type: 'system',
+          chat_type: 'general',
+        },
+      ]);
     });
 
     newSocket.on('left_session', (data) => {
       console.log('🚪 Saiu da sessão:', data);
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        sender: { id: 'system', name: 'Sistema' },
-        content: 'Saiu da sessão',
-        timestamp: new Date().toISOString(),
-        type: 'system',
-        chat_type: 'general'
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: { id: 'system', name: 'Sistema' },
+          content: 'Saiu da sessão',
+          timestamp: new Date().toISOString(),
+          type: 'system',
+          chat_type: 'general',
+        },
+      ]);
     });
 
     // Eventos de usuários
     newSocket.on('user_joined', (data) => {
       console.log('👋 Usuário entrou:', data);
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        sender: { id: 'system', name: 'Sistema' },
-        content: `${data.user?.name || 'Usuário'} entrou na sessão`,
-        timestamp: new Date().toISOString(),
-        type: 'system',
-        chat_type: 'general'
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: { id: 'system', name: 'Sistema' },
+          content: `${data.user?.name || 'Usuário'} entrou na sessão`,
+          timestamp: new Date().toISOString(),
+          type: 'system',
+          chat_type: 'general',
+        },
+      ]);
     });
 
     newSocket.on('user_left', (data) => {
       console.log('👋 Usuário saiu:', data);
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        sender: { id: 'system', name: 'Sistema' },
-        content: `${data.user?.name || 'Usuário'} saiu da sessão`,
-        timestamp: new Date().toISOString(),
-        type: 'system',
-        chat_type: 'general'
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: { id: 'system', name: 'Sistema' },
+          content: `${data.user?.name || 'Usuário'} saiu da sessão`,
+          timestamp: new Date().toISOString(),
+          type: 'system',
+          chat_type: 'general',
+        },
+      ]);
     });
 
     // Eventos de mensagem
@@ -203,15 +215,15 @@ export const useWebSocket = ({
 
     newSocket.on('new_message', (message: ChatMessage) => {
       console.log('📨 Nova mensagem:', message);
-      setMessages(prev => [...prev, message]);
+      setMessages((prev) => [...prev, message]);
     });
 
     // Eventos de digitação
     newSocket.on('user_typing_start', (data) => {
       console.log('⌨️ Usuário digitando:', data);
       if (data.user) {
-        setTypingUsers(prev => {
-          const userExists = prev.find(user => user.id === data.user.id);
+        setTypingUsers((prev) => {
+          const userExists = prev.find((user) => user.id === data.user.id);
           if (!userExists) {
             return [...prev, { id: data.user.id, name: data.user.name }];
           }
@@ -223,7 +235,7 @@ export const useWebSocket = ({
     newSocket.on('user_typing_stop', (data) => {
       console.log('⌨️ Usuário parou de digitar:', data);
       if (data.user) {
-        setTypingUsers(prev => prev.filter(user => user.id !== data.user.id));
+        setTypingUsers((prev) => prev.filter((user) => user.id !== data.user.id));
       }
     });
 
@@ -231,14 +243,17 @@ export const useWebSocket = ({
     newSocket.on('error', (data) => {
       console.error('❌ Erro:', data.message);
       onErrorRef.current?.(data.message);
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        sender: { id: 'system', name: 'Sistema' },
-        content: `Erro: ${data.message}`,
-        timestamp: new Date().toISOString(),
-        type: 'system',
-        chat_type: 'general'
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          sender: { id: 'system', name: 'Sistema' },
+          content: `Erro: ${data.message}`,
+          timestamp: new Date().toISOString(),
+          type: 'system',
+          chat_type: 'general',
+        },
+      ]);
     });
 
     setSocket(newSocket);
@@ -256,54 +271,57 @@ export const useWebSocket = ({
   }, [session?.accessToken, sessionId]);
 
   // Funções de ação memoizadas
-  const sendMessage = useCallback((content: string, chatType: 'general' | 'master') => {
-    if (!socket || !content.trim() || !isAuthenticated || !session?.user) return;
+  const sendMessage = useCallback(
+    (content: string, chatType: 'general' | 'master') => {
+      if (!socket || !content.trim() || !isAuthenticated || !session?.user) return;
 
-    // Adicionar mensagem localmente imediatamente para UX
-    const localMessage: ChatMessage = {
-      id: Date.now().toString(),
-      sender: { 
-        id: session.user.id, 
-        name: session.user.name || 'Você',
-        avatar: session.user.avatar || undefined
-      },
-      content: content.trim(),
-      timestamp: new Date().toISOString(),
-      type: 'user',
-      chat_type: chatType,
-      senderRole: chatType === 'master' ? 'master' : 'player'
-    };
-    
-    setMessages(prev => [...prev, localMessage]);
-    
-    socket.emit('send_message', {
-      sessionId,
-      content: content.trim(),
-      chat_type: chatType
-    });
-    
-    // Parar indicador de digitação
-    if (isTyping) {
-      setIsTyping(false);
-      socket.emit('typing_stop', { sessionId });
-      
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+      // Adicionar mensagem localmente imediatamente para UX
+      const localMessage: ChatMessage = {
+        id: Date.now().toString(),
+        sender: {
+          id: session.user.id,
+          name: session.user.name || 'Você',
+          avatar: session.user.avatar || undefined,
+        },
+        content: content.trim(),
+        timestamp: new Date().toISOString(),
+        type: 'user',
+        chat_type: chatType,
+        senderRole: chatType === 'master' ? 'master' : 'player',
+      };
+
+      setMessages((prev) => [...prev, localMessage]);
+
+      socket.emit('send_message', {
+        sessionId,
+        content: content.trim(),
+        chat_type: chatType,
+      });
+
+      // Parar indicador de digitação
+      if (isTyping) {
+        setIsTyping(false);
+        socket.emit('typing_stop', { sessionId });
+
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
       }
-    }
-  }, [socket, sessionId, isAuthenticated, session?.user, isTyping]);
+    },
+    [socket, sessionId, isAuthenticated, session?.user, isTyping]
+  );
 
   const startTyping = useCallback(() => {
     if (!socket || !isAuthenticated || isTyping) return;
-    
+
     setIsTyping(true);
     socket.emit('typing_start', { sessionId });
-    
+
     // Auto-parar digitação após 1 segundo
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
+
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
       socket.emit('typing_stop', { sessionId });
@@ -312,10 +330,10 @@ export const useWebSocket = ({
 
   const stopTyping = useCallback(() => {
     if (!socket || !isAuthenticated || !isTyping) return;
-    
+
     setIsTyping(false);
     socket.emit('typing_stop', { sessionId });
-    
+
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
@@ -337,42 +355,45 @@ export const useWebSocket = ({
   }, []);
 
   // Função para carregar mais mensagens
-  const loadMoreMessages = useCallback(async (chatType: 'general' | 'master') => {
-    if (!session?.accessToken || isLoadingMessages) return;
+  const loadMoreMessages = useCallback(
+    async (chatType: 'general' | 'master') => {
+      if (!session?.accessToken || isLoadingMessages) return;
 
-    try {
-      setIsLoadingMessages(true);
-      const apiMessages = await sessionService.getMessages(sessionId, {
-        chat_type: chatType,
-        page: currentPage,
-        limit: 10
-      });
+      try {
+        setIsLoadingMessages(true);
+        const apiMessages = await sessionService.getMessages(sessionId, {
+          chat_type: chatType,
+          page: currentPage,
+          limit: 10,
+        });
 
-      // Converter mensagens da API para o formato do chat
-      const convertedMessages: ChatMessage[] = apiMessages.map((msg: ApiMessage) => ({
-        id: msg.id,
-        sender: {
-          id: msg.sender_id,
-          name: msg.sender?.name || 'Usuário',
-          avatar: msg.sender?.avatar || undefined
-        },
-        content: msg.content,
-        timestamp: msg.timestamp,
-        type: msg.type,
-        chat_type: msg.chat_type,
-        senderRole: msg.chat_type === 'master' ? 'master' : 'player'
-      }));
+        // Converter mensagens da API para o formato do chat
+        const convertedMessages: ChatMessage[] = apiMessages.data.map((msg: ApiMessage) => ({
+          id: msg.id,
+          sender: {
+            id: msg.sender_id,
+            name: msg.sender?.name || 'Usuário',
+            avatar: msg.sender?.avatar || undefined,
+          },
+          content: msg.content,
+          timestamp: msg.timestamp,
+          type: msg.type,
+          chat_type: msg.chat_type,
+          senderRole: msg.chat_type === 'master' ? 'master' : 'player',
+        }));
 
-      // Adicionar mensagens no início (ordem cronológica)
-      setMessages(prev => [...convertedMessages.reverse(), ...prev]);
-      setCurrentPage(prev => prev + 1);
-    } catch (error) {
-      console.error('Erro ao carregar mensagens:', error);
-      onErrorRef.current?.(error instanceof Error ? error.message : 'Erro ao carregar mensagens');
-    } finally {
-      setIsLoadingMessages(false);
-    }
-  }, [session?.accessToken, sessionId, currentPage, isLoadingMessages]);
+        // Adicionar mensagens no início (ordem cronológica)
+        setMessages((prev) => [...convertedMessages.reverse(), ...prev]);
+        setCurrentPage((prev) => prev + 1);
+      } catch (error) {
+        console.error('Erro ao carregar mensagens:', error);
+        onErrorRef.current?.(error instanceof Error ? error.message : 'Erro ao carregar mensagens');
+      } finally {
+        setIsLoadingMessages(false);
+      }
+    },
+    [session?.accessToken, sessionId, currentPage, isLoadingMessages]
+  );
 
   // Carregar mensagens iniciais quando conectar
   useEffect(() => {
@@ -382,33 +403,36 @@ export const useWebSocket = ({
   }, [isAuthenticated, messages.length, loadMoreMessages]);
 
   // Retorno memoizado
-  return useMemo(() => ({
-    socket,
-    isAuthenticated,
-    isConnected,
-    messages,
-    typingUsers,
-    isLoadingMessages,
-    loadMoreMessages,
-    sendMessage,
-    startTyping,
-    stopTyping,
-    joinSession,
-    leaveSession,
-    clearMessages
-  }), [
-    socket,
-    isAuthenticated, 
-    isConnected,
-    messages,
-    typingUsers,
-    isLoadingMessages,
-    loadMoreMessages,
-    sendMessage,
-    startTyping,
-    stopTyping,
-    joinSession,
-    leaveSession,
-    clearMessages
-  ]);
-}; 
+  return useMemo(
+    () => ({
+      socket,
+      isAuthenticated,
+      isConnected,
+      messages,
+      typingUsers,
+      isLoadingMessages,
+      loadMoreMessages,
+      sendMessage,
+      startTyping,
+      stopTyping,
+      joinSession,
+      leaveSession,
+      clearMessages,
+    }),
+    [
+      socket,
+      isAuthenticated,
+      isConnected,
+      messages,
+      typingUsers,
+      isLoadingMessages,
+      loadMoreMessages,
+      sendMessage,
+      startTyping,
+      stopTyping,
+      joinSession,
+      leaveSession,
+      clearMessages,
+    ]
+  );
+};
