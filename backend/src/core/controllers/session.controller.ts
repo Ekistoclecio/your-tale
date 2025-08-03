@@ -368,8 +368,6 @@ export class SessionController {
     @Body() body: { role?: MemberRole },
     @CurrentUser() user: User,
   ): Promise<SessionMemberResponseDto> {
-    // Verificar se a sessão existe e se o usuário pode acessá-la
-    await this.sessionService.findById(sessionId, user);
     return this.sessionMemberService.joinSession(sessionId, user.id, body.role);
   }
 
