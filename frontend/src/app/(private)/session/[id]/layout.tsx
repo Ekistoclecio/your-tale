@@ -19,15 +19,18 @@ export default function SessionLayout({ children }: SessionLayoutProps) {
   const pathname = usePathname();
 
   const isSessionRoot = pathname === `/session/${id}`;
+  const isSessionCreateCharacter = pathname === `/session/${id}/create_character`;
   const { error, isLoading } = useVerifyCharacterInSessionQuery(id);
-
   useEffect(() => {
-    if (error && isSessionRoot) {
+    if (error) {
       const axiosError = error as AxiosError<{ errorCode: string }>;
       const errorCode = axiosError.response?.data?.errorCode;
 
+      console.log('errorCode', errorCode);
       if (errorCode === 'CHARACTER_NOT_FOUND') {
         router.push(`/session/${id}/create_character`);
+      } else if (isSessionCreateCharacter && errorCode === 'MASTER_NO_CHARACTER_NEEDED') {
+        router.push(`/session/${id}`);
       } else if (!errorCode) {
         enqueueSnackbar('Erro ao conectar a sessão, por favor tente novamente mais tarde.', {
           variant: 'error',
