@@ -30,6 +30,11 @@ class SessionService extends ApiService {
     super('sessions/');
   }
 
+  verifyCharacterInSession = async (sessionId: string) => {
+    const { data } = await this.get<void>(`${sessionId}/validate-character`);
+    return data;
+  };
+
   createSession = async (data: CreateSessionFormData) => {
     const { data: session } = await this.post<Session>('', data);
     return session;

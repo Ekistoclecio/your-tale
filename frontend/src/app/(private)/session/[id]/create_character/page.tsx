@@ -20,10 +20,8 @@ export default function CreateCharacterPage() {
     setIsLoading(true);
 
     try {
-      console.log('Dados do personagem:', data);
       await registerMember(id);
-      const response = await createCharacter({ ...data, session_id: id });
-      console.log('Resposta da API:', response);
+      await createCharacter({ ...data, session_id: id });
 
       enqueueSnackbar('Personagem criado com sucesso!', { variant: 'success' });
 

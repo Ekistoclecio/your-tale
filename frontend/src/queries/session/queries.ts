@@ -7,3 +7,11 @@ export const useSessionByIdQuery = (id: string) => {
     queryFn: () => sessionService.getSessionById(id),
   });
 };
+
+export const useVerifyCharacterInSessionQuery = (id: string) => {
+  return useQuery({
+    queryKey: ['session', id, 'verify-character'],
+    queryFn: () => sessionService.verifyCharacterInSession(id),
+    retry: false,
+  });
+};
