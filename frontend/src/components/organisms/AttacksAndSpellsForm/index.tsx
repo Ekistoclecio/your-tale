@@ -25,7 +25,7 @@ export const AttacksAndSpellsForm = () => {
     remove: removeAttack,
   } = useFieldArray({
     control,
-    name: 'attacks',
+    name: 'character_sheet.attacks',
   });
 
   const {
@@ -34,7 +34,7 @@ export const AttacksAndSpellsForm = () => {
     remove: removeSpell,
   } = useFieldArray({
     control,
-    name: 'spells',
+    name: 'character_sheet.spells',
   });
 
   return (

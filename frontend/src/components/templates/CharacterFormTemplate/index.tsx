@@ -1,7 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { Box, Step, StepLabel, StepContent, Typography, Container } from '@mui/material';
+import { useEffect, useState } from 'react';
+import {
+  Box,
+  Step,
+  StepLabel,
+  StepContent,
+  Typography,
+  Container,
+  CircularProgress,
+} from '@mui/material';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -71,74 +79,86 @@ export const CharacterFormTemplate = ({
     resolver: zodResolver(createCharacterSchema),
     defaultValues: {
       name: '',
-      class: '',
-      race: '',
-      alignment: '',
-      background: '',
-      playerName: '',
-      experiencePoints: 0,
-      level: 1,
-      attributes: {
-        strength: { value: 10, modifier: 0 },
-        dexterity: { value: 10, modifier: 0 },
-        constitution: { value: 10, modifier: 0 },
-        intelligence: { value: 10, modifier: 0 },
-        wisdom: { value: 10, modifier: 0 },
-        charisma: { value: 10, modifier: 0 },
-      },
-      combatStats: {
-        armorClass: 10,
-        initiative: 0,
-        speed: 30,
+      character_class: '',
+      status: {
         hitPoints: { maximum: 1, current: 1, temporary: 0 },
+        experiencePoints: 0,
+        level: 1,
       },
-      skills: {},
-      savingThrows: {},
-      attacks: [],
-      spells: [],
-      coins: {
-        copper: 0,
-        silver: 0,
-        electrum: 0,
-        gold: 0,
-        platinum: 0,
+      character_sheet: {
+        race: '',
+        alignment: '',
+        background: '',
+        playerName: '',
+        attributes: {
+          strength: { value: 10, modifier: 0 },
+          dexterity: { value: 10, modifier: 0 },
+          constitution: { value: 10, modifier: 0 },
+          intelligence: { value: 10, modifier: 0 },
+          wisdom: { value: 10, modifier: 0 },
+          charisma: { value: 10, modifier: 0 },
+        },
+        combatStats: {
+          armorClass: 10,
+          initiative: 0,
+          speed: 30,
+          hitDice: '',
+        },
+        skills: {},
+        savingThrows: {},
+        attacks: [],
+        spells: [],
+        coins: {
+          copper: 0,
+          silver: 0,
+          electrum: 0,
+          gold: 0,
+          platinum: 0,
+        },
+        equipment: '',
+        weight: 0,
+        carryingCapacity: 0,
+        magicItems: '',
+        treasures: '',
+        inventoryNotes: '',
+        racialTraits: '',
+        classFeatures: '',
+        feats: '',
+        specialAbilities: '',
+        conditions: '',
+        traitsNotes: '',
+        appearance: {
+          age: 25,
+          height: '',
+          weight: '',
+          eyes: '',
+          skin: '',
+          hair: '',
+          distinguishingFeatures: '',
+          clothing: '',
+          description: '',
+        },
+        backstory: '',
+        personality: '',
+        ideals: '',
+        bonds: '',
+        flaws: '',
+        additionalNotes: '',
       },
-      equipment: '',
-      weight: 0,
-      carryingCapacity: 0,
-      magicItems: '',
-      treasures: '',
-      inventoryNotes: '',
-      racialTraits: '',
-      classFeatures: '',
-      feats: '',
-      specialAbilities: '',
-      conditions: '',
-      traitsNotes: '',
-      appearance: {
-        age: 25,
-        height: '',
-        weight: '',
-        eyes: '',
-        skin: '',
-        hair: '',
-        distinguishingFeatures: '',
-        clothing: '',
-        description: '',
-      },
-      backstory: '',
-      personality: '',
-      ideals: '',
-      bonds: '',
-      flaws: '',
-      additionalNotes: '',
     },
   });
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
-  const handleSubmit = form.handleSubmit((data) => onSubmit(data));
+  const handleSubmit = form.handleSubmit((data) => {
+    console.log('Dados do formulário:', data);
+    onSubmit(data);
+  });
   const isLastStep = activeStep === steps.length - 1;
+
+  useEffect(() => {
+    console.log('Erros do formulário:', form.formState.errors);
+  }, [form.formState.errors]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -203,10 +223,11 @@ export const CharacterFormTemplate = ({
               <S.CreateCharacterButton
                 variant="contained"
                 onClick={handleSubmit}
+                type="submit"
                 disabled={isLoading}
                 animationVariant="subtleBounce"
               >
-                {isLoading ? 'Criando...' : 'Criar Personagem'}
+                {isLoading ? <CircularProgress size={24} /> : 'Criar Personagem'}
               </S.CreateCharacterButton>
             </Box>
           )}

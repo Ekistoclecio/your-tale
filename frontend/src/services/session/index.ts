@@ -35,6 +35,11 @@ class SessionService extends ApiService {
     return session;
   };
 
+  registerMember = async (sessionId: string) => {
+    const { data } = await this.post<Session>(`join/${sessionId}`, {});
+    return data;
+  };
+
   getPublicSessions = async (page: number, limit: number) => {
     const { data } = await this.get<{ data: Session[]; totalPages: number; currentPage: number }>(
       'public',

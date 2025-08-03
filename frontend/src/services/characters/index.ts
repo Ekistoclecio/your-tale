@@ -1,11 +1,16 @@
-
 import { Character } from '@/schemas/entities/character';
+import { CreateCharacterFormData } from '@/schemas/form-validation/createCharacterForm';
 import { ApiService } from '@/services/client';
 
 class CharacterService extends ApiService {
   constructor() {
     super('characters/');
   }
+
+  createCharacter = async (character: CreateCharacterFormData & { session_id: string }) => {
+    const { data } = await this.post<Character>(``, character);
+    return data;
+  };
 
   getSessionCharacters = async (sessionId: string) => {
     const { data } = await this.get<Character[]>(`session/${sessionId}`);

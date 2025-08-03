@@ -42,7 +42,7 @@ export const InventoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('equipment')}
+            {...register('character_sheet.equipment')}
             label="Equipamentos"
             placeholder="Ex: Espada longa, Armadura de couro, Mochila, Corda de 50 pés, Tochas (10), Ração de viagem (5 dias), Cantil, Kit de alquimista..."
             multiline
@@ -54,7 +54,7 @@ export const InventoryForm = () => {
         {/* Peso e Capacidade */}
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register('weight')}
+            {...register('character_sheet.weight')}
             label="Peso Total (kgs)"
             type="number"
             slotProps={{
@@ -68,7 +68,7 @@ export const InventoryForm = () => {
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register('carryingCapacity')}
+            {...register('character_sheet.carryingCapacity')}
             label="Capacidade de Carga (kgs)"
             type="number"
             slotProps={{
@@ -94,7 +94,7 @@ export const InventoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('magicItems')}
+            {...register('character_sheet.magicItems')}
             label="Itens Mágicos"
             placeholder="Ex: Espada +1, Anel de Proteção, Poção de Cura Maior, Varinha de Detectar Magia..."
             multiline
@@ -117,7 +117,7 @@ export const InventoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('treasures')}
+            {...register('character_sheet.treasures')}
             label="Tesouros"
             placeholder="Ex: Rubi de 500 po, Estátua de jade, Pergaminho antigo, Chave misteriosa..."
             multiline
@@ -140,7 +140,7 @@ export const InventoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('inventoryNotes')}
+            {...register('character_sheet.inventoryNotes')}
             label="Notas"
             placeholder="Ex: A espada foi herdada do pai, a armadura foi encontrada em uma ruína antiga, o anel tem uma inscrição em élfico..."
             multiline
