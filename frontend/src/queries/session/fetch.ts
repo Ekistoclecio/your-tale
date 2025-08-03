@@ -14,3 +14,10 @@ export const fetchGetMySessions = (page: number, limit: number = DEFAULT_LIMIT) 
     queryFn: () => sessionService.getMySessions(page, limit),
   });
 };
+
+export const fetchGetSessionIdByCode = (code: string) => {
+  return queryClient.fetchQuery({
+    queryKey: ['sessions', 'code', code],
+    queryFn: () => sessionService.getSessionIdByCode(code),
+  });
+};

@@ -1,4 +1,5 @@
 import { Session } from '@/schemas/entities/session';
+import { CreateSessionFormData } from '@/schemas/form-validation/createSessionForm';
 import { ApiService } from '@/services/client';
 
 export interface Message {
@@ -29,23 +30,39 @@ class SessionService extends ApiService {
     super('sessions/');
   }
 
+  createSession = async (data: CreateSessionFormData) => {
+    const { data: session } = await this.post<Session>('', data);
+    return session;
+  };
+
   getPublicSessions = async (page: number, limit: number) => {
-    const { data } = await this.get<Session[]>('public', {
-      params: {
-        page,
-        limit,
-      },
-    });
+    const { data } = await this.get<{ data: Session[]; totalPages: number; currentPage: number }>(
+      'public',
+      {
+        params: {
+          page,
+          limit,
+        },
+      }
+    );
     return data;
   };
 
   getMySessions = async (page: number, limit: number) => {
-    const { data } = await this.get<Session[]>('my', {
-      params: {
-        page,
-        limit,
-      },
-    });
+    const { data } = await this.get<{ data: Session[]; totalPages: number; currentPage: number }>(
+      'my',
+      {
+        params: {
+          page,
+          limit,
+        },
+      }
+    );
+    return data;
+  };
+
+  getSessionIdByCode = async (code: string) => {
+    const { data } = await this.get<string>(`by-code/${code}`);
     return data;
   };
 

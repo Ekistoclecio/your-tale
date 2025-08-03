@@ -6,34 +6,42 @@ export const createSessionSchema = z
       .string()
       .min(3, 'O título deve ter pelo menos 3 caracteres')
       .max(60, 'O título deve ter no máximo 60 caracteres'),
-    description: z
-      .string()
-      .min(10, 'A descrição deve ter pelo menos 10 caracteres')
-      .max(500, 'A descrição deve ter no máximo 500 caracteres'),
-    isPublic: z.boolean(),
-    allowNewPlayersAfterStart: z.boolean(),
-    playerLimit: z.number().min(2, 'Mínimo de 2 jogadores').max(10, 'Máximo de 10 jogadores'),
-    masterType: z.enum(['human', 'ai']),
+    description: z.string().max(500, 'A descrição deve ter no máximo 500 caracteres'),
+    is_public: z.boolean(),
+    join_after_start: z.boolean(),
+    player_limit: z.number().min(2, 'Mínimo de 2 jogadores').max(10, 'Máximo de 10 jogadores'),
+    is_ai_master: z.boolean(),
+    start_date: z.date().nullable().optional(),
     // Campos condicionais para mestre IA
-    aiTheme: z.string().optional(),
-    aiNarrativeStyle: z.string().optional(),
-    aiCampaignDescription: z.string().optional(),
-    startDate: z.date().optional(),
+    ai_theme: z.string().optional(),
+    ai_narrative_style: z.string().optional(),
+    ai_campaign_description: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      // Se o mestre for IA, os campos específicos são obrigatórios
-      if (data.masterType === 'ai') {
-        return data.aiTheme && data.aiNarrativeStyle && data.aiCampaignDescription;
+  .superRefine((data, ctx) => {
+    if (data.is_ai_master) {
+      if (!data.ai_theme || data.ai_theme.trim().length < 3) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'O tema da IA é obrigatório e deve ter pelo menos 3 caracteres',
+          path: ['ai_theme'],
+        });
       }
-      return true;
-    },
-    {
-      message: 'Para mestre IA, todos os campos de configuração são obrigatórios',
-      path: ['aiTheme'],
+      if (!data.ai_narrative_style || data.ai_narrative_style.trim().length < 3) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'O estilo narrativo da IA é obrigatório',
+          path: ['ai_narrative_style'],
+        });
+      }
+      if (!data.ai_campaign_description || data.ai_campaign_description.trim().length < 10) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'A descrição da campanha IA é obrigatória e deve ter pelo menos 10 caracteres',
+          path: ['ai_campaign_description'],
+        });
+      }
     }
-  );
-
+  });
 export type CreateSessionFormData = z.infer<typeof createSessionSchema>;
 
 export const narrativeStyles = [
