@@ -176,19 +176,14 @@ export class SessionMemberService {
       }
     }
 
-    // Criar o membro da sessão
-    const member = this.sessionMemberRepository.create({
-
+    // Criar o membro da sessão usando o método create existente
     return this.create({
       sessionId,
       userId,
       role,
       status: MemberStatus.ACTIVE,
-      joined_at: new Date().toIso,
+      joined_at: new Date().toISOString(),
     });
-
-    const savedMember = await this.sessionMemberRepository.save(member);
-    return this.mapToResponseDto(savedMember);
   }
 
   async leaveSession(sessionId: string, userId: string): Promise<SessionMemberResponseDto> {
