@@ -40,7 +40,6 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
       console.log('Status da conexão WebSocket:', connected);
     },
     onError: (error) => {
-      console.error('Erro no WebSocket:', error);
       enqueueSnackbar(`Erro de conexão: ${error}`, { variant: 'error' });
     },
   });
@@ -60,7 +59,6 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
   const handleRollDice = (exp?: string) => console.log('Rolando dados:', exp || '1d20');
 
   const handleTokenMove = async (id: string, pos: { x: number; y: number }) => {
-    console.log('Movendo token:', { id, pos });
     const updatedCharacters = sessionData.characters
       .map((c) => (c.id === id ? { ...c, position: pos } : c))
       .find((c) => c.id === id);

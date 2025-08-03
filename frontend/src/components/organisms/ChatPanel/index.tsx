@@ -14,7 +14,7 @@ import { Note } from '@/schemas/entities/notes';
 
 // Debounce simples para scroll
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const useDebouncedScroll = (ref: React.RefObject<HTMLDivElement | null>, deps: any[]) => {
+export const useDebouncedScroll = (ref: React.RefObject<HTMLDivElement | null>, deps: any[]) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       ref.current?.scrollIntoView({ behavior: 'smooth' });
@@ -162,15 +162,9 @@ export const ChatPanel = ({
         {/* Chat AI (somente para mestres) */}
         {activeTab === 'ai' && isMaster && (
           <ChatAI
-            messages={convertedMessages}
-            loading={loading || !isAuthenticated}
-            isLoadingMessages={isLoadingMessages}
-            messageInput={messageInput}
-            setMessageInput={handleInputChange}
-            onSendMessage={handleSendMessage}
-            onKeyPress={handleKeyPress}
-            messagesEndRef={messagesEndRef}
             currentUserId={currentUserId}
+            sessionId={sessionId}
+            messagesEndRef={messagesEndRef}
           />
         )}
 

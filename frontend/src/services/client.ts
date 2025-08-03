@@ -8,7 +8,7 @@ class ApiService {
   constructor(entity: string) {
     this.api = axios.create({
       baseURL: `${process.env.NEXT_PUBLIC_API_URL}/${entity}`,
-      timeout: 10000,
+      timeout: 100000,
     });
 
     this.api.interceptors.request.use(async (config) => {

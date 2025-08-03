@@ -129,6 +129,15 @@ class SessionService extends ApiService {
     const { data } = await this.get<{ data: Message[] }>(url);
     return data;
   };
+
+  sendMessage = async (sessionId: string, content: string) => {
+    const { data: message } = await this.post<Message>(`${sessionId}/messages`, {
+      content: content,
+      chat_type: 'master',
+      type: 'user',
+    });
+    return message;
+  };
 }
 
 export const sessionService = new SessionService();
