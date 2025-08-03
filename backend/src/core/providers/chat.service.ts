@@ -122,6 +122,24 @@ export class ChatService {
     return Array.from(sessionRoom);
   }
 
+  async getOnlineUsersInfoInSession(sessionId: string): Promise<Array<{ userId: string; socketId: string }>> {
+    const sessionRoom = this.sessionRooms.get(sessionId);
+    if (!sessionRoom) {
+      return [];
+    }
+    
+    const onlineUsersInfo: Array<{ userId: string; socketId: string }> = [];
+    
+    for (const userId of sessionRoom) {
+      const socketId = this.onlineUsers.get(userId);
+      if (socketId) {
+        onlineUsersInfo.push({ userId, socketId });
+      }
+    }
+    
+    return onlineUsersInfo;
+  }
+
   async isUserOnline(userId: string): Promise<boolean> {
     return this.onlineUsers.has(userId);
   }
