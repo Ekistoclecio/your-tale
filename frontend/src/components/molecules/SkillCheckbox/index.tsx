@@ -35,7 +35,7 @@ export const SkillCheckbox = ({
       <StyledFormControlLabel
         control={
           <Controller
-            name={name}
+            name={`character_sheet.skills.${name}`}
             control={control}
             render={({ field }) => (
               <Checkbox {...field} checked={field.value || false} size="small" />

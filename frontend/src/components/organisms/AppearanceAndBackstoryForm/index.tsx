@@ -39,7 +39,7 @@ export const AppearanceAndBackstoryForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('appearance.age')}
+            {...register('character_sheet.appearance.age')}
             label="Idade"
             type="number"
             slotProps={{
@@ -54,7 +54,7 @@ export const AppearanceAndBackstoryForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('appearance.height')}
+            {...register('character_sheet.appearance.height')}
             label="Altura"
             placeholder="ex: 1,75m"
             helperText="Altura do personagem"
@@ -63,7 +63,7 @@ export const AppearanceAndBackstoryForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('appearance.weight')}
+            {...register('character_sheet.appearance.weight')}
             label="Peso"
             placeholder="ex: 70kg"
             helperText="Peso do personagem"
@@ -72,7 +72,7 @@ export const AppearanceAndBackstoryForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('appearance.eyes')}
+            {...register('character_sheet.appearance.eyes')}
             label="Olhos"
             placeholder="ex: Azuis brilhantes"
             helperText="Cor e características dos olhos"
@@ -81,7 +81,7 @@ export const AppearanceAndBackstoryForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('appearance.skin')}
+            {...register('character_sheet.appearance.skin')}
             label="Pele"
             placeholder="ex: Bronzeada"
             helperText="Cor e textura da pele"
@@ -90,7 +90,7 @@ export const AppearanceAndBackstoryForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('appearance.hair')}
+            {...register('character_sheet.appearance.hair')}
             label="Cabelo"
             placeholder="ex: Loiro longo"
             helperText="Cor, estilo e características do cabelo"
@@ -99,7 +99,7 @@ export const AppearanceAndBackstoryForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('appearance.distinguishingFeatures')}
+            {...register('character_sheet.appearance.distinguishingFeatures')}
             label="Características Distintivas"
             placeholder="ex: Cicatriz no rosto"
             helperText="Marcas, cicatrizes, tatuagens, etc."
@@ -108,7 +108,7 @@ export const AppearanceAndBackstoryForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('appearance.clothing')}
+            {...register('character_sheet.appearance.clothing')}
             label="Vestimentas"
             placeholder="ex: Túnica de viajante"
             helperText="Estilo de roupa preferido"
@@ -132,7 +132,7 @@ export const AppearanceAndBackstoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('appearance.description')}
+            {...register('character_sheet.appearance.description')}
             label="Descrição da Aparência"
             placeholder="Descreva como seu personagem se parece, incluindo postura, expressões faciais, gestos característicos, etc."
             multiline
@@ -154,7 +154,11 @@ export const AppearanceAndBackstoryForm = () => {
             A história de vida do seu personagem
           </Typography>
 
-          <BackstoryEditor name="backstory" label="História do Personagem" maxLength={3000} />
+          <BackstoryEditor
+            name="character_sheet.backstory"
+            label="História do Personagem"
+            maxLength={3000}
+          />
         </Grid>
 
         {/* Personalidade */}
@@ -171,7 +175,7 @@ export const AppearanceAndBackstoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('personality')}
+            {...register('character_sheet.personality')}
             label="Personalidade"
             placeholder="Descreva como seu personagem age, pensa e se comporta. Inclua traços de personalidade, manias, medos, aspirações, etc."
             multiline
@@ -193,7 +197,7 @@ export const AppearanceAndBackstoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('ideals')}
+            {...register('character_sheet.ideals')}
             label="Ideais"
             placeholder="ex: Justiça, Liberdade, Conhecimento, Poder..."
             multiline
@@ -214,7 +218,7 @@ export const AppearanceAndBackstoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('bonds')}
+            {...register('character_sheet.bonds')}
             label="Vínculos"
             placeholder="ex: Família, Mentor, Local sagrado, Objeto precioso..."
             multiline
@@ -235,7 +239,7 @@ export const AppearanceAndBackstoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('flaws')}
+            {...register('character_sheet.flaws')}
             label="Defeitos"
             placeholder="ex: Orgulho excessivo, Medo de altura, Vício em jogos..."
             multiline
@@ -258,7 +262,7 @@ export const AppearanceAndBackstoryForm = () => {
           </Typography>
 
           <TextField
-            {...register('additionalNotes')}
+            {...register('character_sheet.additionalNotes')}
             label="Notas Adicionais"
             placeholder="Qualquer informação adicional sobre a história, aparência ou desenvolvimento do personagem"
             multiline

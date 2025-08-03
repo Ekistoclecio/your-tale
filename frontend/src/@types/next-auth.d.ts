@@ -6,7 +6,7 @@ declare module 'next-auth' {
       id: string;
       name: string;
       email: string;
-      avatar?: string | null;
+      avatar?: string;
       created_at: string;
       updated_at: string;
     } & DefaultSession['user'];
@@ -17,7 +17,7 @@ declare module 'next-auth' {
     id: string;
     name: string;
     email: string;
-    avatar?: string | null;
+    avatar?: string;
     created_at: string;
     updated_at: string;
     accessToken?: string;
@@ -31,7 +31,7 @@ declare module 'next-auth/jwt' {
       id: string;
       name: string;
       email: string;
-      avatar?: string | null;
+      avatar?: string;
       created_at: string;
       updated_at: string;
     };

@@ -82,27 +82,13 @@ export const CharacterIdentityForm = () => {
       }}
     >
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TextField
-            {...register('name')}
-            label="Nome do Personagem"
-            placeholder="Digite o nome do seu personagem"
-            required
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TextField
-            {...register('playerName')}
-            label="Nome do Jogador"
-            placeholder="Seu nome"
-            required
-          />
+        <Grid size={{ xs: 12 }}>
+          <TextField {...register('name')} label="Nome do Personagem" required />
         </Grid>
 
         <Grid size={{ xs: 12, md: 6 }}>
           <Controller
-            name="class"
+            name="character_class"
             control={control}
             rules={{ required: 'Classe é obrigatória' }}
             render={({ field, fieldState }) => (
@@ -123,7 +109,7 @@ export const CharacterIdentityForm = () => {
 
         <Grid size={{ xs: 12, md: 6 }}>
           <Controller
-            name="race"
+            name="character_sheet.race"
             control={control}
             rules={{ required: 'Raça é obrigatória' }}
             render={({ field, fieldState }) => (
@@ -144,7 +130,7 @@ export const CharacterIdentityForm = () => {
 
         <Grid size={{ xs: 12, md: 6 }}>
           <Controller
-            name="background"
+            name="character_sheet.background"
             control={control}
             rules={{ required: 'Antecedente é obrigatório' }}
             render={({ field, fieldState }) => (
@@ -165,7 +151,7 @@ export const CharacterIdentityForm = () => {
 
         <Grid size={{ xs: 12, md: 6 }}>
           <Controller
-            name="alignment"
+            name="character_sheet.alignment"
             control={control}
             rules={{ required: 'Alinhamento é obrigatório' }}
             render={({ field, fieldState }) => (
@@ -186,7 +172,7 @@ export const CharacterIdentityForm = () => {
 
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            {...register('level')}
+            {...register('status.level')}
             label="Nível"
             type="number"
             slotProps={{
@@ -201,7 +187,7 @@ export const CharacterIdentityForm = () => {
 
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
-            {...register('experiencePoints')}
+            {...register('status.experiencePoints')}
             label="Pontos de Experiência"
             type="number"
             slotProps={{

@@ -16,7 +16,7 @@ export const CombatStatsForm = () => {
       <Grid container spacing={3} sx={{ mt: 5 }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('combatStats.armorClass')}
+            {...register('character_sheet.combatStats.armorClass')}
             label="Classe de Armadura"
             slotProps={{ htmlInput: { min: 1, max: 50 } }}
             helperText="CA total"
@@ -25,7 +25,7 @@ export const CombatStatsForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('combatStats.initiative')}
+            {...register('character_sheet.combatStats.initiative')}
             label="Iniciativa"
             slotProps={{ htmlInput: { min: -10, max: 20 } }}
             helperText="Bônus de iniciativa"
@@ -34,7 +34,7 @@ export const CombatStatsForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('combatStats.speed')}
+            {...register('character_sheet.combatStats.speed')}
             label="Deslocamento"
             slotProps={{ htmlInput: { min: 0, max: 200 } }}
             helperText="Pés por turno"
@@ -43,7 +43,7 @@ export const CombatStatsForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
-            {...register('combatStats.hitDice')}
+            {...register('character_sheet.combatStats.hitDice')}
             label="Dados de Vida"
             placeholder="ex: 1d8"
             helperText="Formato: NdM"
@@ -52,7 +52,7 @@ export const CombatStatsForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <TextField
-            {...register('combatStats.hitPoints.maximum')}
+            {...register('status.hitPoints.maximum')}
             label="PV Máximo"
             slotProps={{ htmlInput: { min: 1 } }}
             helperText="Pontos de vida totais"
@@ -61,7 +61,7 @@ export const CombatStatsForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <TextField
-            {...register('combatStats.hitPoints.current')}
+            {...register('status.hitPoints.current')}
             label="PV Atuais"
             slotProps={{ htmlInput: { min: 0 } }}
             helperText="Pontos de vida atuais"
@@ -70,7 +70,7 @@ export const CombatStatsForm = () => {
 
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <TextField
-            {...register('combatStats.hitPoints.temporary')}
+            {...register('status.hitPoints.temporary')}
             label="PV Temporários"
             slotProps={{ htmlInput: { min: 0 } }}
             helperText="PV temporários"
@@ -79,7 +79,7 @@ export const CombatStatsForm = () => {
 
         <Grid size={{ xs: 12 }}>
           <TextField
-            {...register('resistances')}
+            {...register('character_sheet.resistances')}
             label="Resistências"
             placeholder="ex: Fogo, Gelo, Veneno"
             multiline

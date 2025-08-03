@@ -7,11 +7,11 @@ import { useTheme } from '@mui/material/styles';
 import { Wrapper, Header, HeaderTitle, CoinFieldWrapper, CoinIcon } from './styles';
 
 const coinConfig = [
-  { name: 'coins.copper', label: 'Cobre (CP)', color: '#b87333', icon: '🟫' },
-  { name: 'coins.silver', label: 'Prata (PP)', color: '#c0c0c0', icon: '⚪' },
-  { name: 'coins.electrum', label: 'Electro (EP)', color: '#ffd700', icon: '🟡' },
-  { name: 'coins.gold', label: 'Ouro (PO)', color: '#ffd700', icon: '🟡' },
-  { name: 'coins.platinum', label: 'Platina (PP)', color: '#e5e4e2', icon: '⚪' },
+  { name: 'character_sheet.coins.copper', label: 'Cobre (CP)', color: '#b87333', icon: '🟫' },
+  { name: 'character_sheet.coins.silver', label: 'Prata (PP)', color: '#c0c0c0', icon: '⚪' },
+  { name: 'character_sheet.coins.electrum', label: 'Electro (EP)', color: '#ffd700', icon: '🟡' },
+  { name: 'character_sheet.coins.gold', label: 'Ouro (PO)', color: '#ffd700', icon: '🟡' },
+  { name: 'character_sheet.coins.platinum', label: 'Platina (PP)', color: '#e5e4e2', icon: '⚪' },
 ];
 
 export const CoinInputGroup = () => {

@@ -35,7 +35,7 @@ export const TraitsAndAbilitiesForm = () => {
           </Typography>
 
           <TextField
-            {...register('racialTraits')}
+            {...register('character_sheet.racialTraits')}
             label="Características Raciais"
             placeholder="Ex: Visão no Escuro (60 pés), Resistência ao Veneno, Anfíbio, Ferramentas de Artesão..."
             multiline
@@ -58,7 +58,7 @@ export const TraitsAndAbilitiesForm = () => {
           </Typography>
 
           <TextField
-            {...register('classFeatures')}
+            {...register('character_sheet.classFeatures')}
             label="Características de Classe"
             placeholder="Ex: Defesa de Combate, Ataque Extra, Magia de Classe, Especialização em Arma..."
             multiline
@@ -81,7 +81,7 @@ export const TraitsAndAbilitiesForm = () => {
           </Typography>
 
           <TextField
-            {...register('feats')}
+            {...register('character_sheet.feats')}
             label="Talentos"
             placeholder="Ex: Atirador de Elite, Mestre de Armas, Observador, Resiliente..."
             multiline
@@ -104,7 +104,7 @@ export const TraitsAndAbilitiesForm = () => {
           </Typography>
 
           <TextField
-            {...register('specialAbilities')}
+            {...register('character_sheet.specialAbilities')}
             label="Habilidades Especiais"
             placeholder="Ex: Telepatia, Transformação, Habilidade de Voo, Regeneração..."
             multiline
@@ -127,7 +127,7 @@ export const TraitsAndAbilitiesForm = () => {
           </Typography>
 
           <TextField
-            {...register('conditions')}
+            {...register('character_sheet.conditions')}
             label="Condições e Efeitos"
             placeholder="Ex: Bênção de um deus, Maldição antiga, Efeito de poção permanente..."
             multiline
@@ -149,7 +149,7 @@ export const TraitsAndAbilitiesForm = () => {
             Informações adicionais sobre habilidades, características ou observações importantes
           </Typography>
 
-          <BackstoryEditor name="traitsNotes" label="Anotações" maxLength={2000} />
+          <BackstoryEditor name="character_sheet.traitsNotes" label="Anotações" maxLength={2000} />
         </Grid>
       </Grid>
 

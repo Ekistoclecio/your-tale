@@ -11,26 +11,23 @@ import {
 } from '@mui/icons-material';
 import Logo from '../../atoms/Logo';
 import { Avatar } from '../../atoms/Avatar';
-import { UserProfileMenu } from '../../molecules';
+import { EnterCodeModal, UserProfileMenu } from '../../molecules';
 import { MobileDrawerUserProfileMenu } from '../../molecules';
-import { UserProfileModal } from '@/components/organisms';
+import { CreateSessionModal, UserProfileModal } from '@/components/organisms';
 import * as S from './styles';
 import { signOut } from 'next-auth/react';
+import { User } from '@/schemas/entities/user';
 
 interface HeaderProps {
-  onCreateSession: () => void;
-  onEnterCode: () => void;
-  user?: {
-    name: string;
-    email: string;
-    avatar?: string;
-  };
+  user?: User;
 }
 
-export const Header = ({ onCreateSession, onEnterCode, user }: HeaderProps) => {
+export const Header = ({ user }: HeaderProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userProfileModalOpen, setUserProfileModalOpen] = useState(false);
+  const [createSessionModalOpen, setCreateSessionModalOpen] = useState(false);
+  const [enterCodeModalOpen, setEnterCodeModalOpen] = useState(false);
   const getDisplayName = (fullName: string) => {
     const names = fullName.trim().split(' ');
     if (names.length === 1) return names[0];
@@ -59,7 +56,7 @@ export const Header = ({ onCreateSession, onEnterCode, user }: HeaderProps) => {
       label: 'Criar nova sessão',
       icon: <AddIcon />,
       onClick: () => {
-        onCreateSession();
+        setCreateSessionModalOpen(true);
         handleMenuClose();
         setDrawerOpen(false);
       },
@@ -68,7 +65,7 @@ export const Header = ({ onCreateSession, onEnterCode, user }: HeaderProps) => {
       label: 'Entrar com código',
       icon: <VpnKeyIcon />,
       onClick: () => {
-        onEnterCode();
+        setEnterCodeModalOpen(true);
         handleMenuClose();
         setDrawerOpen(false);
       },
@@ -151,6 +148,13 @@ export const Header = ({ onCreateSession, onEnterCode, user }: HeaderProps) => {
         onSaveField={handleSaveField}
         loading={false}
       />
+
+      <CreateSessionModal
+        open={createSessionModalOpen}
+        onClose={() => setCreateSessionModalOpen(false)}
+      />
+
+      <EnterCodeModal open={enterCodeModalOpen} onClose={() => setEnterCodeModalOpen(false)} />
     </>
   );
 };

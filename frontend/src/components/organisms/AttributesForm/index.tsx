@@ -3,37 +3,37 @@ import { AttributeInput } from '@/components/molecules';
 
 const attributes = [
   {
-    name: 'attributes.strength',
+    name: 'character_sheet.attributes.strength',
     label: 'Força',
     abbreviation: 'FOR',
     color: '#d32f2f',
   },
   {
-    name: 'attributes.dexterity',
+    name: 'character_sheet.attributes.dexterity',
     label: 'Destreza',
     abbreviation: 'DES',
     color: '#388e3c',
   },
   {
-    name: 'attributes.constitution',
+    name: 'character_sheet.attributes.constitution',
     label: 'Constituição',
     abbreviation: 'CON',
     color: '#f57c00',
   },
   {
-    name: 'attributes.intelligence',
+    name: 'character_sheet.attributes.intelligence',
     label: 'Inteligência',
     abbreviation: 'INT',
     color: '#1976d2',
   },
   {
-    name: 'attributes.wisdom',
+    name: 'character_sheet.attributes.wisdom',
     label: 'Sabedoria',
     abbreviation: 'SAB',
     color: '#7A6FA1',
   },
   {
-    name: 'attributes.charisma',
+    name: 'character_sheet.attributes.charisma',
     label: 'Carisma',
     abbreviation: 'CAR',
     color: '#c2185b',
