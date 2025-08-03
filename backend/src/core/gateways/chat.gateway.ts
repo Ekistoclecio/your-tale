@@ -139,7 +139,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       client.emit('joined_session', { 
         sessionId,
         message: 'Successfully joined session chat',
-        onlineUsers: otherOnlineUsers // Lista de usuários que já estavam na sessão
+        onlineUsers: otherOnlineUsers, // Lista de usuários que já estavam na sessão
+        user: user
       });
       
       // Notificar outros usuários na sessão
