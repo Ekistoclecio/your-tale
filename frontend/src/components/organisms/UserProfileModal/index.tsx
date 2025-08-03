@@ -6,6 +6,10 @@ import { MotionCard } from '../../atoms/MotionCard';
 import { Avatar } from '../../atoms/Avatar';
 import * as S from './styles';
 import { EditableField } from '@/components/molecules/EditableField';
+import { useUpdateUser } from '@/queries/users/mutation';
+import { useSnackbar } from 'notistack';
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface User {
   name: string;
@@ -17,19 +21,34 @@ interface UserProfileModalProps {
   open: boolean;
   onClose: () => void;
   user: User;
-  onSaveField: (field: 'name' | 'email', value: string) => void;
-  loading?: boolean;
 }
 
-export const UserProfileModal = ({
-  open,
-  onClose,
-  user,
-  onSaveField,
-  loading = false,
-}: UserProfileModalProps) => {
-  const handleSaveField = (field: 'name' | 'email', value: string) => {
-    onSaveField(field, value);
+export const UserProfileModal = ({ open, onClose, user }: UserProfileModalProps) => {
+  const { mutateAsync: updateUser } = useUpdateUser();
+  const { enqueueSnackbar } = useSnackbar();
+  const [isLoading, setIsLoading] = useState(false);
+  const { data: session, update } = useSession();
+  const handleSaveField = async (field: 'name' | 'email', value: string) => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      const updatedUser = { [field]: value } as { name?: string; email?: string };
+      const user = await updateUser(updatedUser);
+      enqueueSnackbar('Usuário atualizado com sucesso', { variant: 'success' });
+      await update({
+        user: {
+          ...session?.user,
+          email: user.email,
+          name: user.name,
+        },
+      });
+    } catch {
+      enqueueSnackbar('Erro ao atualizar usuário, por favor tente novamente mais tarde.', {
+        variant: 'error',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -65,7 +84,7 @@ export const UserProfileModal = ({
                   value={user.name}
                   field="name"
                   onSave={handleSaveField}
-                  loading={loading}
+                  loading={isLoading}
                 />
 
                 <EditableField
@@ -73,7 +92,7 @@ export const UserProfileModal = ({
                   value={user.email}
                   field="email"
                   onSave={handleSaveField}
-                  loading={loading}
+                  loading={isLoading}
                 />
               </S.FieldsContainer>
 
@@ -82,7 +101,7 @@ export const UserProfileModal = ({
                   animationVariant="subtleBounce"
                   variant="outlined"
                   onClick={handleClose}
-                  disabled={loading}
+                  disabled={isLoading}
                 >
                   Fechar
                 </S.CloseButton>

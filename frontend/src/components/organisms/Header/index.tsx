@@ -35,10 +35,6 @@ export const Header = ({ user }: HeaderProps) => {
     return `${names[0]} ${names[names.length - 1]}`;
   };
 
-  const handleSaveField = (field: 'name' | 'email', value: string) => {
-    console.log('Salvando campo:', field, value);
-  };
-
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -145,8 +141,6 @@ export const Header = ({ user }: HeaderProps) => {
         open={userProfileModalOpen}
         onClose={() => setUserProfileModalOpen(false)}
         user={user!}
-        onSaveField={handleSaveField}
-        loading={false}
       />
 
       <CreateSessionModal
