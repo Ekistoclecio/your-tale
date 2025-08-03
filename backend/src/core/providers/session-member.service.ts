@@ -144,6 +144,7 @@ export class SessionMemberService {
   }
 
   async joinSession(sessionId: string, userId: string, role: MemberRole = MemberRole.PLAYER): Promise<SessionMemberResponseDto> {
+
     const session = await this.sessionRepository.findOne({ where: { id: sessionId } });
     if (!session) {
       throw new NotFoundException('Session not found');
@@ -177,11 +178,13 @@ export class SessionMemberService {
 
     // Criar o membro da sessão
     const member = this.sessionMemberRepository.create({
+
+    return this.create({
       sessionId,
       userId,
       role,
       status: MemberStatus.ACTIVE,
-      joined_at: new Date(),
+      joined_at: new Date().toIso,
     });
 
     const savedMember = await this.sessionMemberRepository.save(member);
