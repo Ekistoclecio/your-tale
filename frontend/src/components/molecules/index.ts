@@ -13,3 +13,4 @@ export { PlayerList } from './PlayerList';
 export { SessionBar } from './SessionBar';
 export { ChatTabs } from './ChatTabs';
 export { SessionInviteModal } from './SessionInviteModal';
+export { PublicSessionsEmptyState } from './PublicSessionsEmptyState';

@@ -15,7 +15,7 @@ export const BadgeVariants = {
     color: 'default' as const,
     icon: Flag,
   },
-  scheduled: {
+  not_started: {
     label: 'Agendada',
     color: 'warning' as const,
     icon: Schedule,

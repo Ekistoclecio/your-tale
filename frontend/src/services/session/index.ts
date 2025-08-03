@@ -1,5 +1,5 @@
-
 import { Session } from '@/schemas/entities/session';
+import { CreateSessionFormData } from '@/schemas/form-validation/createSessionForm';
 import { ApiService } from '@/services/client';
 
 export interface Message {
@@ -30,6 +30,42 @@ class SessionService extends ApiService {
     super('sessions/');
   }
 
+  createSession = async (data: CreateSessionFormData) => {
+    const { data: session } = await this.post<Session>('', data);
+    return session;
+  };
+
+  getPublicSessions = async (page: number, limit: number) => {
+    const { data } = await this.get<{ data: Session[]; totalPages: number; currentPage: number }>(
+      'public',
+      {
+        params: {
+          page,
+          limit,
+        },
+      }
+    );
+    return data;
+  };
+
+  getMySessions = async (page: number, limit: number) => {
+    const { data } = await this.get<{ data: Session[]; totalPages: number; currentPage: number }>(
+      'my',
+      {
+        params: {
+          page,
+          limit,
+        },
+      }
+    );
+    return data;
+  };
+
+  getSessionIdByCode = async (code: string) => {
+    const { data } = await this.get<{ id: string }>(`by-code/${code}`);
+    return data;
+  };
+
   getSessionById = async (id: string) => {
     const { data } = await this.get<Session>(`${id}`);
     return data;
@@ -42,18 +78,18 @@ class SessionService extends ApiService {
 
   getMessages = async (sessionId: string, params: GetMessagesParams = {}) => {
     const queryParams = new URLSearchParams();
-    
+
     if (params.chat_type) {
       queryParams.append('chat_type', params.chat_type);
     }
     if (params.page) {
       queryParams.append('page', params.page.toString());
     }
-    queryParams.append('limit', "9999");
+    queryParams.append('limit', '9999');
 
     const queryString = queryParams.toString();
     const url = `${sessionId}/messages${queryString ? `?${queryString}` : ''}`;
-    
+
     const { data } = await this.get<Message[]>(url);
     return data;
   };

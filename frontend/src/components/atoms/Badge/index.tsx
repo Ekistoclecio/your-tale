@@ -5,7 +5,7 @@ import { Box, Chip, ChipProps, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 
 interface CustomBadgeProps extends ChipProps {
-  badgeVariant?: 'active' | 'ended' | 'scheduled' | 'ai' | 'human';
+  badgeVariant?: 'active' | 'ended' | 'not_started' | 'ai' | 'human';
   whileHover?: object;
 }
 

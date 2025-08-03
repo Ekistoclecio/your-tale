@@ -1,34 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { Typography } from '@mui/material';
+import { CircularProgress, Typography } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MotionCard } from '../../atoms/MotionCard';
 import Key from '@/assets/icons/key.svg';
 import * as S from './styles';
+import { fetchGetSessionIdByCode } from '@/queries/session/fetch';
+import { useSnackbar } from 'notistack';
+import { useRouter } from 'next/navigation';
 
 interface EnterCodeModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (code: string) => void;
-  loading?: boolean;
 }
 
-export const EnterCodeModal = ({
-  open,
-  onClose,
-  onSubmit,
-  loading = false,
-}: EnterCodeModalProps) => {
+export const EnterCodeModal = ({ open, onClose }: EnterCodeModalProps) => {
+  const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+  const [loading, setLoading] = useState(false);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (loading) return;
     if (!code.trim()) return setError('Digite o código da sessão');
     if (code.trim().length < 6) return setError('O código deve ter pelo menos 6 caracteres');
 
     setError('');
-    onSubmit(code.trim());
+    setLoading(true);
+    try {
+      const { id: sessionId } = await fetchGetSessionIdByCode(code.trim());
+      onClose();
+      router.push(`/session/${sessionId}/create_character`);
+    } catch {
+      enqueueSnackbar('Código de sessão inválido', { variant: 'error' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -85,8 +94,9 @@ export const EnterCodeModal = ({
                   variant="contained"
                   onClick={handleSubmit}
                   disabled={loading}
+                  sx={{ width: '115px' }}
                 >
-                  {loading ? 'Entrando...' : 'Entrar'}
+                  {loading ? <CircularProgress size={24} /> : 'Entrar'}
                 </S.SubmitButton>
               </S.Actions>
             </MotionCard>

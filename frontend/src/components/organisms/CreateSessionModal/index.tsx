@@ -27,36 +27,37 @@ import { BasicInfos } from '@/components/organisms/CreateSessionModal/BasicInfos
 import { AccessRules } from '@/components/organisms/CreateSessionModal/AccessRules';
 import { SessionMasterConfig } from '@/components/organisms/CreateSessionModal/SessionMasterConfig';
 import { Scheduling } from '@/components/organisms/CreateSessionModal/Scheduling';
+import { useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
+import { useCreateSession } from '@/queries/session/mutation';
+import { useRouter } from 'next/navigation';
 
 interface CreateSessionModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateSessionFormData) => void;
-  loading?: boolean;
 }
 
-export const CreateSessionModal = ({
-  open,
-  onClose,
-  onSubmit,
-  loading = false,
-}: CreateSessionModalProps) => {
+export const CreateSessionModal = ({ open, onClose }: CreateSessionModalProps) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
+  const [loading, setLoading] = useState(false);
+  const { mutateAsync: createSession } = useCreateSession();
 
   const methods = useForm<CreateSessionFormData>({
     resolver: zodResolver(createSessionSchema),
     defaultValues: {
       title: '',
       description: '',
-      isPublic: true,
-      allowNewPlayersAfterStart: true,
-      playerLimit: 4,
-      masterType: 'human',
-      aiTheme: '',
-      aiNarrativeStyle: '',
-      aiCampaignDescription: '',
-      startDate: null as unknown as Date,
+      is_public: true,
+      join_after_start: true,
+      player_limit: 4,
+      is_ai_master: false,
+      ai_theme: '',
+      ai_narrative_style: '',
+      ai_campaign_description: '',
+      start_date: null as unknown as Date,
     },
     mode: 'all',
   });
@@ -67,13 +68,46 @@ export const CreateSessionModal = ({
     reset,
   } = methods;
 
+  useEffect(() => {
+    console.log(methods.formState.errors);
+  }, [methods.formState.errors]);
+
   const handleClose = () => {
     reset();
     onClose();
   };
 
-  const handleFormSubmit = (data: CreateSessionFormData) => {
-    onSubmit(data);
+  const handleFormSubmit = async (data: CreateSessionFormData) => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const newSession = {
+        title: data.title,
+        description: data.description,
+        is_public: data.is_public,
+        join_after_start: data.join_after_start,
+        player_limit: data.player_limit,
+        is_ai_master: data.is_ai_master,
+        start_date: data.start_date
+          ? new Date(data.start_date).toISOString()
+          : new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      };
+      if (data.is_ai_master) {
+        newSession.description = `
+        Tema da história: ${data.ai_theme}
+        Estilo narrativo que o mestre deve seguir: ${data.ai_narrative_style}
+        Descrição introdutória da campanha: ${data.ai_campaign_description}. ${data.description}
+        `;
+      }
+      console.log(newSession);
+      const session = await createSession(newSession as unknown as CreateSessionFormData);
+      router.push(`/session/${session.id}/create_character`);
+      enqueueSnackbar('Sessão criada com sucesso', { variant: 'success' });
+    } catch {
+      enqueueSnackbar('Erro ao criar sessão', { variant: 'error' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
