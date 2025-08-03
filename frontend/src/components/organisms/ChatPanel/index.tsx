@@ -27,7 +27,6 @@ interface ChatPanelProps {
   sessionId: string;
   currentUserId: string;
   isMaster?: boolean;
-  onRollDice?: (expression?: string) => void;
   loading?: boolean;
   notes?: Note[];
   onUpdateNotes: (notes: Note[]) => void;
@@ -37,7 +36,6 @@ export const ChatPanel = ({
   sessionId,
   currentUserId,
   isMaster = false,
-  onRollDice,
   loading = false,
   notes = [],
   onUpdateNotes,
@@ -127,13 +125,13 @@ export const ChatPanel = ({
     setMessageInput(value);
   }, []);
 
-  const handleRollDice = useCallback(() => {
-    if (onRollDice) {
-      onRollDice('1d20');
-    } else {
-      sendMessage(`🎲 Rolou 1d20: ${Math.floor(Math.random() * 20 + 1)}`, currentChatType);
-    }
-  }, [onRollDice, sendMessage, currentChatType]);
+  // const handleRollDice = useCallback(() => {
+  //   if (onRollDice) {
+  //     onRollDice('1d20');
+  //   } else {
+  //     sendMessage(`🎲 Rolou 1d20: ${Math.floor(Math.random() * 20 + 1)}`, currentChatType);
+  //   }
+  // }, [onRollDice, sendMessage, currentChatType]);
 
   return (
     <S.ChatContainer elevation={0}>
@@ -153,7 +151,7 @@ export const ChatPanel = ({
             setMessageInput={handleInputChange}
             onSendMessage={handleSendMessage}
             onKeyPress={handleKeyPress}
-            onRollDice={isMaster ? undefined : handleRollDice}
+            onRollDice={undefined}
             messagesEndRef={messagesEndRef}
             currentUserId={currentUserId}
           />
