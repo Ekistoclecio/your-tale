@@ -28,7 +28,14 @@ interface ChatPanelProps {
 }
 
 export const ChatPanel = (props: ChatPanelProps) => {
-  const { sessionId, currentUserId, isMaster = false, onRollDice, loading = false, notes = [] } = props;
+  const {
+    sessionId,
+    currentUserId,
+    isMaster = false,
+    onRollDice,
+    loading = false,
+    notes = [],
+  } = props;
   const { enqueueSnackbar } = useSnackbar();
 
   const [activeTab, setActiveTab] = useState<'general' | 'ai' | 'notes'>('general');
@@ -43,12 +50,11 @@ export const ChatPanel = (props: ChatPanelProps) => {
     messages,
     typingUsers,
     isLoadingMessages,
-    loadMoreMessages,
     sendMessage,
     startTyping,
     stopTyping,
     isAuthenticated,
-    isConnected
+    isConnected,
   } = useWebSocket({
     sessionId,
     onConnectionChange: (connected) => {
@@ -60,7 +66,7 @@ export const ChatPanel = (props: ChatPanelProps) => {
     },
     onError: (error) => {
       enqueueSnackbar(`Erro no chat: ${error}`, { variant: 'error' });
-    }
+    },
   });
 
   const currentChatType = activeTab === 'ai' ? 'master' : 'general';
@@ -72,7 +78,7 @@ export const ChatPanel = (props: ChatPanelProps) => {
 
   const handleSendMessage = useCallback(() => {
     if (!messageInput.trim() || loading || !isAuthenticated) return;
-    
+
     sendMessage(messageInput.trim(), currentChatType);
     setMessageInput('');
     stopTyping();
@@ -85,15 +91,18 @@ export const ChatPanel = (props: ChatPanelProps) => {
     }
   };
 
-  const handleInputChange = useCallback((value: string) => {
-    setMessageInput(value);
-    
-    if (value.trim() && isAuthenticated) {
-      startTyping();
-    } else {
-      stopTyping();
-    }
-  }, [isAuthenticated, startTyping, stopTyping]);
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setMessageInput(value);
+
+      if (value.trim() && isAuthenticated) {
+        startTyping();
+      } else {
+        stopTyping();
+      }
+    },
+    [isAuthenticated, startTyping, stopTyping]
+  );
 
   const handleRollDice = useCallback(() => {
     if (onRollDice) {
@@ -115,7 +124,7 @@ export const ChatPanel = (props: ChatPanelProps) => {
   // Converter ChatMessage para o formato esperado pelos componentes
   const convertMessagesToOldFormat = (messages: ChatMessage[]) => {
     console.log('messages', messages);
-    return messages.map(msg => ({
+    return messages.map((msg) => ({
       id: msg.id,
       senderId: msg.sender?.id,
       senderName: msg.sender?.name,
@@ -130,27 +139,19 @@ export const ChatPanel = (props: ChatPanelProps) => {
 
   const convertedMessages = convertMessagesToOldFormat(filteredMessages);
 
-    return (
+  return (
     <S.ChatContainer elevation={0}>
       {/* Debug: Status da conexão */}
       <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider' }}>
-        <ConnectionStatus 
-          isConnected={isConnected}
-          isAuthenticated={isAuthenticated}
-        />
+        <ConnectionStatus isConnected={isConnected} isAuthenticated={isAuthenticated} />
       </Box>
-      
-      <ChatTabs 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
-        isMaster={isMaster}
-      >
+
+      <ChatTabs activeTab={activeTab} onTabChange={setActiveTab} isMaster={isMaster}>
         {activeTab === 'general' && (
           <ChatGeneral
             messages={convertedMessages}
             loading={loading || !isAuthenticated}
             isLoadingMessages={isLoadingMessages}
-            onLoadMoreMessages={() => loadMoreMessages('general')}
             messageInput={messageInput}
             setMessageInput={handleInputChange}
             onSendMessage={handleSendMessage}
@@ -167,7 +168,6 @@ export const ChatPanel = (props: ChatPanelProps) => {
             messages={convertedMessages}
             loading={loading || !isAuthenticated}
             isLoadingMessages={isLoadingMessages}
-            onLoadMoreMessages={() => loadMoreMessages('master')}
             messageInput={messageInput}
             setMessageInput={handleInputChange}
             onSendMessage={handleSendMessage}

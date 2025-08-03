@@ -251,7 +251,10 @@ export const CharacterModal = ({
                           size="small"
                           label="HP Atual"
                           type="number"
-                          value={character.status.hitPoints.current}
+                          {...form.register('status.hitPoints.current', {
+                            valueAsNumber: true,
+                          })}
+                          value={form.watch('status.hitPoints.current') || 0}
                           disabled={!canEdit}
                           variant="outlined"
                           sx={{
@@ -266,7 +269,10 @@ export const CharacterModal = ({
                           size="small"
                           label="HP Máximo"
                           type="number"
-                          value={character.status.hitPoints.maximum}
+                          {...form.register('status.hitPoints.maximum', {
+                            valueAsNumber: true,
+                          })}
+                          value={form.watch('status.hitPoints.maximum') || 0}
                           disabled={!canEdit}
                           variant="outlined"
                           sx={{
@@ -283,7 +289,10 @@ export const CharacterModal = ({
                               size="small"
                               label="Mana Atual"
                               type="number"
-                              value={character.status.mana.current}
+                              {...form.register('status.mana.current', {
+                                valueAsNumber: true,
+                              })}
+                              value={form.watch('status.mana.current') || 0}
                               disabled={!canEdit}
                               variant="outlined"
                               sx={{
@@ -298,7 +307,10 @@ export const CharacterModal = ({
                               size="small"
                               label="Mana Máxima"
                               type="number"
-                              value={character.status.mana.maximum}
+                              {...form.register('status.mana.maximum', {
+                                valueAsNumber: true,
+                              })}
+                              value={form.watch('status.mana.maximum') || 0}
                               disabled={!canEdit}
                               variant="outlined"
                               sx={{

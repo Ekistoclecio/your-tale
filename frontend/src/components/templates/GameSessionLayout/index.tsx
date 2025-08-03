@@ -83,16 +83,19 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
   const { data: session } = useSession();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
-  const isMaster = useMemo(() => sessionData.creator.id === session?.user?.id && !sessionData.is_ai_master, [sessionData, session]);
+  const isMaster = useMemo(
+    () => sessionData.creator?.id === session?.user?.id && !sessionData.is_ai_master,
+    [sessionData, session]
+  );
 
   const { mutateAsync: startSession } = useStartSession();
 
   const handleStartSession = async () => {
-    try{
+    try {
       await startSession(sessionData.id);
       updateSessionData({ ...sessionData, status: 'active' });
       enqueueSnackbar('Sessão iniciada com sucesso', { variant: 'success' });
-    }catch{
+    } catch {
       enqueueSnackbar('Erro ao iniciar sessão', { variant: 'error' });
     }
   };
@@ -103,7 +106,10 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
     console.log('Movendo token:', { id, pos });
 
   const handleSaveCharacter = (character: Character) => {
-    updateSessionData({ ...sessionData, characters: sessionData.characters.map((c) => c.id === character.id ? character : c) });
+    updateSessionData({
+      ...sessionData,
+      characters: sessionData.characters.map((c) => (c.id === character.id ? character : c)),
+    });
   };
 
   return (
@@ -112,7 +118,7 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
         <SessionBar
           title={sessionData.title}
           status={sessionData.status}
-          isMaster={sessionData.creator.id === session?.user?.id}
+          isMaster={sessionData.creator?.id === session?.user?.id}
           onStartSession={handleStartSession}
           joinCode={sessionData.join_code}
         />
@@ -122,7 +128,7 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
           <S.LeftPanel sx={{ display: { xs: 'none', lg: 'block' } }}>
             <PlayerList
               players={sessionData.characters}
-              currentUserId={sessionData.creator.id}
+              currentUserId={session?.user?.id || ''}
               userRole={isMaster ? 'master' : 'player'}
               onSaveCharacter={handleSaveCharacter}
             />

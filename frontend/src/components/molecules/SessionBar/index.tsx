@@ -13,7 +13,7 @@ interface SessionBarProps {
   title: string;
   status: SessionStatus;
   isMaster?: boolean;
-  onStartSession?: () => void;
+  onStartSession?: () => Promise<void>;
   joinCode: string;
 }
 
@@ -95,16 +95,18 @@ export const SessionBar = ({
                 </IconButton>
               </Tooltip>
 
-              <ButtonStartSession
-                status={status}
-                onClick={async () => {
-                  setIsLoadingStartSession(true);
-                  await onStartSession?.();
-                  setIsLoadingStartSession(false);
-                }}
-                loading={isLoadingStartSession}
-                size="small"
-              />
+              {status !== 'active' && (
+                <ButtonStartSession
+                  status={status}
+                  onClick={async () => {
+                    setIsLoadingStartSession(true);
+                    await onStartSession?.();
+                    setIsLoadingStartSession(false);
+                  }}
+                  loading={isLoadingStartSession}
+                  size="small"
+                />
+              )}
             </>
           )}
         </S.RightSection>
