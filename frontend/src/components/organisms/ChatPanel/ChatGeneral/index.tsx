@@ -3,7 +3,7 @@
 import { Typography } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SendRounded as SendIcon, CasinoRounded as DiceIcon } from '@mui/icons-material';
-import { MessageBubble, TypingIndicator } from '@/components/atoms';
+import { MessageBubble } from '@/components/atoms';
 import * as S from '../styles';
 
 interface Message {
@@ -18,11 +18,6 @@ interface Message {
   avatar?: string;
 }
 
-interface TypingUser {
-  id: string;
-  name: string;
-}
-
 interface ChatGeneralProps {
   messages: Message[];
   loading: boolean;
@@ -33,7 +28,6 @@ interface ChatGeneralProps {
   onKeyPress: (e: React.KeyboardEvent) => void;
   onRollDice?: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
-  typingUsers?: TypingUser[];
   currentUserId?: string;
 }
 
@@ -46,7 +40,6 @@ export const ChatGeneral = ({
   onKeyPress,
   onRollDice,
   messagesEndRef,
-  typingUsers = [],
   currentUserId,
 }: ChatGeneralProps) => (
   <>
@@ -70,17 +63,15 @@ export const ChatGeneral = ({
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <MessageBubble 
-                {...message} 
-                isOwner={message.senderId === currentUserId} 
+              <MessageBubble
+                {...message}
+                senderName={message.type === 'ai' ? 'Mestre de IA' : message.senderName}
+                isOwner={message.senderId === currentUserId}
               />
             </motion.div>
           ))
         )}
       </AnimatePresence>
-
-      {/* Typing Indicators */}
-      <TypingIndicator users={typingUsers} />
 
       <div ref={messagesEndRef} />
     </S.MessagesArea>

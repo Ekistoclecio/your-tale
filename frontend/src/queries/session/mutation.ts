@@ -16,3 +16,12 @@ export const useStartSession = () => {
     mutationFn: sessionService.startSession,
   });
 };
+
+export const useSendMessage = (sessionId: string) => {
+  return useMutation({
+    mutationFn: (content: string) => sessionService.sendMessage(sessionId, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-chat-messages'] });
+    },
+  });
+};

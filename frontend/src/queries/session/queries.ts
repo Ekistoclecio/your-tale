@@ -15,3 +15,10 @@ export const useVerifyCharacterInSessionQuery = (id: string) => {
     retry: false,
   });
 };
+
+export const useSessionAiChatMessagesQuery = (sessionId: string) => {
+  return useQuery({
+    queryKey: ['ai-chat-messages'],
+    queryFn: () => sessionService.getMessages(sessionId, { chat_type: 'master' }),
+  });
+};

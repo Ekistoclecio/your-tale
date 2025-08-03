@@ -8,7 +8,7 @@ class ApiService {
   constructor(entity: string) {
     this.api = axios.create({
       baseURL: `${process.env.NEXT_PUBLIC_API_URL}/${entity}`,
-      timeout: 10000,
+      timeout: 100000,
     });
 
     this.api.interceptors.request.use(async (config) => {
@@ -51,6 +51,14 @@ class ApiService {
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> => {
     return await this.api.patch<T>(url, data, config);
+  };
+
+  public put = async <T>(
+    url: string,
+    data: object,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => {
+    return await this.api.put<T>(url, data, config);
   };
 
   public delete = async <T>(

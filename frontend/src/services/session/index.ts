@@ -1,3 +1,4 @@
+import { Note } from '@/schemas/entities/notes';
 import { Session } from '@/schemas/entities/session';
 import { CreateSessionFormData } from '@/schemas/form-validation/createSessionForm';
 import { ApiService } from '@/services/client';
@@ -43,6 +44,31 @@ class SessionService extends ApiService {
   registerMember = async (sessionId: string) => {
     const { data } = await this.post<Session>(`${sessionId}/members/join`, {});
     return data;
+  };
+
+  getSessionNotes = async (sessionId: string) => {
+    const { data } = await this.get<{ data: Note[] }>(`${sessionId}/notes`, {
+      params: {
+        page: 1,
+        limit: 9999,
+      },
+    });
+    return data;
+  };
+
+  createSessionNote = async (sessionId: string, data: Omit<Note, 'id'>) => {
+    const { data: note } = await this.post<Note>(`${sessionId}/notes`, data);
+    return note;
+  };
+
+  deleteSessionNote = async (noteId: string) => {
+    const { data } = await this.delete<Note>(`/notes/${noteId}`);
+    return data;
+  };
+
+  updateSessionNote = async (noteId: string, data: Omit<Note, 'id'>) => {
+    const { data: note } = await this.put<Note>(`/notes/${noteId}`, data);
+    return note;
   };
 
   getPublicSessions = async (page: number, limit: number) => {
@@ -100,8 +126,17 @@ class SessionService extends ApiService {
     const queryString = queryParams.toString();
     const url = `${sessionId}/messages${queryString ? `?${queryString}` : ''}`;
 
-    const { data } = await this.get<Message[]>(url);
+    const { data } = await this.get<{ data: Message[] }>(url);
     return data;
+  };
+
+  sendMessage = async (sessionId: string, content: string) => {
+    const { data: message } = await this.post<Message>(`${sessionId}/messages`, {
+      content: content,
+      chat_type: 'master',
+      type: 'user',
+    });
+    return message;
   };
 }
 
