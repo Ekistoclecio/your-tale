@@ -169,4 +169,40 @@ export class CharacterService {
       relations: ['user']
     });
   }
+
+  async hasCharacterInSession(sessionId: string, userId: string): Promise<{ hasCharacter: boolean; isMaster: boolean }> {
+    // Verificar acesso à sessão
+    const sessionMember = await this.sessionMemberRepository.findOne({
+      where: { userId: userId, sessionId: sessionId }
+    });
+    if (!sessionMember) {
+      throw new ForbiddenException('User does not have access to this session');
+    }
+
+    // Verificar se o usuário é o mestre da sessão
+    const session = await this.sessionRepository.findOne({
+      where: { id: sessionId },
+      relations: ['creator']
+    });
+
+    if (!session) {
+      throw new NotFoundException('Session not found');
+    }
+    
+    const isMaster = session.creator.id === userId;
+
+    // Verificar se o usuário tem pelo menos um personagem ativo na sessão
+    const character = await this.characterRepository.findOne({
+      where: { 
+        user_id: userId, 
+        session_id: sessionId,
+        is_active: true
+      }
+    });
+
+    return { 
+      hasCharacter: !!character,
+      isMaster 
+    };
+  }
 } 
