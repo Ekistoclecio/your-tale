@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChatTabs } from '@/components/molecules';
 import * as S from './styles';
 import { ChatGeneral } from './ChatGeneral';
@@ -10,6 +10,17 @@ import { useWebSocket, ChatMessage } from '@/hooks/useWebSocket';
 import { useSnackbar } from 'notistack';
 import { ConnectionStatus } from '@/components/atoms';
 import { Box } from '@mui/material';
+
+// Debounce simples para scroll
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const useDebouncedScroll = (ref: React.RefObject<HTMLDivElement | null>, deps: any[]) => {
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, deps);
+};
 
 interface Note {
   id: string;
@@ -27,15 +38,14 @@ interface ChatPanelProps {
   notes?: Note[];
 }
 
-export const ChatPanel = (props: ChatPanelProps) => {
-  const {
-    sessionId,
-    currentUserId,
-    isMaster = false,
-    onRollDice,
-    loading = false,
-    notes = [],
-  } = props;
+export const ChatPanel = ({
+  sessionId,
+  currentUserId,
+  isMaster = false,
+  onRollDice,
+  loading = false,
+  notes = [],
+}: ChatPanelProps) => {
   const { enqueueSnackbar } = useSnackbar();
 
   const [activeTab, setActiveTab] = useState<'general' | 'ai' | 'notes'>('general');
@@ -43,110 +53,134 @@ export const ChatPanel = (props: ChatPanelProps) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [noteTitle, setNoteTitle] = useState('');
   const [noteContent, setNoteContent] = useState('');
-  const [editingNote] = useState<string | null>(null);
+  const [editingNote, setEditingNote] = useState<string | null>(null);
 
-  // WebSocket integration
-  const {
-    messages,
-    typingUsers,
-    isLoadingMessages,
-    sendMessage,
-    startTyping,
-    stopTyping,
-    isAuthenticated,
-    isConnected,
-  } = useWebSocket({
-    sessionId,
-    onConnectionChange: (connected) => {
-      if (connected) {
-        enqueueSnackbar('Conectado ao chat', { variant: 'success' });
-      } else {
-        enqueueSnackbar('Desconectado do chat', { variant: 'warning' });
-      }
+  // ✅ WebSocket callbacks memoizados
+  const handleConnectionChange = useCallback(
+    (connected: boolean) => {
+      enqueueSnackbar(connected ? 'Conectado ao chat' : 'Desconectado do chat', {
+        variant: connected ? 'success' : 'warning',
+      });
     },
-    onError: (error) => {
+    [enqueueSnackbar]
+  );
+
+  const handleError = useCallback(
+    (error: string) => {
       enqueueSnackbar(`Erro no chat: ${error}`, { variant: 'error' });
     },
+    [enqueueSnackbar]
+  );
+
+  // ✅ Hook WebSocket otimizado
+  const { messages, isLoadingMessages, sendMessage, isAuthenticated, isConnected } = useWebSocket({
+    sessionId,
+    onConnectionChange: handleConnectionChange,
+    onError: handleError,
   });
 
-  const currentChatType = activeTab === 'ai' ? 'master' : 'general';
-  const filteredMessages = messages.filter((m) => m.chat_type === currentChatType);
+  // ✅ Determina tipo de chat ativo
+  const currentChatType = useMemo(() => (activeTab === 'ai' ? 'master' : 'general'), [activeTab]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [filteredMessages]);
+  // ✅ Filtra mensagens apenas quando necessário
+  const filteredMessages = useMemo(
+    () => messages.filter((m) => m.chat_type === currentChatType),
+    [messages, currentChatType]
+  );
 
+  // ✅ Conversão de mensagens memoizada
+  const convertMessagesToOldFormat = useCallback(
+    (msgs: ChatMessage[]) =>
+      msgs.map((msg) => ({
+        id: msg.id,
+        senderId: msg.sender?.id,
+        senderName: msg.sender?.name,
+        content: msg.content,
+        timestamp: new Date(msg.timestamp),
+        type: msg.type,
+        chatType: msg.chat_type,
+        senderRole: msg.senderRole,
+        avatar: msg.sender?.avatar,
+      })),
+    []
+  );
+
+  const convertedMessages = useMemo(
+    () => convertMessagesToOldFormat(filteredMessages),
+    [filteredMessages, convertMessagesToOldFormat]
+  );
+
+  // ✅ Scroll debounced
+  useDebouncedScroll(messagesEndRef, [filteredMessages]);
+
+  // ✅ Handlers memoizados
   const handleSendMessage = useCallback(() => {
     if (!messageInput.trim() || loading || !isAuthenticated) return;
-
     sendMessage(messageInput.trim(), currentChatType);
     setMessageInput('');
-    stopTyping();
-  }, [messageInput, loading, isAuthenticated, sendMessage, currentChatType, stopTyping]);
+  }, [messageInput, loading, isAuthenticated, sendMessage, currentChatType]);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  const handleInputChange = useCallback(
-    (value: string) => {
-      setMessageInput(value);
-
-      if (value.trim() && isAuthenticated) {
-        startTyping();
-      } else {
-        stopTyping();
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
       }
     },
-    [isAuthenticated, startTyping, stopTyping]
+    [handleSendMessage]
   );
+
+  const handleInputChange = useCallback((value: string) => {
+    setMessageInput(value);
+  }, []);
 
   const handleRollDice = useCallback(() => {
     if (onRollDice) {
       onRollDice('1d20');
     } else {
-      // Enviar como mensagem padrão
-      sendMessage('🎲 Rolou 1d20: ' + Math.floor(Math.random() * 20 + 1), currentChatType);
+      sendMessage(`🎲 Rolou 1d20: ${Math.floor(Math.random() * 20 + 1)}`, currentChatType);
     }
   }, [onRollDice, sendMessage, currentChatType]);
 
-  const formatNoteDate = (date: Date) =>
-    date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const formatNoteDate = useCallback(
+    (date: Date) =>
+      date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    []
+  );
 
-  // Converter ChatMessage para o formato esperado pelos componentes
-  const convertMessagesToOldFormat = (messages: ChatMessage[]) => {
-    console.log('messages', messages);
-    return messages.map((msg) => ({
-      id: msg.id,
-      senderId: msg.sender?.id,
-      senderName: msg.sender?.name,
-      content: msg.content,
-      timestamp: new Date(msg.timestamp),
-      type: msg.type,
-      chatType: msg.chat_type,
-      senderRole: msg.senderRole,
-      avatar: msg.sender?.avatar,
-    }));
-  };
+  // ✅ Handlers de notas (ainda placeholders, mas prontos para lógica futura)
+  const handleAddNote = useCallback(() => {
+    console.log('add note');
+  }, []);
 
-  const convertedMessages = convertMessagesToOldFormat(filteredMessages);
+  const handleEditNote = useCallback((note: Note) => {
+    setEditingNote(note.id);
+    console.log('edit note', note);
+  }, []);
+
+  const handleDeleteNote = useCallback((id: string) => {
+    console.log('delete note', id);
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingNote(null);
+    console.log('cancel edit');
+  }, []);
 
   return (
     <S.ChatContainer elevation={0}>
-      {/* Debug: Status da conexão */}
+      {/* Status de conexão */}
       <Box sx={{ p: 1, borderBottom: 1, borderColor: 'divider' }}>
         <ConnectionStatus isConnected={isConnected} isAuthenticated={isAuthenticated} />
       </Box>
 
       <ChatTabs activeTab={activeTab} onTabChange={setActiveTab} isMaster={isMaster}>
+        {/* Chat Geral */}
         {activeTab === 'general' && (
           <ChatGeneral
             messages={convertedMessages}
@@ -158,11 +192,11 @@ export const ChatPanel = (props: ChatPanelProps) => {
             onKeyPress={handleKeyPress}
             onRollDice={isMaster ? undefined : handleRollDice}
             messagesEndRef={messagesEndRef}
-            typingUsers={typingUsers}
             currentUserId={currentUserId}
           />
         )}
 
+        {/* Chat AI (somente para mestres) */}
         {activeTab === 'ai' && isMaster && (
           <ChatAI
             messages={convertedMessages}
@@ -173,11 +207,11 @@ export const ChatPanel = (props: ChatPanelProps) => {
             onSendMessage={handleSendMessage}
             onKeyPress={handleKeyPress}
             messagesEndRef={messagesEndRef}
-            typingUsers={typingUsers}
             currentUserId={currentUserId}
           />
         )}
 
+        {/* Notas */}
         {activeTab === 'notes' && (
           <ChatNotes
             notes={notes}
@@ -186,10 +220,10 @@ export const ChatPanel = (props: ChatPanelProps) => {
             editingNote={editingNote}
             setNoteTitle={setNoteTitle}
             setNoteContent={setNoteContent}
-            handleAddNote={() => console.log('add note')}
-            handleEditNote={(n: unknown) => console.log(n)}
-            handleDeleteNote={(id: string) => console.log(id)}
-            handleCancelEdit={() => console.log('cancel edit')}
+            handleAddNote={handleAddNote}
+            handleEditNote={handleEditNote}
+            handleDeleteNote={handleDeleteNote}
+            handleCancelEdit={handleCancelEdit}
             formatNoteDate={formatNoteDate}
           />
         )}

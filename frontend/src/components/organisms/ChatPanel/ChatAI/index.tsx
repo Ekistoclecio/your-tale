@@ -3,7 +3,7 @@
 import { Typography } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SendRounded as SendIcon } from '@mui/icons-material';
-import { MessageBubble, TypingIndicator } from '@/components/atoms';
+import { MessageBubble } from '@/components/atoms';
 import * as S from '../styles';
 
 interface Message {
@@ -18,11 +18,6 @@ interface Message {
   avatar?: string;
 }
 
-interface TypingUser {
-  id: string;
-  name: string;
-}
-
 interface ChatAIProps {
   messages: Message[];
   loading: boolean;
@@ -32,7 +27,6 @@ interface ChatAIProps {
   onSendMessage: () => void;
   onKeyPress: (e: React.KeyboardEvent) => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
-  typingUsers?: TypingUser[];
   currentUserId?: string;
 }
 
@@ -44,12 +38,10 @@ export const ChatAI = ({
   onSendMessage,
   onKeyPress,
   messagesEndRef,
-  typingUsers = [],
   currentUserId,
 }: ChatAIProps) => (
   <>
     <S.MessagesArea id="chat-ai-messages">
-
       <AnimatePresence>
         {messages.length === 0 ? (
           <S.EmptyState>
@@ -69,17 +61,11 @@ export const ChatAI = ({
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <MessageBubble 
-                {...message} 
-                isOwner={message.senderId === currentUserId} 
-              />
+              <MessageBubble {...message} isOwner={message.senderId === currentUserId} />
             </motion.div>
           ))
         )}
       </AnimatePresence>
-
-      {/* Typing Indicators */}
-      <TypingIndicator users={typingUsers} />
 
       <div ref={messagesEndRef} />
     </S.MessagesArea>
