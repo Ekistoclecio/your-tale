@@ -103,10 +103,11 @@ export class ChatService {
       // Usar o serviço de mensagens existente para criar a mensagem
       // Isso garante que todas as validações e lógicas de IA sejam aplicadas
       const message = await this.messageService.create(sessionId, messageData, userId);
+      const messageWithSender = await this.messageService.findOne(message.id, userId);
       
       this.logger.log(`Message sent in session ${sessionId} by user ${userId}`);
       
-      return message;
+      return messageWithSender;
     } catch (error) {
       this.logger.error(`Error sending message: ${error.message}`);
       throw error;
