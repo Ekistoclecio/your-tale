@@ -6,6 +6,7 @@ import { CharacterFormTemplate } from '@/components/templates/CharacterFormTempl
 import { CreateCharacterFormData } from '@/schemas/form-validation/createCharacterForm';
 import { useSnackbar } from 'notistack';
 import { useCreateCharacter, useRegisterMember } from '@/queries/character/mutation';
+import axios from 'axios';
 
 export default function CreateCharacterPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,8 +20,24 @@ export default function CreateCharacterPage() {
   const handleSubmit = async (data: CreateCharacterFormData) => {
     setIsLoading(true);
 
+    const handleRegisterMember = async () => {
+      try {
+        await registerMember(id);
+        return true;
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 409) {
+          return true;
+        }
+        enqueueSnackbar('Erro ao registrar membro. Tente novamente.', { variant: 'error' });
+        return false;
+      }
+    };
+
     try {
-      await registerMember(id);
+      const isMemberRegistered = await handleRegisterMember();
+      if (!isMemberRegistered) {
+        return;
+      }
       await createCharacter({ ...data, session_id: id });
 
       enqueueSnackbar('Personagem criado com sucesso!', { variant: 'success' });

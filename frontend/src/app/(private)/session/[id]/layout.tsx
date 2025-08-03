@@ -6,7 +6,7 @@ import { Box } from '@mui/material';
 import { AxiosError } from 'axios';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 interface SessionLayoutProps {
   children: ReactNode;
@@ -19,20 +19,23 @@ export default function SessionLayout({ children }: SessionLayoutProps) {
   const pathname = usePathname();
 
   const isSessionRoot = pathname === `/session/${id}`;
-
   const { error, isLoading } = useVerifyCharacterInSessionQuery(id);
 
-  if (error && isSessionRoot) {
-    const axiosError = error as AxiosError<{ errorCode: string }>;
-    if (axiosError.response?.data?.errorCode === 'CHARACTER_NOT_FOUND') {
-      return router.push(`/session/${id}/create_character`);
-    } else if (!axiosError.response?.data?.errorCode) {
-      enqueueSnackbar('Erro ao conectar a sessão, por favor tente novamente mais tarde.', {
-        variant: 'error',
-      });
-      return router.push(`/`);
+  useEffect(() => {
+    if (error && isSessionRoot) {
+      const axiosError = error as AxiosError<{ errorCode: string }>;
+      const errorCode = axiosError.response?.data?.errorCode;
+
+      if (errorCode === 'CHARACTER_NOT_FOUND') {
+        router.push(`/session/${id}/create_character`);
+      } else if (!errorCode) {
+        enqueueSnackbar('Erro ao conectar a sessão, por favor tente novamente mais tarde.', {
+          variant: 'error',
+        });
+        router.push(`/`);
+      }
     }
-  }
+  }, [error, isSessionRoot, enqueueSnackbar, router, id]);
 
   if (isLoading)
     return (

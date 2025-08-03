@@ -16,8 +16,8 @@ export const useRegisterMember = () => {
   return useMutation({
     mutationFn: sessionService.registerMember,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['session'] });
-      queryClient.invalidateQueries({ queryKey: ['characters'] });
+      queryClient.invalidateQueries({ queryKey: ['session'], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ['characters'], refetchType: 'active' });
     },
   });
 };
