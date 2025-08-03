@@ -153,7 +153,8 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
               currentUserId={session?.user?.id || ''}
               isMaster={isMaster}
               onRollDice={handleRollDice}
-              notes={[]}
+              notes={sessionData.notes}
+              onUpdateNotes={handleUpdateNotes}
             />
           </S.MobileChatOverlay>
         )}
