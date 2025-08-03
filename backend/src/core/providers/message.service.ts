@@ -290,6 +290,7 @@ export class MessageService {
       .leftJoinAndSelect('message.sender', 'sender')
       .where('message.session_id = :sessionId', { sessionId })
       .andWhere('message.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere('message.type != :type', { type: MessageType.SYSTEM })
       .orderBy('message.timestamp', 'DESC');
 
     // Filtrar por chat_type baseado no papel do usuário

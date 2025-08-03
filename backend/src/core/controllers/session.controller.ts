@@ -1,13 +1,16 @@
-import { Controller, Post, Get, Patch, Put, Delete, Param, Body, UseGuards, Request, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Put, Delete, Param, Body, UseGuards, Request, HttpCode, HttpStatus, Query, NotFoundException, BadRequestException } from '@nestjs/common';
+import { CharacterValidationException } from '../exceptions/character-validation.exception';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SessionService } from '../../core/providers/session.service';
 import { SessionMemberService } from '../../core/providers/session-member.service';
 import { MessageService } from '../../core/providers/message.service';
 import { NoteService } from '../../core/providers/note.service';
+import { CharacterService } from '../../core/providers/character.service';
 import { CreateSessionDto, UpdateSessionDto, JoinSessionDto, GetSessionsQueryDto } from '../../core/dto/session.dto';
 import { CreateSessionMemberDto, UpdateSessionMemberDto, SessionMemberResponseDto } from '../../core/dto/session-member.dto';
 import { CreateMessageDto, UpdateMessageDto, MessageResponseDto, GetMessagesQueryDto } from '../../core/dto/message.dto';
 import { CreateNoteDto, UpdateNoteDto, NoteResponseDto, GetNotesQueryDto } from '../../core/dto/note.dto';
+import { CharacterValidationErrorDto } from '../../core/dto/character.dto';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { User } from '../../core/entities/user.entity';
@@ -24,6 +27,7 @@ export class SessionController {
     private readonly sessionMemberService: SessionMemberService,
     private readonly messageService: MessageService,
     private readonly noteService: NoteService,
+    private readonly characterService: CharacterService,
   ) {}
 
   @Post()
@@ -156,9 +160,10 @@ export class SessionController {
     return this.sessionService.update(id, dto, user);
   }
 
-  @Post(':id/join')
+  @Post('join/:join_code')
   @ApiOperation({ summary: 'Entrar em uma sessão usando código de acesso' })
   @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiParam({ name: 'join_code', description: 'Código de acesso da sessão' })
   @ApiResponse({ 
     status: 200, 
     description: 'Entrou na sessão com sucesso',
@@ -168,9 +173,11 @@ export class SessionController {
     status: 400, 
     description: 'Código de acesso inválido' 
   })
-  @ApiBody({ type: JoinSessionDto })
-  async join(@Param('id') id: string, @Body() dto: JoinSessionDto, @CurrentUser() user: User) {
-    return this.sessionService.join(id, user, dto.join_code);
+  async join(
+    @Param('join_code') join_code: string, 
+    @CurrentUser() user: User
+  ) {
+    return this.sessionService.join(user, join_code);
   }
 
   @Post(':id/start')
@@ -680,5 +687,52 @@ export class SessionController {
     @CurrentUser() user: User,
   ): Promise<{ count: number }> {
     return this.noteService.getNoteCount(sessionId, user.id);
+  }
+
+  // ===== ENDPOINTS DE PERSONAGENS =====
+
+  @Get(':id/validate-character')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Validar se o usuário tem personagem criado na sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({ 
+    status: 204, 
+    description: 'Usuário possui personagem ativo na sessão' 
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Erro de validação de personagem',
+    type: CharacterValidationErrorDto
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Usuário não tem acesso à sessão' 
+  })
+  async validateUserCharacter(
+    @Param('id') sessionId: string,
+    @CurrentUser() user: User,
+  ): Promise<void> {
+    const result = await this.characterService.hasCharacterInSession(sessionId, user.id);
+    
+    // Se o usuário é o mestre da sessão, retorna erro específico
+    if (result.isMaster) {
+      throw new CharacterValidationException(
+        'Session master does not need a character',
+        true,
+        'MASTER_NO_CHARACTER_NEEDED'
+      );
+    }
+    
+    // Se o usuário não tem personagem ativo, retorna erro
+    if (!result.hasCharacter) {
+      throw new CharacterValidationException(
+        'User does not have an active character in this session',
+        false,
+        'CHARACTER_NOT_FOUND'
+      );
+    }
+    
+    // Se chegou até aqui, o usuário tem personagem ativo na sessão
+    // Retorna 204 (No Content) conforme solicitado
   }
 } 
