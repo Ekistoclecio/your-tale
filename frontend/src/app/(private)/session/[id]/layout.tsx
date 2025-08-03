@@ -26,16 +26,17 @@ export default function SessionLayout({ children }: SessionLayoutProps) {
       const axiosError = error as AxiosError<{ errorCode: string }>;
       const errorCode = axiosError.response?.data?.errorCode;
 
-      console.log('errorCode', errorCode);
       if (errorCode === 'CHARACTER_NOT_FOUND') {
         router.push(`/session/${id}/create_character`);
       } else if (isSessionCreateCharacter && errorCode === 'MASTER_NO_CHARACTER_NEEDED') {
         router.push(`/session/${id}`);
-      } else if (!errorCode) {
+      } else if (!errorCode && axiosError.response?.status === 400) {
         enqueueSnackbar('Erro ao conectar a sessão, por favor tente novamente mais tarde.', {
           variant: 'error',
         });
-        router.push(`/`);
+        router.push(`/session`);
+      } else if (isSessionRoot && axiosError.response?.status === 403) {
+        router.push(`/session/${id}/create_character`);
       }
     }
   }, [error, isSessionRoot, enqueueSnackbar, router, id]);
