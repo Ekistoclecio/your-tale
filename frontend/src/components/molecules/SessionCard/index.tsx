@@ -9,6 +9,8 @@ import * as S from './styles';
 import { Session } from '@/schemas/entities/session';
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface SessionCardProps {
   session: Session;
@@ -39,7 +41,12 @@ export const SessionCard = ({ session, isMySessions = false }: SessionCardProps)
     if (session.status === 'active') {
       return <strong>Ativa</strong>;
     } else if (session.start_date && session.status === 'not_started') {
-      return <strong>Agendada para {session.start_date}</strong>;
+      return (
+        <strong>
+          Agendada para{' '}
+          {format(new Date(session.start_date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+        </strong>
+      );
     } else if (session.status === 'ended') {
       return <strong>Encerrada</strong>;
     }
