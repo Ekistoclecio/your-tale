@@ -68,6 +68,30 @@ export class CreateSessionDto {
   @IsOptional()
   @IsObject()
   settings?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Tema do histórico da sessão',
+    example: 'Fantasia medieval'
+  })
+  @IsOptional()
+  @IsString()
+  history_theme?: string;
+
+  @ApiPropertyOptional({
+    description: 'Descrição do histórico da sessão',
+    example: 'Uma história épica de heróis em busca de um artefato perdido'
+  })
+  @IsOptional()
+  @IsString()
+  history_description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Estilo narrativo da sessão',
+    example: 'Dramático e detalhado'
+  })
+  @IsOptional()
+  @IsString()
+  narrative_style?: string;
 }
 
 export class UpdateSessionDto {
@@ -145,6 +169,30 @@ export class UpdateSessionDto {
   @IsOptional()
   @IsObject()
   settings?: Record<string, any>;
+
+  @ApiPropertyOptional({
+    description: 'Tema do histórico da sessão',
+    example: 'Fantasia medieval'
+  })
+  @IsOptional()
+  @IsString()
+  history_theme?: string;
+
+  @ApiPropertyOptional({
+    description: 'Descrição do histórico da sessão',
+    example: 'Uma história épica de heróis em busca de um artefato perdido'
+  })
+  @IsOptional()
+  @IsString()
+  history_description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Estilo narrativo da sessão',
+    example: 'Dramático e detalhado'
+  })
+  @IsOptional()
+  @IsString()
+  narrative_style?: string;
 }
 
 export class JoinSessionDto {

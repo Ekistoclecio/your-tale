@@ -91,13 +91,14 @@ export const CreateSessionModal = ({ open, onClose }: CreateSessionModalProps) =
         start_date: data.start_date
           ? new Date(data.start_date).toISOString()
           : new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        history_theme: '',
+        history_description: '',
+        narrative_style: '',
       };
       if (data.is_ai_master) {
-        newSession.description = `
-        Tema da história: ${data.ai_theme}
-        Estilo narrativo que o mestre deve seguir: ${data.ai_narrative_style}
-        Descrição introdutória da campanha: ${data.ai_campaign_description}. ${data.description}
-        `;
+        newSession.history_theme = data.ai_theme || '';
+        newSession.history_description = data.ai_campaign_description || '';
+        newSession.narrative_style = data.ai_narrative_style || '';
       }
       console.log(newSession);
       const session = await createSession(newSession as unknown as CreateSessionFormData);
