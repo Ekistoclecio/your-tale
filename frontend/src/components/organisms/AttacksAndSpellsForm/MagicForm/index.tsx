@@ -43,19 +43,22 @@ interface MagicFormProps {
 
 export const MagicForm = ({ setShowSpellForm, appendSpell, spellFields }: MagicFormProps) => {
   const theme = useTheme();
-  const { register, control } = useFormContext();
+  const { register, control, getValues, unregister } = useFormContext();
+  const index = spellFields.length;
   const handleAddSpell = () => {
+    const values = getValues(`character_sheet.spells.${index}`);
     appendSpell({
-      name: '',
-      level: 0,
-      school: 'Evocação',
-      prepared: false,
-      castingTime: '',
-      range: '',
-      components: '',
-      duration: '',
-      description: '',
+      name: values?.name || '',
+      level: Number(values?.level ?? 0),
+      school: values?.school || 'Evocação',
+      prepared: values?.prepared || false,
+      castingTime: values?.castingTime || '',
+      range: values?.range || '',
+      components: values?.components || '',
+      duration: values?.duration || '',
+      description: values?.description || '',
     });
+    unregister(`character_sheet.spells.${index}`);
     setShowSpellForm(false);
   };
   return (

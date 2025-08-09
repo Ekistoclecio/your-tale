@@ -50,19 +50,23 @@ interface AttackFormProps {
 
 export const AttackForm = ({ setShowAttackForm, appendAttack, attackFields }: AttackFormProps) => {
   const theme = useTheme();
-  const { register, control } = useFormContext();
+  const { register, control, getValues, unregister } = useFormContext();
   const index = attackFields.length;
 
   const handleAddAttack = () => {
+    const values = getValues(`character_sheet.attacks.${index}`);
     appendAttack({
-      name: '',
-      bonus: 0,
-      damage: '',
-      type: 'Corpo a Corpo',
-      damageType: 'Cortante',
-      range: '',
-      notes: '',
+      name: values?.name || '',
+      bonus: Number(values?.bonus ?? 0),
+      damage: values?.damage || '',
+      type: values?.type || 'Corpo a Corpo',
+      damageType: values?.damageType || 'Cortante',
+      range: values?.range || '',
+      notes: values?.notes || '',
     });
+
+    // opcional: limpar o “slot temporário” para não ficar lixo no form state
+    unregister(`character_sheet.attacks.${index}`);
     setShowAttackForm(false);
   };
 
