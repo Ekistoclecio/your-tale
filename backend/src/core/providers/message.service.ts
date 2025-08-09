@@ -103,13 +103,17 @@ export class MessageService {
       },
     });
 
-    console.log('messageHistory', messageHistory);
+    const session = await this.sessionRepository.findOne({ where: { id: message.session_id } });
+
+    if (!session) {
+      throw new NotFoundException('Session not found');
+    }
 
     const request: LLMRequest = {
       messages: messageHistory.map(msg => ({
         role: msg.type === MessageType.USER || msg.type === MessageType.SYSTEM ? 'user' : 'assistant',
-        content: msg.content,
-      }))
+        content: this.handleMasterChatContent(msg, session),
+      })),
     }
 
     // Adicionar job à fila em vez de processar diretamente
@@ -147,6 +151,28 @@ export class MessageService {
     await this.messageRepository.save(processingMessage);
 
     return this.formatMessageResponse(processingMessage);
+  }
+
+  private handleMasterChatContent(message: Message, session: Session): string {
+    if (message.type === MessageType.AI || message.type === MessageType.SYSTEM) {
+      return message.content;
+    }
+    
+    return `
+      Você é um assistente de mestre de RPG. Sua função é ajudar o mestre a contar a história, criar situações ou personagens e responder perguntas sobre a história.
+      Para ajudar você, temos que o título da história é: ${session.history_theme ? session.history_theme : session.title}
+      E a descrição da história é: ${session.history_description ? session.history_description : session.description}
+
+      A mensagem que o mestre enviou é:
+
+      ${message.content}
+
+      *Observações sobre nosso chat:*
+      - Não traga conteúdos extremamente complexos e detalhados, a não ser que o mestre solicite.
+      - Não traga conteúdos que não sejam relevantes para a história.
+      - Não traga conteúdos que não sejam relevantes para o tema da história.
+      - Caso você ache que o mestre ou o contexto da conversa não está claro em relação a um assunto, pergunte para ele.
+    `
   }
 
   private handleAIChatContent(message: Message, sessionCharacters: Character[]): string {
@@ -249,7 +275,7 @@ export class MessageService {
     const characters = await this.characterService.findAllBySession(session.id);
 
     return `Você agora é um mestre de RPG.
-    O tema da história que você contará é: ${session.history_theme ?? session.title} - ${session.history_description ?? session.description}
+    O tema da história que você contará é: ${session.history_theme ? session.history_theme : session.title} - ${session.history_description ? session.history_description : session.description}
     Inicie a conversa agora com uma apresentação sobre a história.
     Uma breve descrição dos personagens atuais:
 
