@@ -16,10 +16,17 @@ export const AttributeInput = ({
   abbreviation,
   color = 'primary.main',
 }: AttributeInputProps) => {
-  const { control, watch } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
 
   const attributeValue = watch(name).value;
-  const calculateModifier = (value: number): number => Math.floor((value - 10) / 2);
+  const calculateModifier = (value: number): number => {
+    const modifier = Math.floor((value - 10) / 2);
+    if (typeof modifier === 'number') {
+      setValue(`${name}.modifier`, modifier);
+      return modifier;
+    }
+    return 0;
+  };
   const modifier = useMemo(() => calculateModifier(attributeValue), [attributeValue]);
   const formatModifier = (modifier: number): string =>
     modifier >= 0 ? `+${modifier}` : `${modifier}`;

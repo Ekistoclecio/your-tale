@@ -67,14 +67,14 @@ export const MagicForm = ({ setShowSpellForm, appendSpell, spellFields }: MagicF
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`spells.${spellFields.length}.name`)}
+            {...register(`character_sheet.spells.${spellFields.length}.name`)}
             label="Nome da Magia"
             placeholder="ex: Bola de Fogo"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`spells.${spellFields.length}.level`)}
+            {...register(`character_sheet.spells.${spellFields.length}.level`)}
             label="Nível"
             type="number"
             slotProps={{
@@ -87,7 +87,7 @@ export const MagicForm = ({ setShowSpellForm, appendSpell, spellFields }: MagicF
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <Controller
-            name={`spells.${spellFields.length}.school`}
+            name={`character_sheet.spells.${spellFields.length}.school`}
             control={control}
             defaultValue={spellSchools[0]} // ou '' se preferir iniciar vazio
             render={({ field }) => (
@@ -110,35 +110,35 @@ export const MagicForm = ({ setShowSpellForm, appendSpell, spellFields }: MagicF
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`spells.${spellFields.length}.castingTime`)}
+            {...register(`character_sheet.spells.${spellFields.length}.castingTime`)}
             label="Tempo de Conjuração"
             placeholder="ex: 1 ação"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`spells.${spellFields.length}.range`)}
+            {...register(`character_sheet.spells.${spellFields.length}.range`)}
             label="Alcance"
             placeholder="ex: 150 pés"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`spells.${spellFields.length}.components`)}
+            {...register(`character_sheet.spells.${spellFields.length}.components`)}
             label="Componentes"
             placeholder="ex: V, S, M"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`spells.${spellFields.length}.duration`)}
+            {...register(`character_sheet.spells.${spellFields.length}.duration`)}
             label="Duração"
             placeholder="ex: Instantânea"
           />
         </Grid>
         <Grid size={{ xs: 12 }}>
           <TextField
-            {...register(`spells.${spellFields.length}.description`)}
+            {...register(`character_sheet.spells.${spellFields.length}.description`)}
             label="Descrição"
             placeholder="Descrição da magia"
             multiline

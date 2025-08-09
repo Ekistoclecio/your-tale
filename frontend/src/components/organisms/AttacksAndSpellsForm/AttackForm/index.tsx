@@ -76,7 +76,7 @@ export const AttackForm = ({ setShowAttackForm, appendAttack, attackFields }: At
       <Grid container spacing={4}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`attacks.${index}.name`)}
+            {...register(`character_sheet.attacks.${index}.name`)}
             label="Nome do Ataque"
             placeholder="ex: Espada Longa"
             fullWidth
@@ -84,7 +84,7 @@ export const AttackForm = ({ setShowAttackForm, appendAttack, attackFields }: At
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`attacks.${index}.bonus`)}
+            {...register(`character_sheet.attacks.${index}.bonus`)}
             label="Bônus de Ataque"
             placeholder="+5"
             fullWidth
@@ -92,7 +92,7 @@ export const AttackForm = ({ setShowAttackForm, appendAttack, attackFields }: At
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`attacks.${index}.damage`)}
+            {...register(`character_sheet.attacks.${index}.damage`)}
             label="Dano"
             placeholder="ex: 1d8+3"
             fullWidth
@@ -101,7 +101,7 @@ export const AttackForm = ({ setShowAttackForm, appendAttack, attackFields }: At
         <Grid size={{ xs: 12, sm: 6 }}>
           <Controller
             control={control}
-            name={`attacks.${index}.type`}
+            name={`character_sheet.attacks.${index}.type`}
             defaultValue={attackTypes[0]}
             render={({ field }) => (
               <FormControl fullWidth>
@@ -120,7 +120,7 @@ export const AttackForm = ({ setShowAttackForm, appendAttack, attackFields }: At
         <Grid size={{ xs: 12, sm: 6 }}>
           <Controller
             control={control}
-            name={`attacks.${index}.damageType`}
+            name={`character_sheet.attacks.${index}.damageType`}
             defaultValue={damageTypes[0]}
             render={({ field }) => (
               <FormControl fullWidth>
@@ -142,7 +142,7 @@ export const AttackForm = ({ setShowAttackForm, appendAttack, attackFields }: At
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
-            {...register(`attacks.${index}.range`)}
+            {...register(`character_sheet.attacks.${index}.range`)}
             label="Alcance"
             placeholder="ex: 5 pés"
             fullWidth
@@ -150,7 +150,7 @@ export const AttackForm = ({ setShowAttackForm, appendAttack, attackFields }: At
         </Grid>
         <Grid size={{ xs: 12 }}>
           <TextField
-            {...register(`attacks.${index}.notes`)}
+            {...register(`character_sheet.attacks.${index}.notes`)}
             label="Notas"
             placeholder="Características especiais do ataque"
             multiline
