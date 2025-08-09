@@ -10,7 +10,6 @@ import { QueueController } from '../controllers/queue.controller';
 import { LLMModule } from './llm.module';
 import { ChatModule } from './chat.module';
 import { QueueResultService } from '../providers/queue-result.service';
-import { WebSocketQueueService } from '../providers/websocket-queue.service';
 
 @Module({
   imports: [
@@ -59,7 +58,6 @@ import { WebSocketQueueService } from '../providers/websocket-queue.service';
     LLMQueueService, 
     LLMWorker,
     QueueResultService,
-    WebSocketQueueService,
   ],
   exports: [LLMQueueService, BullModule, QueueResultService],
 })
