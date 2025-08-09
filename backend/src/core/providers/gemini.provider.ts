@@ -21,6 +21,8 @@ export class GeminiProvider implements LLMProvider {
   async generateResponse(request: LLMRequest): Promise<LLMResponse> {
     try {
       const { messages, context } = request;
+
+      console.log({context});
       
       // Preparar o histórico de conversa para o Gemini
       const chat = this.model.startChat({

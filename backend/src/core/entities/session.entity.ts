@@ -84,6 +84,15 @@ export class Session {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column({ nullable: true })
+  history_theme?: string;
+
+  @Column({ nullable: true })
+  history_description?: string;
+
+  @Column({ nullable: true })
+  narrative_style?: string;
+
   @OneToMany(() => SessionMember, (member) => member.session)
   members: SessionMember[];
 
