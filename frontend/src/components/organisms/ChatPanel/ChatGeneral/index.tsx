@@ -84,7 +84,7 @@ export const ChatGeneral = ({
         value={messageInput}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessageInput(e.target.value)}
         onKeyPress={onKeyPress}
-        disabled={loading}
+        disabled={loading || (messages.length > 0 && messages[messages.length - 1]?.type !== 'ai')}
         size="small"
       />
 
@@ -96,7 +96,11 @@ export const ChatGeneral = ({
 
       <S.ActionButton
         onClick={onSendMessage}
-        disabled={!messageInput.trim() || loading}
+        disabled={
+          !messageInput.trim() ||
+          loading ||
+          (messages.length > 0 && messages[messages.length - 1]?.type !== 'ai')
+        }
         title="Enviar mensagem"
       >
         <SendIcon fontSize="small" />
