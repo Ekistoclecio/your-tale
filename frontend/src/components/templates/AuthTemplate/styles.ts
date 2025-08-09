@@ -10,6 +10,11 @@ export const Root = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   padding: theme.spacing(2),
 
+  backgroundImage: `url(/auth-background.jpg)`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+
   [theme.breakpoints.up('sm')]: {
     padding: theme.spacing(8),
   },
