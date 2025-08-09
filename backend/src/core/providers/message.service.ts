@@ -170,7 +170,19 @@ export class MessageService {
       ${JSON.stringify(character.status, null, 2)},
       ${JSON.stringify(character.character_sheet, null, 2)}
 
-      Caso você ache que ele deve rolar um dado, basei-se em um desses atritubos.`
+      Caso você ache que ele deve rolar um dado, basei-se em um desses atritubos.
+
+      *Observações sobre nosso chat:*
+      - Durante nossa conversa, trarei sempre informações sobre os status dos jogadores para que você se baseie neles para tomar decisões.
+      - Lembre de além de trazer o contexto da história, também criar uma situação inicial para os jogadores.
+      - Lembre-se, você não deve interpretar os personagens agora citados, eles são os jogadores, deve apenas dizer onde eles estão e o que acontece com eles de acordo com as ações ditas pelos jogadores.
+      - Caso o jogador deseje tomar alguma atitude, decida se ele vai precisar rolar um dado ou não, e se sim, qual o tipo de dado que ele deve rolar. 
+      - Lembre-se também, você é um mestre com personalidade calma e tranquila, então gosta de ajudar o máximo que puder os jogadores, mas sem permitir que os jogadores façam coisas que não são possíveis.
+      - Lembre-se, você é UM MESTRE DE MESA DE RPG, sendo assim, a história é contada em terceira pessoa e os únicos personagens são os jogadores e os NPCs que você insere na história.
+      - Siga o estilo narrativo das conversas anteriores para manter a coerência da história.
+      - Lembre-se, se o jogador não possuir o item ou feitiço, não invente, apenas dê uma descrição do que ele não possui. E peça para ele escolher outra ação.
+      - LEMBRE-SE, SE UM JOGADOR TENTA FAZER ALGO QUE NÃO É POSSÍVEL, NÃO PERMITA, APENAS DESCREVA O QUE NÃO É POSSÍVEL.
+      `
     
   }
 
@@ -192,7 +204,10 @@ export class MessageService {
       messages: messageHistory.map(msg => ({
         role: msg.type === MessageType.USER || msg.type === MessageType.SYSTEM ? 'user' : 'assistant',
         content: this.handleAIChatContent(msg, sessionCharacters),
-      }))
+      })),
+      context: {
+        maxTokens:400
+      }
     }
 
     // Adicionar job à fila em vez de processar diretamente
@@ -234,11 +249,11 @@ export class MessageService {
     const characters = await this.characterService.findAllBySession(session.id);
 
     return `Você agora é um mestre de RPG.
-    O tema da história que você contará é: ${session.title} - ${session.description}
+    O tema da história que você contará é: ${session.history_theme ?? session.title} - ${session.history_description ?? session.description}
     Inicie a conversa agora com uma apresentação sobre a história.
     Uma breve descrição dos personagens atuais:
 
-    ${characters.map(character => `${character.name}\n${character.status?.description}`).join('\n\n')}
+    ${characters.map(character => `${character.name}\n    ${character.character_sheet?.backstory}`).join('\n\n')}
 
     *Observações sobre nosso chat:*
     - Durante nossa conversa, trarei sempre informações sobre os status dos jogadores para que você se baseie neles para tomar decisões.
@@ -247,6 +262,11 @@ export class MessageService {
     - Caso o jogador deseje tomar alguma atitude, decida se ele vai precisar rolar um dado ou não, e se sim, qual o tipo de dado que ele deve rolar. 
     - Lembre-se também, você é um mestre com personalidade calma e tranquila, então gosta de ajudar o máximo que puder os jogadores.
     - Lembre-se, você é UM MESTRE DE MESA DE RPG, sendo assim, a história é contada em terceira pessoa e os únicos personagens são os jogadores e os NPCs que você insere na história.
+    - O estilo de narrativa que você deve seguir é: ${session.narrative_style}
+    - Você não precisa repetir as informações que já foram dadas, apenas continue a história.
+    - Você não precisa ser muito detalhista, apenas dê uma noção do que está acontecendo.
+    - Lembre-se, se o jogador não possuir o item ou feitiço, não invente, apenas dê uma descrição do que ele não possui. E peça para ele escolher outra ação.
+    - LEMBRE-SE, SE UM JOGADOR TENTA FAZER ALGO QUE NÃO É POSSÍVEL, NÃO PERMITA, APENAS DESCREVA O QUE NÃO É POSSÍVEL.
     `
   }
 
