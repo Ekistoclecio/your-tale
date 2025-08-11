@@ -67,7 +67,7 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
         characters: sessionData.characters.map((c) => (c.id === id ? { ...c, position: pos } : c)),
       });
     } catch {
-      enqueueSnackbar('Erro ao atualizar personagem', { variant: 'error' });
+      // enqueueSnackbar('Erro ao atualizar personagem', { variant: 'error' });
     }
   };
 
