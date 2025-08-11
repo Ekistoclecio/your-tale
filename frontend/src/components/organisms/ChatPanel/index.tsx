@@ -30,6 +30,7 @@ interface ChatPanelProps {
   loading?: boolean;
   notes?: Note[];
   onUpdateNotes: (notes: Note[]) => void;
+  isAIMaster?: boolean;
 }
 
 export const ChatPanel = ({
@@ -39,6 +40,7 @@ export const ChatPanel = ({
   loading = false,
   notes = [],
   onUpdateNotes,
+  isAIMaster = false,
 }: ChatPanelProps) => {
   const { enqueueSnackbar } = useSnackbar();
 
@@ -154,6 +156,7 @@ export const ChatPanel = ({
             onRollDice={undefined}
             messagesEndRef={messagesEndRef}
             currentUserId={currentUserId}
+            isAIMaster={isAIMaster}
           />
         )}
 

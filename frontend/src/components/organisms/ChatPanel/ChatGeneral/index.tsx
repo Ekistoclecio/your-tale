@@ -29,6 +29,7 @@ interface ChatGeneralProps {
   onRollDice?: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   currentUserId?: string;
+  isAIMaster?: boolean;
 }
 
 export const ChatGeneral = ({
@@ -41,6 +42,7 @@ export const ChatGeneral = ({
   onRollDice,
   messagesEndRef,
   currentUserId,
+  isAIMaster,
 }: ChatGeneralProps) => (
   <>
     <S.MessagesArea id="chat-general-messages">
@@ -84,7 +86,10 @@ export const ChatGeneral = ({
         value={messageInput}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessageInput(e.target.value)}
         onKeyPress={onKeyPress}
-        disabled={loading || (messages.length > 0 && messages[messages.length - 1]?.type !== 'ai')}
+        disabled={
+          loading ||
+          (messages.length > 0 && messages[messages.length - 1]?.type !== 'ai' && isAIMaster)
+        }
         size="small"
       />
 
@@ -99,7 +104,7 @@ export const ChatGeneral = ({
         disabled={
           !messageInput.trim() ||
           loading ||
-          (messages.length > 0 && messages[messages.length - 1]?.type !== 'ai')
+          (messages.length > 0 && messages[messages.length - 1]?.type !== 'ai' && isAIMaster)
         }
         title="Enviar mensagem"
       >

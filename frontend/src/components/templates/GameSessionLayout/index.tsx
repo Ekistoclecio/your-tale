@@ -132,6 +132,7 @@ export const GameSessionLayout = ({ sessionData, updateSessionData }: GameSessio
               isMaster={isMaster}
               notes={sessionData.notes}
               onUpdateNotes={handleUpdateNotes}
+              isAIMaster={sessionData.is_ai_master}
             />
           </S.RightPanel>
         </S.MainContainer>
